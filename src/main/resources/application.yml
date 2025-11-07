@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: SmartRouteAPI
+  datasource:
+    url:  jdbc:h2:mem:driverdb
+    driver-class-name: org.h2.Driver
+    username: admin
+    password: 123
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.http.convert.json: DEBUG
