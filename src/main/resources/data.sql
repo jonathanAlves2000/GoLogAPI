@@ -11,7 +11,7 @@ create table driver_table (
     name varchar(255) not null,
     cpf varchar(20) not null unique,
     cnh varchar(20) not null unique,
-    fone varchar(20) not null unique,
+    cell_number varchar(20) not null unique,
     user_id int
 );
 

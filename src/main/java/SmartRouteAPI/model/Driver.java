@@ -22,10 +22,11 @@ public class Driver {
     @Column(name = "cnh")
     private String cnh;
 
-    @Column(name="fone")
-    private String fone;
 
-    @ManyToOne
+    @Column(name="cel_number")
+    private String cellNumber;
+
+    @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 
