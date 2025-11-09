@@ -2,9 +2,12 @@ package SmartRouteAPI.controller;
 
     import SmartRouteAPI.service.UserService;
     import SmartRouteAPI.model.User;
+    import org.springframework.http.HttpStatus;
+    import org.springframework.http.HttpStatusCode;
     import org.springframework.web.bind.annotation.*;
+    import org.springframework.web.server.ResponseStatusException;
 
-    @RestController
+@RestController
     @RequestMapping("/user")
     public class UserController {
 
@@ -16,7 +19,12 @@ package SmartRouteAPI.controller;
 
         @PostMapping
         public User SaveUser(@RequestBody User user){
-            return userService.saveUser(user);
+            try{
+                return userService.saveUser(user);
+            }catch (IllegalArgumentException e){
+                var messageError = e.getMessage();
+                throw new ResponseStatusException(HttpStatus.CONFLICT, messageError);
+            }
         }
 
         @GetMapping("{id}")

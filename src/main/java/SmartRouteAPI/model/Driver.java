@@ -23,7 +23,7 @@ public class Driver {
     private String cnh;
 
 
-    @Column(name="cel_number")
+    @Column(name="cell_number")
     private String cellNumber;
 
     @OneToOne

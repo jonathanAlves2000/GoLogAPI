@@ -2,18 +2,24 @@ package SmartRouteAPI.service;
 
 import SmartRouteAPI.repository.UserRepository;
 import SmartRouteAPI.model.User;
+import SmartRouteAPI.validation.UserValidator;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final UserValidator userValidator;
 
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository, UserValidator userValidator){
         this.userRepository = userRepository;
+        this.userValidator = userValidator;
     }
 
     public User saveUser(User user){
+        userValidator.validatorUserName(user);
+        userValidator.validatorUserEmail(user);
         return this.userRepository.save(user);
     }
 
@@ -26,10 +32,10 @@ public class UserService {
     }
 
     public User updateUser(Integer id, User user){
-      if(userRepository.existsById(id)){
-          user.setId(id);
-          return this.userRepository.save(user);
+      if(!userRepository.existsById(id)){
+          throw new RuntimeException("Usuário com o ID " + id + "não encontrado");
       }
-        return null;
+        user.setId(id);
+        return this.userRepository.save(user);
     }
 }

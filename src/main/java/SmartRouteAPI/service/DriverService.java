@@ -1,5 +1,6 @@
 package SmartRouteAPI.service;
 
+import SmartRouteAPI.dto.DriverDTO;
 import SmartRouteAPI.model.Driver;
 import SmartRouteAPI.repository.DriverRepository;
 import org.springframework.stereotype.Service;
