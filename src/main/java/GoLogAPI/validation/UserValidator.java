@@ -12,7 +12,6 @@ public class UserValidator {
     public UserValidator(UserRepository userRepository){
         this.userRepository = userRepository;
     }
-
     public void validatorUserName(User user){
         if(existsUserName(user.getUserName())){
             throw new IllegalArgumentException("Nome de usuário já cadastrado");

@@ -1,4 +1,4 @@
-package com.SmartRoutAPI;
+package GoLogAPI;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
