@@ -1,4 +1,4 @@
-package SmartRouteAPI.model;
+package GoLogAPI.model;
 
 public enum TypeUser {
     ADMIN,

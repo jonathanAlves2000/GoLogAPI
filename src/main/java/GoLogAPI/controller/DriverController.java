@@ -1,7 +1,7 @@
-package SmartRouteAPI.controller;
+package GoLogAPI.controller;
 
-import SmartRouteAPI.model.Driver;
-import SmartRouteAPI.service.DriverService;
+import GoLogAPI.model.Driver;
+import GoLogAPI.service.DriverService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -1,7 +1,7 @@
-package SmartRouteAPI.validation;
+package GoLogAPI.validation;
 
-import SmartRouteAPI.model.User;
-import SmartRouteAPI.repository.UserRepository;
+import GoLogAPI.model.User;
+import GoLogAPI.repository.UserRepository;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,15 +1,14 @@
-package SmartRouteAPI.controller;
+package GoLogAPI.controller;
 
-    import SmartRouteAPI.service.UserService;
-    import SmartRouteAPI.model.User;
-    import org.springframework.http.HttpStatus;
-    import org.springframework.http.HttpStatusCode;
-    import org.springframework.web.bind.annotation.*;
-    import org.springframework.web.server.ResponseStatusException;
+import GoLogAPI.service.UserService;
+import GoLogAPI.model.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-    @RequestMapping("/user")
-    public class UserController {
+@RequestMapping("/user")
+public class UserController {
 
         private final UserService userService;
 
@@ -42,4 +41,4 @@ package SmartRouteAPI.controller;
             return userService.updateUser(id, user);
         }
 
-    }
+}

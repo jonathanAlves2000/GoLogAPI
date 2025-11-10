@@ -1,6 +1,6 @@
-package SmartRouteAPI.repository;
+package GoLogAPI.repository;
 
-import SmartRouteAPI.model.User;
+import GoLogAPI.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

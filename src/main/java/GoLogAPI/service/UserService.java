@@ -1,10 +1,9 @@
-package SmartRouteAPI.service;
+package GoLogAPI.service;
 
-import SmartRouteAPI.repository.UserRepository;
-import SmartRouteAPI.model.User;
-import SmartRouteAPI.validation.UserValidator;
+import GoLogAPI.repository.UserRepository;
+import GoLogAPI.model.User;
+import GoLogAPI.validation.UserValidator;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {

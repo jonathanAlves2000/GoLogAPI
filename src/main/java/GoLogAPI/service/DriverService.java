@@ -1,10 +1,8 @@
-package SmartRouteAPI.service;
+package GoLogAPI.service;
 
-import SmartRouteAPI.dto.DriverDTO;
-import SmartRouteAPI.model.Driver;
-import SmartRouteAPI.repository.DriverRepository;
+import GoLogAPI.model.Driver;
+import GoLogAPI.repository.DriverRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service

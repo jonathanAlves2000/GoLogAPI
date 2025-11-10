@@ -1,7 +1,5 @@
-package SmartRouteAPI.config;
+package GoLogAPI.config;
 
-import ch.qos.logback.core.model.Model;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
