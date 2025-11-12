@@ -1,6 +1,6 @@
 spring:
   application:
-    name: SmartRouteAPI
+    name: GoLogAPI
   datasource:
     url:  jdbc:h2:mem:driverdb
     driver-class-name: org.h2.Driver
