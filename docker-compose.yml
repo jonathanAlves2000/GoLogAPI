@@ -4,7 +4,7 @@ services:
 
   postgres:
     image: postgres:18.0
-    container_name: gologdb
+    container_name: postgres
     restart: always
     environment:
       POSTGRES_USER: admin
@@ -13,20 +13,42 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - golognet
 
   app:
     build: .
-    container_name: GoLogAPIContainer
+    container_name: golog-api
     restart: always
     depends_on:
-      - postgres
+       postgres:
+         condition: service_healthy
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gologdb
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: 123
+    networks:
+      - golognet
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: always
+    ports:
+      - "15432:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 123
+    depends_on:
+      - postgres
+    networks:
+      - golognet
 
 volumes:
   postgres_data:
+
+networks:
+  golognet:
