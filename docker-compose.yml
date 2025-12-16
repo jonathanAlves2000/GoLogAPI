@@ -16,6 +16,11 @@ services:
       - postgres_data:/var/lib/postgresql
     networks:
       - golognet
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d gologdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     build: .
