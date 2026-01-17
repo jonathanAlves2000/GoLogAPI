@@ -7,19 +7,12 @@ import lombok.Data;
 @Data
 public class DriverDTO {
 
-    @NotBlank(message = "O nome é obrigatório")
-    private String name;
-
-    @NotBlank(message = "O CPF é obrigatório")
-    @Pattern(regexp = "\\d{11}", message = "CPF deve conter 11 digitos numéricos")
-    private String cpf;
-
     @NotBlank(message = "A CNH é obrigatória")
-    private String cnh;
+    private String cnhNumber;
 
-    @NotBlank(message = "O número de celular é obrigatório")
-    @Pattern(regexp = "\\+?\\d{10,15}", message = "Número de celular invalido")
-    private String cellNumer;
+    @NotBlank(message = "A data de expiração da cnh é pbrigatória")
+    @Pattern(regexp = "\\+?\\d{8}", message = "Formato da data invalida")
+    private String cnhExpiration;
 
     private Integer userId;
 }

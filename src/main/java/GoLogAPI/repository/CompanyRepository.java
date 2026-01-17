@@ -1,10 +1,10 @@
 package GoLogAPI.repository;
 
-import GoLogAPI.model.Driver;
+import GoLogAPI.model.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface DriverRepository extends JpaRepository<Driver, Integer> {
+public interface CompanyRepository extends JpaRepository<Company, Integer> {
 
 }

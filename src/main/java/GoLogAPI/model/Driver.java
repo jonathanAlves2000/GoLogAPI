@@ -13,17 +13,11 @@ public class Driver {
     @Column(name = "id", unique = true)
     private Integer id;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "cnh_number")
+    private String cnhNumber;
 
-    @Column(name = "cpf")
-    private String cpf;
-
-    @Column(name = "cnh")
-    private String cnh;
-
-    @Column(name = "cell_number")
-    private String cellNumber;
+    @Column(name = "cnh_expiration")
+    private String cnhExpiration;
 
     @OneToOne
     @JoinColumn(name = "user_id")
