@@ -1,12 +1,10 @@
 package GoLogAPI.controller;
 
-import GoLogAPI.dto.DriverDTO;
+import GoLogAPI.dto.DriverDto;
 import GoLogAPI.model.Driver;
 import GoLogAPI.service.DriverService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("driver")
@@ -19,12 +17,12 @@ public class DriverController {
     }
 
     @PostMapping
-    public Driver SaveDriver(@RequestBody @Valid DriverDTO driverDTO) {
+    public Driver SaveDriver(@RequestBody @Valid DriverDto driverDTO) {
         return this.driverService.saveDriver(driverDTO);
     }
 
     @GetMapping("{id}")
-    public Driver GetDriverById(@PathVariable int id){
+    public DriverDto GetDriverById(@PathVariable int id){
         return this.driverService.getDriverById(id);
     }
 
@@ -34,7 +32,7 @@ public class DriverController {
     }
 
     @PutMapping("{id}")
-    public Driver UpdateDriver(@PathVariable int id, @RequestBody @Valid DriverDTO driverDTO){
+    public Driver UpdateDriver(@PathVariable int id, @RequestBody @Valid DriverDto driverDTO){
         return this.driverService.updateDriver(id, driverDTO);
     }
 }
