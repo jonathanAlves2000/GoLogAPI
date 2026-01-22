@@ -2,6 +2,7 @@ package GoLogAPI.controller;
 
 import GoLogAPI.model.Address;
 import GoLogAPI.service.AddressService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,9 +20,10 @@ public class AddressController {
         return this.addressService.saveAddress(address);
     }
 
-    @GetMapping("{id}")
-    public Address GetAddressById(@PathVariable int id){
-        return this.addressService.getAddressById(id);
+    @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
+    public ResponseEntity<Address> GetAddressById(@PathVariable int id){
+        Address address = addressService.getAddressById(id);
+        return ResponseEntity.ok(address);
     }
 
     @DeleteMapping("{id}")

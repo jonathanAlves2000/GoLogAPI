@@ -13,7 +13,6 @@ public class Application {
         SpringApplication.run(Application.class, args);
 //        SpringApplicationBuilder builder = new SpringApplicationBuilder(Application.class);
 //        builder.run(args);
-
     }
 }
 

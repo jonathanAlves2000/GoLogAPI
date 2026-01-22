@@ -7,27 +7,32 @@ import GoLogAPI.model.Driver;
 import GoLogAPI.model.User;
 import GoLogAPI.repository.DriverRepository;
 import GoLogAPI.repository.UserRepository;
+import GoLogAPI.validation.DriverValidator;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DriverService {
 
-    private DriverMapper driverMapper;
     private UserRepository userRepository;
     private DriverRepository driverRepository;
+    private DriverMapper driverMapper;
+    private DriverValidator driverValidator;
 
-    public DriverService(DriverMapper driverMapper, UserRepository userRepository ,DriverRepository driverRepository){
-        this.driverMapper = driverMapper;
+    public DriverService(UserRepository userRepository ,DriverRepository driverRepository, DriverMapper driverMapper, DriverValidator driverValidator){
         this.driverRepository = driverRepository;
+        this.driverMapper = driverMapper;
         this.userRepository = userRepository;
+        this.driverValidator = driverValidator;
     }
 
-    public Driver saveDriver(DriverDto driverDto) {
+    public DriverDto saveDriver(DriverDto driverDto) {
+        driverValidator.driverValidate(driverDto);
         Driver driver = driverMapper.toEntity(driverDto);
-        User user = userRepository.findById(driverDto.getUserId())
+        User user = userRepository.findById(driverDto.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID do usuario!"));
         driver.setUser(user);
-        return driverRepository.save(driver);
+        driverRepository.save(driver);
+        return driverMapper.toDto(driver);
     }
 
     public DriverDto getDriverById(int id){
@@ -42,17 +47,18 @@ public class DriverService {
         driverRepository.deleteById(id);
     }
 
-    public Driver updateDriver(int id, DriverDto driverDto){
+    public DriverDto updateDriver(int id, DriverDto driverDto){
         driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID: " + id));
 
         Driver driver = driverMapper.toEntity(driverDto);
 
-        User user = userRepository.findById(driverDto.getUserId())
+        User user = userRepository.findById(driverDto.userId())
                         .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID " + id));
-        driver.setUser(user);
 
+        driver.setUser(user);
         driver.setId(id);
-        return driverRepository.save(driver);
+        driverRepository.save(driver);
+        return driverMapper.toDto(driver);
     }
 }

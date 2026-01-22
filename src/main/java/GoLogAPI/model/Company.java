@@ -1,11 +1,16 @@
 package GoLogAPI.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "company_table")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Company {
 
     @Id
@@ -16,8 +21,8 @@ public class Company {
     @Column(name = "legal_name")
     private String legalName;
 
-    @Column(name = "company_type")
-    private String companyType;
+    @Column(name = "is_cliente")
+    private Boolean isCliente;
 
     @Column(name = "phone_number")
     private String phoneNumber;
@@ -31,9 +36,5 @@ public class Company {
     @OneToOne
     @JoinColumn(name = "address_id")
     private Address address;
-
-    @ManyToOne
-    @JoinColumn(name = "representative_id")
-    private User user;
 
 }

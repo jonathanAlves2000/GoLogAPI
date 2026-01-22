@@ -1,14 +1,14 @@
 package GoLogAPI.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import lombok.Data;
-
-import java.util.List;
+import lombok.*;
 
 @Entity
 @Table(name = "user_table")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -19,7 +19,6 @@ public class User {
     @Column(name = "user_name")
     private String userName;
 
-    @Email
     @Column(name= "email")
     private String email;
 
@@ -29,9 +28,11 @@ public class User {
     @Column(name = "cpf")
     private String cpf;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "user_profile")
-    private String userProfile;
+    private UserProfile userProfile;
 
-    @OneToMany(mappedBy = "user")
-    private List<Company> companies;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 }
