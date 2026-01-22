@@ -1,7 +1,10 @@
 package GoLogAPI.controller;
 
+import GoLogAPI.dto.CompanyDto;
 import GoLogAPI.model.Company;
 import GoLogAPI.service.CompanyService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,13 +18,14 @@ public class CompanyController {
     }
 
     @PostMapping
-    public Company SaveCompany(@RequestBody Company company){
-        return companyService.saveCompany(company);
+    public CompanyDto SaveCompany(@RequestBody @Valid CompanyDto companyDto){
+        return companyService.saveCompany(companyDto);
     }
 
-    @GetMapping("{id}")
-    public Company GetCompanyById(@PathVariable int id){
-        return companyService.getCompanyById(id);
+    @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
+    public ResponseEntity<CompanyDto> GetCompanyById(@PathVariable int id){
+        CompanyDto companyDto = companyService.getCompanyById(id);
+        return ResponseEntity.ok(companyDto);
     }
 
     @DeleteMapping("{id}")

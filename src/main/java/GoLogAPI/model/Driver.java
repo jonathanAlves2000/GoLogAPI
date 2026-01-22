@@ -1,11 +1,16 @@
 package GoLogAPI.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "driver_table")
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Driver {
 
     @Id
@@ -17,7 +22,7 @@ public class Driver {
     private String cnhNumber;
 
     @Column(name = "cnh_expiration")
-    private String cnhExpiration;
+    private LocalDate cnhExpiration;
 
     @OneToOne
     @JoinColumn(name = "user_id")

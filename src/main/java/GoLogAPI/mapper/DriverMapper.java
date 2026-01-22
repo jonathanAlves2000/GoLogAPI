@@ -13,6 +13,5 @@ public interface DriverMapper {
     Driver toEntity(DriverDto driverDTO);
 
     @Mapping(source = "user.id", target = "userId")
-//    @Mapping(source = "driver.id", target = "id")
     DriverDto toDto(Driver driver);
 }
