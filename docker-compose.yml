@@ -7,9 +7,9 @@ services:
     container_name: postgres
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: gologdb
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
@@ -32,9 +32,9 @@ services:
     ports:
       - "8081:8080"
     environment:
-      - DB_HOST=postgres
-      - DB_USER=admin
-      - DB_PASS=123
+      - DB_HOST=DB_NAME
+      - DB_USER=DB_USER
+      - DB_PASS=DB_PASSWORD
     networks:
       - golognet
 
@@ -45,8 +45,8 @@ services:
     ports:
       - "15432:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: 123
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     depends_on:
       - postgres
     networks:
