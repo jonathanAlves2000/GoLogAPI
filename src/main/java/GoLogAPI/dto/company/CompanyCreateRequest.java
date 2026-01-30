@@ -1,12 +1,10 @@
-package GoLogAPI.dto;
+package GoLogAPI.dto.company;
 
-import GoLogAPI.model.Address;
-import GoLogAPI.model.User;
 import jakarta.validation.constraints.*;
-import java.util.List;
+import java.util.UUID;
 
 public record CompanyDto(
-        Integer id,
+        UUID id,
 
         @NotBlank(message = "Legal Name vazio")
         @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Nome invalido, use somente letras ou letras com acentos")
@@ -26,9 +24,9 @@ public record CompanyDto(
 
         @NotBlank
         @Pattern(regexp = "(^\\d{11}$)|(^\\d{14}$)", message = "CPF ou CNPJ inválido, deve ter 11 ou 14 digitos")
-        String cnpj_cpf,
+        String cnpjCpf,
 
         @NotNull(message = "AddressId nulo")
-        Integer addressId
+        UUID addressId
 
 ) { }
