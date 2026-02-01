@@ -1,10 +1,9 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.UserDto;
+import GoLogAPI.dto.user.UserCreateRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.UserRepository;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,38 +16,38 @@ public class UserValidator {
         this.userRepository = userRepository;
     }
 
-    List<String> errorList = new ArrayList<>();
+    List<String> errors = new ArrayList<>();
 
-    public void userValidate(UserDto userDto){
+    public void userValidate(UserCreateRequest userCreateRequest){
 
-        nameValidate(userDto.userName(), errorList);
-        emailValidate(userDto.email(), errorList);
-        passwordValidate(userDto.password(), errorList);
-        cpfValidate(userDto.cpf(), errorList);
+        nameValidate(userCreateRequest.userName(), errors);
+        emailValidate(userCreateRequest.email(), errors);
+        passwordValidate(userCreateRequest.password(), errors);
+        cpfValidate(userCreateRequest.cpf(), errors);
 
-        if(!errorList.isEmpty()){
-            throw new ConflictException(errorList);
+        if(!errors.isEmpty()){
+            throw new ConflictException(errors);
         }
     }
 
-    public void nameValidate(String userName, List<String> errorList){
+    public void nameValidate(String userName, List<String> errors){
         boolean exists = userRepository.existsByUserName(userName);
         if(exists){
-            errorList.add("Nome de usuário já cadastrado!");
+            errors.add("Nome de usuário já cadastrado!");
         }
     }
 
-    public void emailValidate(String userEmail, List<String> errorList){
+    public void emailValidate(String userEmail, List<String> errors){
         boolean exists = userRepository.existsByEmail(userEmail);
         if(exists){
-            errorList.add("Email já cadastrado!");
+            errors.add("Email já cadastrado!");
         }
     }
 
-    public void passwordValidate(String userPassword, List<String> errorList){
+    public void passwordValidate(String userPassword, List<String> errors){
         boolean exists = userRepository.existsByPassword(userPassword);
         if(exists){
-            errorList.add("Senha já cadastrada!");
+            errors.add("Senha já cadastrada!");
         }
     }
 

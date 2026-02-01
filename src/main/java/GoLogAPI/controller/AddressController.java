@@ -1,9 +1,14 @@
 package GoLogAPI.controller;
 
-import GoLogAPI.model.Address;
+import GoLogAPI.dto.address.AddressCreateRequest;
+import GoLogAPI.dto.address.AddressPacthRequest;
+import GoLogAPI.dto.address.AddressResponse;
 import GoLogAPI.service.AddressService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("address")
@@ -16,24 +21,29 @@ public class AddressController {
     }
 
     @PostMapping
-    public Address SaveAddress(@RequestBody Address address){
-        return this.addressService.saveAddress(address);
+    public AddressResponse SaveAddress(@Valid @RequestBody AddressCreateRequest addressCreateRequest){
+        return addressService.saveAddress(addressCreateRequest);
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<Address> GetAddressById(@PathVariable int id){
-        Address address = addressService.getAddressById(id);
-        return ResponseEntity.ok(address);
+    public ResponseEntity<AddressResponse> GetAddress(@PathVariable UUID id){
+        AddressResponse addressResponse = addressService.getAddress(id);
+        return ResponseEntity.ok(addressResponse);
     }
 
     @DeleteMapping("{id}")
-    public void DeleteAddresById(@PathVariable int id){
-        this.addressService.deleteAdrressById(id);
+    public void DeleteAddress(@PathVariable UUID id){
+        addressService.deleteAdrress(id);
     }
 
     @PutMapping("{id}")
-    public Address UpdateAddresById(@PathVariable int id, @RequestBody Address address){
-        return this.addressService.updateAddress(id, address);
+    public AddressResponse PutAddress(@PathVariable UUID id, @Valid @RequestBody AddressCreateRequest addressCreateRequest){
+        return addressService.putAddress(id, addressCreateRequest);
+    }
+
+    @PatchMapping("{id}")
+    public AddressResponse PatchAddress(@PathVariable UUID id, @Valid @RequestBody AddressPacthRequest addressPacthRequest){
+        return addressService.patchAddress(id, addressPacthRequest);
     }
 
 }

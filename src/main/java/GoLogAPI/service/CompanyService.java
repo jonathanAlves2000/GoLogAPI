@@ -1,6 +1,8 @@
 package GoLogAPI.service;
 
-import GoLogAPI.dto.CompanyDto;
+import GoLogAPI.dto.company.CompanyCreateRequest;
+import GoLogAPI.dto.company.CompanyPatchRequest;
+import GoLogAPI.dto.company.CompanyResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.CompanyMapper;
 import GoLogAPI.model.Address;
@@ -8,7 +10,10 @@ import GoLogAPI.model.Company;
 import GoLogAPI.repository.AddressRepository;
 import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.validation.CompanyValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class CompanyService {
@@ -18,6 +23,8 @@ public class CompanyService {
     private CompanyMapper companyMapper;
     private CompanyValidator companyValidator;
 
+    String message = "Registro não encontrado para o Id: ";
+
     public CompanyService(CompanyRepository companyRepository, AddressRepository addressRepository, CompanyMapper companyMapper, CompanyValidator companyValidator){
         this.companyRepository = companyRepository;
         this.addressRepository = addressRepository;
@@ -25,33 +32,56 @@ public class CompanyService {
         this.companyValidator = companyValidator;
     }
 
-    public CompanyDto saveCompany(CompanyDto companyDto){
-        companyValidator.companyValidate(companyDto);
-        Company company = companyMapper.toEntity(companyDto);
-        Address address = addressRepository.findById(companyDto.addressId())
-                        .orElseThrow(() -> new  ResourceNotFoundException("Registro não encontrado para o ID: " + companyDto.addressId()));
+    public CompanyResponse saveCompany(CompanyCreateRequest companyCreateRequest){
+        companyValidator.companyValidate(companyCreateRequest);
+        Company company = companyMapper.toEntity(companyCreateRequest);
+        Address address = addressRepository.findById(companyCreateRequest.addressId())
+                        .orElseThrow(() -> new  ResourceNotFoundException(message + companyCreateRequest.addressId()));
         company.setAddress(address);
         companyRepository.save(company);
-        return companyMapper.toDto(company);
+        return companyMapper.toResponse(company);
     }
 
-    public CompanyDto getCompanyById(int id){
+    public CompanyResponse getCompany(UUID id){
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID: " + id));
-        return companyMapper.toDto(company);
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+        return companyMapper.toResponse(company);
     }
 
-    public void deleteCompanyById(int id){
+    public void deleteCompany(UUID id){
         companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID: " + id));
-        this.companyRepository.deleteById(id);
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+        companyRepository.deleteById(id);
     }
 
-    public Company updateCompanyById(int id, Company company){
-        if(!companyRepository.existsById(id)){
-            throw new ResourceNotFoundException("Registro não encontrado para o ID: " + id);
-        }
+    public CompanyResponse putCompany(UUID id, CompanyCreateRequest companyCreateRequest){
+        companyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+        Address address = addressRepository.findById(companyCreateRequest.addressId())
+                .orElseThrow(() -> new ResourceNotFoundException(message + companyCreateRequest.addressId()));
+        Company company = companyMapper.toEntity(companyCreateRequest);
+        company.setAddress(address);
         company.setId(id);
-        return companyRepository.save(company);
+        companyRepository.save(company);
+        return companyMapper.toResponse(company);
+    }
+
+    @Transactional
+    public CompanyResponse patchCompany(UUID id, CompanyPatchRequest companyPatchRequest){
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+
+        if(companyPatchRequest.cnpjCpf() != null) company.setCnpjCpf(companyPatchRequest.cnpjCpf());
+        if(companyPatchRequest.isCliente() != null) company.setIsCliente(companyPatchRequest.isCliente());
+        if(companyPatchRequest.email() != null) company.setEmail(companyPatchRequest.email());
+        if(companyPatchRequest.legalName() != null) company.setLegalName(companyPatchRequest.legalName());
+        if(companyPatchRequest.phoneNumber() != null) company.setPhoneNumber(companyPatchRequest.phoneNumber());
+        if(companyPatchRequest.addressId() != null){
+            Address address = addressRepository.findById(companyPatchRequest.addressId())
+                    .orElseThrow(() -> new ResourceNotFoundException(message + companyPatchRequest.addressId()));
+            company.setAddress(address);
+        }
+        companyRepository.save(company);
+        return companyMapper.toResponse(company);
     }
 }

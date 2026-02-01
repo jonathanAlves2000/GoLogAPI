@@ -3,6 +3,8 @@ package GoLogAPI.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "address_table")
 @Getter
@@ -12,9 +14,9 @@ import lombok.*;
 public class Address {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", unique = true)
-    private Integer id;
+    private UUID id;
 
     @Column(name = "street")
     private String street;
@@ -37,7 +39,7 @@ public class Address {
     @Column(name = "cep")
     private String cep;
 
-    @Column(name = "complement")
+    @Column(name = "complement", nullable = true)
     private String complement;
 
 }

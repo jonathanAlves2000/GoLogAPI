@@ -3,8 +3,7 @@ package GoLogAPI.dto.company;
 import jakarta.validation.constraints.*;
 import java.util.UUID;
 
-public record CompanyDto(
-        UUID id,
+public record CompanyCreateRequest(
 
         @NotBlank(message = "Legal Name vazio")
         @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Nome invalido, use somente letras ou letras com acentos")
@@ -28,5 +27,4 @@ public record CompanyDto(
 
         @NotNull(message = "AddressId nulo")
         UUID addressId
-
 ) { }

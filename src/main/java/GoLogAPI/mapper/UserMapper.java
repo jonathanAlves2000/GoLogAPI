@@ -1,18 +1,17 @@
 package GoLogAPI.mapper;
 
-import GoLogAPI.dto.UserDto;
+import GoLogAPI.dto.user.UserCreateRequest;
+import GoLogAPI.dto.user.UserResponse;
 import GoLogAPI.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "Spring")
+@Mapper(componentModel = "Spring", uses = {CompanyMapper.class})
 public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "company", ignore = true)
-    User toEntity(UserDto userDto);
+    User toEntity(UserCreateRequest userCreateRequest);
 
-    //@Mapping(target = "password", ignore = true)
-    @Mapping(source = "company.id", target = "companyId")
-    UserDto toDto(User user);
+    UserResponse toResponse(User user);
 }

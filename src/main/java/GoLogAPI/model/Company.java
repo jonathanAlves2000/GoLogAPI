@@ -2,8 +2,7 @@ package GoLogAPI.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "company_table")
@@ -14,9 +13,9 @@ import java.util.List;
 public class Company {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", unique = true)
-    private Integer id;
+    private UUID id;
 
     @Column(name = "legal_name")
     private String legalName;
@@ -31,7 +30,7 @@ public class Company {
     private String email;
 
     @Column(name = "cnpj_cpf")
-    private String cnpj_cpf;
+    private String cnpjCpf;
 
     @OneToOne
     @JoinColumn(name = "address_id")

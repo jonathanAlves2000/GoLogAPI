@@ -1,4 +1,4 @@
-package GoLogAPI.dto;
+package GoLogAPI.dto.driver;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Future;
@@ -7,9 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
-public record DriverDto(
-        Integer id,
+public record DriverCreateRequest(
 
         @NotBlank(message = "Campo numero da CNH vazio")
         @Pattern(regexp = "\\+?\\d{11}", message = "CNH invalida, minimo 11 digitos")
@@ -21,5 +21,5 @@ public record DriverDto(
         LocalDate cnhExpiration,
 
         @NotNull(message = "Id do usuario está vazio ou nulo")
-        Integer userId
+        UUID userId
 ) { }

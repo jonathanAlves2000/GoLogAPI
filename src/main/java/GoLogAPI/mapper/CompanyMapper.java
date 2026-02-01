@@ -1,17 +1,17 @@
 package GoLogAPI.mapper;
 
-import GoLogAPI.dto.CompanyDto;
+import GoLogAPI.dto.company.CompanyCreateRequest;
+import GoLogAPI.dto.company.CompanyResponse;
 import GoLogAPI.model.Company;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {AddressMapper.class})
 public interface CompanyMapper {
 
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "address", ignore = true)
-    Company toEntity(CompanyDto companyDto);
+    @Mapping(target = "id", ignore = true)
+    Company toEntity(CompanyCreateRequest companyCreateRequest);
 
-    @Mapping(source = "address.id", target = "addressId")
-    CompanyDto toDto(Company company);
+    CompanyResponse toResponse(Company company);
 }

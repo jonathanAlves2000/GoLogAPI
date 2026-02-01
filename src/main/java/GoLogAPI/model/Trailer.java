@@ -3,6 +3,8 @@ package GoLogAPI.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "trailer_table")
 @Getter
@@ -11,9 +13,9 @@ import lombok.*;
 @NoArgsConstructor
 public class Trailer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    private Integer id;
+    private UUID id;
 
     @Column(name = "maximum_volume")
     private Double maximumVolume;

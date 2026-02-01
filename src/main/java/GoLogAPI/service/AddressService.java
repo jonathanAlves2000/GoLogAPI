@@ -1,43 +1,77 @@
 package GoLogAPI.service;
 
+import GoLogAPI.dto.address.AddressCreateRequest;
+import GoLogAPI.dto.address.AddressPacthRequest;
+import GoLogAPI.dto.address.AddressResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.mapper.AddressMapper;
 import GoLogAPI.model.Address;
 import GoLogAPI.repository.AddressRepository;
+import GoLogAPI.validation.AddressValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
 @Service
 public class AddressService {
 
     private AddressRepository addressRepository;
+    private AddressMapper addressMapper;
+    private AddressValidator addressValidator;
 
-    public AddressService(AddressRepository addressRepository){
+    String message = "Registro não encontrado para o Id: ";
+
+    public AddressService(AddressRepository addressRepository, AddressMapper addressMapper, AddressValidator addressValidator){
         this.addressRepository = addressRepository;
+        this.addressMapper = addressMapper;
+        this.addressValidator = addressValidator;
     }
 
-    public Address saveAddress(Address address){
-        return addressRepository.save(address);
+    public AddressResponse saveAddress(AddressCreateRequest addressCreateRequest){
+        addressValidator.addressValidateCreate(addressCreateRequest);
+        Address address = addressMapper.toEntity(addressCreateRequest);
+        addressRepository.save(address);
+        return addressMapper.toDto(address);
     }
 
-    public Address getAddressById(int id){
-        if(!addressRepository.existsById(id)){
-            throw new ResourceNotFoundException("Endereço não encontrado para o ID: " + id);
-        }
-        return addressRepository.findById(id).orElse(null);
+    public AddressResponse getAddress(UUID id){
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+        return addressMapper.toDto(address);
     }
 
-    public void deleteAdrressById(int id){
-        if(!addressRepository.existsById(id)){
-            throw  new ResourceNotFoundException("Endereço não encontrado para o ID: " + id);
-        }
+    public void deleteAdrress(UUID id){
+        addressRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
         addressRepository.deleteById(id);
     }
 
-    public Address updateAddress(int id, Address address){
-        if(!addressRepository.existsById(id)){
-            throw new ResourceNotFoundException("Endereço não encontrado para o ID: " + id);
-        }
+    public AddressResponse putAddress(UUID id, AddressCreateRequest addressCreateRequest){
+        addressValidator.addressValidateCreate(addressCreateRequest);
+        addressRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+        Address address = addressMapper.toEntity(addressCreateRequest);
         address.setId(id);
-        return addressRepository.save(address);
+        addressRepository.save(address);
+        return addressMapper.toDto(address);
+    }
+
+    @Transactional
+    public AddressResponse patchAddress(UUID id, AddressPacthRequest addressPacthRequest){
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+
+        if(addressPacthRequest.cep() != null) address.setCep(addressPacthRequest.cep());
+        if(addressPacthRequest.city() != null) address.setCity(addressPacthRequest.city());
+        if(addressPacthRequest.country() != null) address.setCountry(addressPacthRequest.country());
+        if(addressPacthRequest.district() != null) address.setDistrict(addressPacthRequest.district());
+        if(addressPacthRequest.number() != null) address.setNumber(addressPacthRequest.number());
+        if(addressPacthRequest.state() != null) address.setState(addressPacthRequest.state());
+        if(addressPacthRequest.street() != null) address.setStreet(addressPacthRequest.street());
+        if(addressPacthRequest.complement() != null) address.setComplement(addressPacthRequest.complement());
+
+        addressRepository.save(address);
+        return addressMapper.toDto(address);
     }
 
 }

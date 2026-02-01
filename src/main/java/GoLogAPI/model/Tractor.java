@@ -3,6 +3,8 @@ package GoLogAPI.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "tractor_table")
 @Getter
@@ -12,9 +14,9 @@ import lombok.*;
 public class Tractor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    private Integer id;
+    private UUID id;
 
     @Column(name = "type_fuel")
     private String typeFuel;

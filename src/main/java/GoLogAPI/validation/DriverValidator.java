@@ -1,6 +1,6 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.DriverDto;
+import GoLogAPI.dto.driver.DriverCreateRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.DriverRepository;
 import org.springframework.stereotype.Component;
@@ -17,20 +17,20 @@ public class DriverValidator {
         this.driverRepository = driverRepository;
     }
 
-    List<String> errorList = new ArrayList<>();
+    List<String> errors = new ArrayList<>();
 
-    public void driverValidate(DriverDto driverDto){
-        cnhValidate(driverDto.cnhNumber(), errorList);
+    public void driverValidate(DriverCreateRequest driverCreateRequest){
+        cnhValidate(driverCreateRequest.cnhNumber(), errors);
 
-        if(!errorList.isEmpty()){
-            throw new ConflictException(errorList);
+        if(!errors.isEmpty()){
+            throw new ConflictException(errors);
         }
     }
 
-    public void cnhValidate(String cnh, List<String> errorList){
+    public void cnhValidate(String cnh, List<String> errors){
         boolean exists = driverRepository.existsByCnhNumber(cnh);
         if(exists){
-            errorList.add("CNH já cadastrada!");
+            errors.add("CNH já cadastrada!");
         }
     }
 }

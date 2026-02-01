@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "driver_table")
@@ -14,9 +15,9 @@ import java.time.LocalDate;
 public class Driver {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", unique = true)
-    private Integer id;
+    private UUID id;
 
     @Column(name = "cnh_number")
     private String cnhNumber;

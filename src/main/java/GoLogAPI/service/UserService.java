@@ -1,6 +1,8 @@
 package GoLogAPI.service;
 
-import GoLogAPI.dto.UserDto;
+import GoLogAPI.dto.user.UserCreateRequest;
+import GoLogAPI.dto.user.UserPatchRequest;
+import GoLogAPI.dto.user.UserResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.UserMapper;
 import GoLogAPI.model.Company;
@@ -8,7 +10,10 @@ import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.UserRepository;
 import GoLogAPI.model.User;
 import GoLogAPI.validation.UserValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -18,6 +23,8 @@ public class UserService {
     private UserMapper userMapper;
     private UserValidator userValidator;
 
+    String message = "Registro não encontrado para o Id: ";
+
     public UserService(UserRepository userRepository, CompanyRepository companyRepository ,UserMapper userMapper, UserValidator userValidator){
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
@@ -25,42 +32,57 @@ public class UserService {
         this.userValidator = userValidator;
     }
 
-    public UserDto saveUser(UserDto userDto){
-        userValidator.userValidate(userDto);
-        User user = userMapper.toEntity(userDto);
-        Company company = companyRepository.findById(userDto.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID da companhia" + userDto.companyId()));
+    public UserResponse saveUser(UserCreateRequest userCreateRequest){
+        userValidator.userValidate(userCreateRequest);
+        User user = userMapper.toEntity(userCreateRequest);
+        Company company = companyRepository.findById(userCreateRequest.companyId())
+                .orElseThrow(() -> new ResourceNotFoundException(message + userCreateRequest.companyId()));
         user.setCompany(company);
         this.userRepository.save(user);
-        return userMapper.toDto(user);
+        return userMapper.toResponse(user);
     }
 
-    public void deleteUser(Integer id){
+    public void deleteUser(UUID id){
         userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
         this.userRepository.deleteById(id);
     }
 
-    public UserDto getUserById(Integer id){
+    public UserResponse getUser(UUID id){
        User user = userRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID: " + id));
-       return userMapper.toDto(user);
+                orElseThrow(() -> new ResourceNotFoundException(message + id));
+       return userMapper.toResponse(user);
     }
 
-    public UserDto updateUser(Integer id, UserDto userDto){
+    public UserResponse putUser(UUID id, UserCreateRequest userCreateRequest){
       userRepository.findById(id)
-              .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID: " + id));
-
+              .orElseThrow(() -> new ResourceNotFoundException(message + id));
       //userValidator.userValidate(userDto);
-
-      User user = userMapper.toEntity(userDto);
-
-      Company company = companyRepository.findById(userDto.companyId())
-              .orElseThrow(() -> new ResourceNotFoundException("Registro não encontrado para o ID da comphania" + userDto.companyId()));
-
+      User user = userMapper.toEntity(userCreateRequest);
+      Company company = companyRepository.findById(userCreateRequest.companyId())
+              .orElseThrow(() -> new ResourceNotFoundException(message + userCreateRequest.companyId()));
       user.setCompany(company);
       user.setId(id);
       userRepository.save(user);
-      return userMapper.toDto(user);
+      return userMapper.toResponse(user);
+    }
+
+    @Transactional
+    public UserResponse patchUser(UUID id, UserPatchRequest userPatchRequest){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+
+        if(userPatchRequest.userName() != null) user.setUserName(userPatchRequest.userName());
+        if(userPatchRequest.userProfile() != null) user.setUserProfile(userPatchRequest.userProfile());
+        if(userPatchRequest.cpf() != null) user.setCpf(userPatchRequest.cpf());
+        if(userPatchRequest.email() != null) user.setEmail(userPatchRequest.email());
+        if(userPatchRequest.password() != null) user.setPassword(userPatchRequest.password());
+        if(userPatchRequest.companyId() != null){
+            Company company = companyRepository.findById(userPatchRequest.companyId())
+                    .orElseThrow(() -> new ResourceNotFoundException(message + userPatchRequest.companyId()));
+            user.setCompany(company);
+        }
+        userRepository.save(user);
+        return userMapper.toResponse(user);
     }
 }
