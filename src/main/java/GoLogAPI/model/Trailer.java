@@ -12,9 +12,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Trailer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", unique = true)
     private UUID id;
 
     @Column(name = "maximum_volume")

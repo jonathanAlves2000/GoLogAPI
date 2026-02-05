@@ -11,6 +11,7 @@ import GoLogAPI.repository.UserRepository;
 import GoLogAPI.model.User;
 import GoLogAPI.validation.UserValidator;
 import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -22,21 +23,25 @@ public class UserService {
     private CompanyRepository companyRepository;
     private UserMapper userMapper;
     private UserValidator userValidator;
+    private PasswordEncoder passwordEncoder;
 
     String message = "Registro não encontrado para o Id: ";
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository ,UserMapper userMapper, UserValidator userValidator){
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository ,UserMapper userMapper, UserValidator userValidator, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.userMapper = userMapper;
         this.userValidator = userValidator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse saveUser(UserCreateRequest userCreateRequest){
-        userValidator.userValidate(userCreateRequest);
-        User user = userMapper.toEntity(userCreateRequest);
         Company company = companyRepository.findById(userCreateRequest.companyId())
                 .orElseThrow(() -> new ResourceNotFoundException(message + userCreateRequest.companyId()));
+        userValidator.userValidate(userCreateRequest);
+        String passwordEnconder = passwordEncoder.encode(userCreateRequest.password());
+        User user = userMapper.toEntity(userCreateRequest);
+        user.setPassword(passwordEnconder);
         user.setCompany(company);
         this.userRepository.save(user);
         return userMapper.toResponse(user);
@@ -57,7 +62,7 @@ public class UserService {
     public UserResponse putUser(UUID id, UserCreateRequest userCreateRequest){
       userRepository.findById(id)
               .orElseThrow(() -> new ResourceNotFoundException(message + id));
-      //userValidator.userValidate(userDto);
+      userValidator.userValidate(userCreateRequest);
       User user = userMapper.toEntity(userCreateRequest);
       Company company = companyRepository.findById(userCreateRequest.companyId())
               .orElseThrow(() -> new ResourceNotFoundException(message + userCreateRequest.companyId()));
@@ -72,7 +77,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
 
-        if(userPatchRequest.userName() != null) user.setUserName(userPatchRequest.userName());
+        if(userPatchRequest.name() != null) user.setName(userPatchRequest.name());
         if(userPatchRequest.userProfile() != null) user.setUserProfile(userPatchRequest.userProfile());
         if(userPatchRequest.cpf() != null) user.setCpf(userPatchRequest.cpf());
         if(userPatchRequest.email() != null) user.setEmail(userPatchRequest.email());

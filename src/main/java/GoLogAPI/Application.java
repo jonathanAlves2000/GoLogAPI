@@ -10,8 +10,6 @@ public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
-//        SpringApplicationBuilder builder = new SpringApplicationBuilder(Application.class);
-//        builder.run(args);
     }
 }
 

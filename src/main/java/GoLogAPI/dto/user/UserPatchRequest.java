@@ -10,7 +10,7 @@ public record UserPatchRequest(
 
         @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Nome invalido, use somente letras ou letras com acentos")
         @Size(min = 10, max = 100, message = "Nome deve ter de 10 a 100 letras")
-        String userName,
+        String name,
 
         @Email(message = "Email invalido")
         String email,

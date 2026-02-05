@@ -15,7 +15,7 @@ public class Tractor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", unique = true)
     private UUID id;
 
     @Column(name = "type_fuel")

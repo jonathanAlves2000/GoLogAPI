@@ -20,7 +20,7 @@ public class UserValidator {
 
     public void userValidate(UserCreateRequest userCreateRequest){
 
-        nameValidate(userCreateRequest.userName(), errors);
+        nameValidate(userCreateRequest.name(), errors);
         emailValidate(userCreateRequest.email(), errors);
         passwordValidate(userCreateRequest.password(), errors);
         cpfValidate(userCreateRequest.cpf(), errors);
@@ -31,7 +31,7 @@ public class UserValidator {
     }
 
     public void nameValidate(String userName, List<String> errors){
-        boolean exists = userRepository.existsByUserName(userName);
+        boolean exists = userRepository.existsByName(userName);
         if(exists){
             errors.add("Nome de usuário já cadastrado!");
         }

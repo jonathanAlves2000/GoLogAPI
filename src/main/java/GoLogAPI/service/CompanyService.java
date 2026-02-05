@@ -12,7 +12,6 @@ import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.validation.CompanyValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
-
 import java.util.UUID;
 
 @Service
