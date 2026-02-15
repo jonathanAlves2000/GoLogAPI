@@ -21,16 +21,16 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<List<String>> handleConflict(ConflictException ex){
+    public ResponseEntity<List<String>> handleConflict(ConflictException exception){
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(ex.getError());
+                .body(exception.getError());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleNotFound(ResourceNotFoundException ex){
+    public ResponseEntity<String> handleNotFound(ResourceNotFoundException exception){
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
+                .body(exception.getMessage());
     }
 }

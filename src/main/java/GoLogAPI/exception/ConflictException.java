@@ -10,7 +10,6 @@ public class ConflictException extends RuntimeException {
     public ConflictException(List<String> errorList){
         super("Múltiplos erros de validação!");
         this.errors = new ArrayList<>(errorList);
-        errorList.forEach(messageError -> System.err.println(messageError));
         errorList.clear();
     }
 

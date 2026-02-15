@@ -1,6 +1,5 @@
 package GoLogAPI.dto.address;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 

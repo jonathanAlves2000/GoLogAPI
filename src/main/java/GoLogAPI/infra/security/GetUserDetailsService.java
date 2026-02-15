@@ -1,4 +1,4 @@
-package GoLogAPI.service;
+package GoLogAPI.infra.security;
 
 import GoLogAPI.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -7,13 +7,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthenticationService implements UserDetailsService {
+public class GetUserDetailsService implements UserDetailsService {
 
     String message = "Usuario não encontrado";
 
     private UserRepository userRepository;
 
-    public AuthenticationService(UserRepository userRepository){
+    public GetUserDetailsService(UserRepository userRepository){
         this.userRepository = userRepository;
     }
 

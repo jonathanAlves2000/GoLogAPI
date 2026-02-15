@@ -43,14 +43,14 @@ public class UserService {
         User user = userMapper.toEntity(userCreateRequest);
         user.setPassword(passwordEnconder);
         user.setCompany(company);
-        this.userRepository.save(user);
+        userRepository.save(user);
         return userMapper.toResponse(user);
     }
 
     public void deleteUser(UUID id){
         userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
-        this.userRepository.deleteById(id);
+        userRepository.deleteById(id);
     }
 
     public UserResponse getUser(UUID id){

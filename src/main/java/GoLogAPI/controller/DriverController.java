@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("driver")
+@RequestMapping("/driver")
 public class DriverController {
 
     private final DriverService driverService;
