@@ -1,11 +1,13 @@
 package GoLogAPI.dto.user;
 
 import GoLogAPI.model.UserProfile;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
 
 import java.util.UUID;
 
+@Schema(name = "Create User")
 public record UserCreateRequest(
 
         @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Nome invalido, use somente letras ou letras com acentos")
@@ -25,6 +27,7 @@ public record UserCreateRequest(
         String cpf,
 
         @NotNull(message = "User Profile vazio")
+        @Schema(name = "User Profile")
         UserProfile userProfile,
 
         @NotNull(message = "CompanyId nulo")

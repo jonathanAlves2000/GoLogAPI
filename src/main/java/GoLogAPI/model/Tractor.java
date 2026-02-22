@@ -11,12 +11,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Tractor {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", unique = true)
-    private UUID id;
+public class Tractor extends Equipament{
 
     @Column(name = "type_fuel")
     private String typeFuel;

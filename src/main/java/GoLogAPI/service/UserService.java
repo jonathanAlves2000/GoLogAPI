@@ -35,10 +35,10 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserResponse saveUser(UserCreateRequest userCreateRequest){
+    public UserResponse save(UserCreateRequest userCreateRequest){
         Company company = companyRepository.findById(userCreateRequest.companyId())
                 .orElseThrow(() -> new ResourceNotFoundException(message + userCreateRequest.companyId()));
-        userValidator.userValidate(userCreateRequest);
+        userValidator.validate(userCreateRequest);
         String passwordEnconder = passwordEncoder.encode(userCreateRequest.password());
         User user = userMapper.toEntity(userCreateRequest);
         user.setPassword(passwordEnconder);
@@ -47,22 +47,22 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
-    public void deleteUser(UUID id){
-        userRepository.findById(id)
+    public void delete(UUID id){
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
-        userRepository.deleteById(id);
+        userRepository.delete(user);
     }
 
-    public UserResponse getUser(UUID id){
+    public UserResponse get(UUID id){
        User user = userRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException(message + id));
        return userMapper.toResponse(user);
     }
 
-    public UserResponse putUser(UUID id, UserCreateRequest userCreateRequest){
+    public UserResponse update(UUID id, UserCreateRequest userCreateRequest){
       userRepository.findById(id)
               .orElseThrow(() -> new ResourceNotFoundException(message + id));
-      userValidator.userValidate(userCreateRequest);
+      userValidator.validate(userCreateRequest);
       User user = userMapper.toEntity(userCreateRequest);
       Company company = companyRepository.findById(userCreateRequest.companyId())
               .orElseThrow(() -> new ResourceNotFoundException(message + userCreateRequest.companyId()));
@@ -73,7 +73,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse patchUser(UUID id, UserPatchRequest userPatchRequest){
+    public UserResponse updatePartial(UUID id, UserPatchRequest userPatchRequest){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
 

@@ -11,12 +11,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Trailer {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", unique = true)
-    private UUID id;
+public class Trailer extends Equipament {
 
     @Column(name = "maximum_volume")
     private Double maximumVolume;

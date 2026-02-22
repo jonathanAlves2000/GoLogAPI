@@ -21,28 +21,28 @@ public class CompanyController {
     }
 
     @PostMapping
-    public CompanyResponse SaveCompany(@Valid @RequestBody CompanyCreateRequest companyCreateRequest){
-        return companyService.saveCompany(companyCreateRequest);
+    public CompanyResponse save(@Valid @RequestBody CompanyCreateRequest companyCreateRequest){
+        return companyService.save(companyCreateRequest);
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<CompanyResponse> GetCompany(@PathVariable UUID id){
-        CompanyResponse companyResponse = companyService.getCompany(id);
+    public ResponseEntity<CompanyResponse> get(@PathVariable UUID id){
+        CompanyResponse companyResponse = companyService.get(id);
         return ResponseEntity.ok(companyResponse);
     }
 
     @DeleteMapping("{id}")
-    public void DeleteCompany(@PathVariable UUID id){
-        this.companyService.deleteCompany(id);
+    public void delete(@PathVariable UUID id){
+        this.companyService.delete(id);
     }
 
     @PutMapping("{id}")
-    public CompanyResponse PutCompany(@PathVariable UUID id, @Valid @RequestBody CompanyCreateRequest companyCreateRequest){
-        return companyService.putCompany(id, companyCreateRequest);
+    public CompanyResponse update(@PathVariable UUID id, @Valid @RequestBody CompanyCreateRequest companyCreateRequest){
+        return companyService.update(id, companyCreateRequest);
     }
 
     @PatchMapping("{id}")
-    public CompanyResponse PatchCompany(@PathVariable UUID id, @Valid @RequestBody CompanyPatchRequest companyPatchRequest){
-        return companyService.patchCompany(id, companyPatchRequest);
+    public CompanyResponse updatePartial(@PathVariable UUID id, @Valid @RequestBody CompanyPatchRequest companyPatchRequest){
+        return companyService.updatePartial(id, companyPatchRequest);
     }
 }

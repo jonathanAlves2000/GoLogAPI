@@ -31,8 +31,8 @@ public class CompanyService {
         this.companyValidator = companyValidator;
     }
 
-    public CompanyResponse saveCompany(CompanyCreateRequest companyCreateRequest){
-        companyValidator.companyValidate(companyCreateRequest);
+    public CompanyResponse save(CompanyCreateRequest companyCreateRequest){
+        companyValidator.validate(companyCreateRequest);
         Company company = companyMapper.toEntity(companyCreateRequest);
         Address address = addressRepository.findById(companyCreateRequest.addressId())
                         .orElseThrow(() -> new  ResourceNotFoundException(message + companyCreateRequest.addressId()));
@@ -41,19 +41,19 @@ public class CompanyService {
         return companyMapper.toResponse(company);
     }
 
-    public CompanyResponse getCompany(UUID id){
+    public CompanyResponse get(UUID id){
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
         return companyMapper.toResponse(company);
     }
 
-    public void deleteCompany(UUID id){
-        companyRepository.findById(id)
+    public void delete(UUID id){
+        Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
-        companyRepository.deleteById(id);
+        companyRepository.delete(company);
     }
 
-    public CompanyResponse putCompany(UUID id, CompanyCreateRequest companyCreateRequest){
+    public CompanyResponse update(UUID id, CompanyCreateRequest companyCreateRequest){
         companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
         Address address = addressRepository.findById(companyCreateRequest.addressId())
@@ -66,7 +66,7 @@ public class CompanyService {
     }
 
     @Transactional
-    public CompanyResponse patchCompany(UUID id, CompanyPatchRequest companyPatchRequest){
+    public CompanyResponse updatePartial(UUID id, CompanyPatchRequest companyPatchRequest){
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
 

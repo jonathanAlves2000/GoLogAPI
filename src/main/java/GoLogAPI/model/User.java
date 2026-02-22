@@ -2,6 +2,8 @@ package GoLogAPI.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +18,9 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class User implements UserDetails {
+@SQLDelete(sql = "UPDATE user_table SET active = true WHERE id = ?")
+@Where(clause = "active = true")
+public class User extends Audit implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

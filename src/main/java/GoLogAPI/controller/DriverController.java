@@ -21,29 +21,29 @@ public class DriverController {
     }
 
     @PostMapping
-    public DriverResponse SaveDriver(@Valid @RequestBody DriverCreateRequest driverCreateRequest) {
-        return driverService.saveDriver(driverCreateRequest);
+    public DriverResponse save(@Valid @RequestBody DriverCreateRequest driverCreateRequest) {
+        return driverService.save(driverCreateRequest);
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<DriverResponse> GetDriver(@PathVariable UUID id){
-        DriverResponse driverResponse = driverService.getDriver(id);
+    public ResponseEntity<DriverResponse> get(@PathVariable UUID id){
+        DriverResponse driverResponse = driverService.get(id);
         return ResponseEntity.ok(driverResponse);
     }
 
     @DeleteMapping("{id}")
-    public void DeleteDriver(@PathVariable UUID id){
-        driverService.deleteDriver(id);
+    public void delete(@PathVariable UUID id){
+        driverService.delete(id);
     }
 
     @PutMapping("{id}")
-    public DriverResponse PutDriver(@PathVariable UUID id, @Valid @RequestBody DriverCreateRequest driverCreateRequest){
-        return driverService.putDriver(id, driverCreateRequest);
+    public DriverResponse update(@PathVariable UUID id, @Valid @RequestBody DriverCreateRequest driverCreateRequest){
+        return driverService.update(id, driverCreateRequest);
     }
 
 
     @PatchMapping("{id}")
-    public DriverResponse PatchDriver(@PathVariable UUID id, @Valid @RequestBody DriverPatchRequest driverPatchRequest){
-        return driverService.patchDriver(id, driverPatchRequest);
+    public DriverResponse updatePartial(@PathVariable UUID id, @Valid @RequestBody DriverPatchRequest driverPatchRequest){
+        return driverService.updatePartial(id, driverPatchRequest);
     }
 }

@@ -31,8 +31,8 @@ public class DriverService {
         this.driverValidator = driverValidator;
     }
 
-    public DriverResponse saveDriver(DriverCreateRequest driverCreateRequest) {
-        driverValidator.driverValidate(driverCreateRequest);
+    public DriverResponse save(DriverCreateRequest driverCreateRequest) {
+        driverValidator.validate(driverCreateRequest);
         Driver driver = driverMapper.toEntity(driverCreateRequest);
         User user = userRepository.findById(driverCreateRequest.userId())
                 .orElseThrow(() -> new ResourceNotFoundException(message + driverCreateRequest.userId()));
@@ -41,19 +41,19 @@ public class DriverService {
         return driverMapper.toResponse(driver);
     }
 
-    public DriverResponse getDriver(UUID id){
+    public DriverResponse get(UUID id){
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
         return driverMapper.toResponse(driver);
     }
 
-    public void deleteDriver(UUID id){
-        driverRepository.findById(id)
+    public void delete(UUID id){
+        Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
-        driverRepository.deleteById(id);
+        driverRepository.delete(driver);
     }
 
-    public DriverResponse putDriver(UUID id, DriverCreateRequest driverCreateRequest){
+    public DriverResponse update(UUID id, DriverCreateRequest driverCreateRequest){
         driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
         Driver driver = driverMapper.toEntity(driverCreateRequest);
@@ -65,7 +65,7 @@ public class DriverService {
         return driverMapper.toResponse(driver);
     }
 
-    public DriverResponse patchDriver(UUID id, DriverPatchRequest driverPatchRequest){
+    public DriverResponse updatePartial(UUID id, DriverPatchRequest driverPatchRequest){
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
 

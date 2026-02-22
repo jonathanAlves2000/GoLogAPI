@@ -10,6 +10,8 @@ import GoLogAPI.repository.AddressRepository;
 import GoLogAPI.validation.AddressValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -27,37 +29,42 @@ public class AddressService {
         this.addressValidator = addressValidator;
     }
 
-    public AddressResponse saveAddress(AddressCreateRequest addressCreateRequest){
-        addressValidator.addressValidateCreate(addressCreateRequest);
+    public AddressResponse save(AddressCreateRequest addressCreateRequest){
+        addressValidator.validate(addressCreateRequest);
         Address address = addressMapper.toEntity(addressCreateRequest);
         addressRepository.save(address);
-        return addressMapper.toDto(address);
+        return addressMapper.toResponse(address);
     }
 
-    public AddressResponse getAddress(UUID id){
+    public AddressResponse get(UUID id){
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
-        return addressMapper.toDto(address);
+        return addressMapper.toResponse(address);
     }
 
-    public void deleteAdrress(UUID id){
-        addressRepository.findById(id)
+    public List<AddressResponse> listAll(){
+        List<Address> adddressList = addressRepository.findAll();
+        return addressMapper.toResponses(adddressList);
+    }
+
+    public void delete(UUID id){
+        Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
-        addressRepository.deleteById(id);
+        addressRepository.delete(address);
     }
 
-    public AddressResponse putAddress(UUID id, AddressCreateRequest addressCreateRequest){
-        addressValidator.addressValidateCreate(addressCreateRequest);
+    public AddressResponse update(UUID id, AddressCreateRequest addressCreateRequest){
+        addressValidator.validate(addressCreateRequest);
         addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
         Address address = addressMapper.toEntity(addressCreateRequest);
         address.setId(id);
         addressRepository.save(address);
-        return addressMapper.toDto(address);
+        return addressMapper.toResponse(address);
     }
 
     @Transactional
-    public AddressResponse patchAddress(UUID id, AddressPacthRequest addressPacthRequest){
+    public AddressResponse updatePartial(UUID id, AddressPacthRequest addressPacthRequest){
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
 
@@ -71,7 +78,7 @@ public class AddressService {
         if(addressPacthRequest.complement() != null) address.setComplement(addressPacthRequest.complement());
 
         addressRepository.save(address);
-        return addressMapper.toDto(address);
+        return addressMapper.toResponse(address);
     }
 
 }

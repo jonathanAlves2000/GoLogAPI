@@ -2,6 +2,8 @@ package GoLogAPI.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.UUID;
 
@@ -11,7 +13,10 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Equipament {
+@Inheritance(strategy = InheritanceType.JOINED)
+@SQLDelete(sql = "UPDATE equipament_table SET active = false WHERE id = ?")
+@Where(clause = "active = true")
+public class Equipament extends Audit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,12 +37,4 @@ public class Equipament {
 
     @Column(name = "maximum_capacity")
     private Double maximumCapacity;
-
-    @OneToOne
-    @JoinColumn(name = "tractor_id", nullable = true)
-    private Tractor tractor;
-
-    @OneToOne
-    @JoinColumn(name = "trailer_id", nullable = true)
-    private Trailer trailer;
 }

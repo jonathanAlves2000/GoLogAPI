@@ -12,8 +12,7 @@ import org.springframework.context.annotation.Configuration;
                 version = "1.0.0",
                 contact = @Contact(
                         name = "Jonatthan Alves",
-                        email = "jonathanmatheusalves@gmail.com",
-                        url = "gologapi.com"
+                        email = "jonathanmatheusalves@gmail.com"
                 )
         )
 )

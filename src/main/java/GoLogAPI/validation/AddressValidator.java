@@ -18,14 +18,14 @@ public class AddressValidator {
 
     List<String> erros = new ArrayList<>();
 
-    public void addressValidateCreate(AddressCreateRequest addressCreateRequest){
-        validateCepNumber(addressCreateRequest.cep(), addressCreateRequest.number(), erros);
+    public void validate(AddressCreateRequest addressCreateRequest){
+        cepNumber(addressCreateRequest.cep(), addressCreateRequest.number(), erros);
         if(!erros.isEmpty()){
             throw new ConflictException(erros);
         }
     }
 
-    public void validateCepNumber(String cep, String number, List<String> erros){
+    public void cepNumber(String cep, String number, List<String> erros){
         boolean exists = addressRepository.existsByCepAndNumber(cep, number);
 
         if(exists){

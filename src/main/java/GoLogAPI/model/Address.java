@@ -2,6 +2,8 @@ package GoLogAPI.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.util.UUID;
 
@@ -11,7 +13,9 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Address {
+@SQLDelete(sql = "UPDATE address_table SET active = false WHERE id = ?")
+@Where(clause = "active = true")
+public class Address extends Audit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
