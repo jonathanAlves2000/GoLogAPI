@@ -2,6 +2,7 @@ package GoLogAPI.service;
 
 import GoLogAPI.dto.driver.DriverCreateRequest;
 import GoLogAPI.dto.driver.DriverPatchRequest;
+import GoLogAPI.dto.driver.DriverResponseList;
 import GoLogAPI.dto.driver.DriverResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.DriverMapper;
@@ -12,6 +13,7 @@ import GoLogAPI.repository.UserRepository;
 import GoLogAPI.validation.DriverValidator;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -45,6 +47,11 @@ public class DriverService {
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
         return driverMapper.toResponse(driver);
+    }
+
+    public List<DriverResponseList> listAll(){
+        List<Driver> drivers = driverRepository.findAll();
+        return driverMapper.toResponses(drivers);
     }
 
     public void delete(UUID id){

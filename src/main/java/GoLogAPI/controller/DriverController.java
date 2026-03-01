@@ -2,12 +2,16 @@ package GoLogAPI.controller;
 
 import GoLogAPI.dto.driver.DriverCreateRequest;
 import GoLogAPI.dto.driver.DriverPatchRequest;
+import GoLogAPI.dto.driver.DriverResponseList;
 import GoLogAPI.dto.driver.DriverResponse;
 import GoLogAPI.service.DriverService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,8 +25,13 @@ public class DriverController {
     }
 
     @PostMapping
-    public DriverResponse save(@Valid @RequestBody DriverCreateRequest driverCreateRequest) {
-        return driverService.save(driverCreateRequest);
+    public ResponseEntity<DriverResponse> save(@Valid @RequestBody DriverCreateRequest driverCreateRequest) {
+        DriverResponse driverResponse = driverService.save(driverCreateRequest);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("{id}")
+                .buildAndExpand(driverResponse)
+                .toUri();
+        return ResponseEntity.created(uri).body(driverResponse);
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
@@ -31,19 +40,27 @@ public class DriverController {
         return ResponseEntity.ok(driverResponse);
     }
 
+    @GetMapping
+    public ResponseEntity<List<DriverResponseList>> listAll(){
+        List<DriverResponseList> driverResponses = driverService.listAll();
+        return ResponseEntity.ok(driverResponses);
+    }
+
     @DeleteMapping("{id}")
-    public void delete(@PathVariable UUID id){
+    public ResponseEntity<Void> delete(@PathVariable UUID id){
         driverService.delete(id);
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping("{id}")
-    public DriverResponse update(@PathVariable UUID id, @Valid @RequestBody DriverCreateRequest driverCreateRequest){
-        return driverService.update(id, driverCreateRequest);
+    public ResponseEntity<DriverResponse> update(@PathVariable UUID id, @Valid @RequestBody DriverCreateRequest driverCreateRequest){
+        DriverResponse driverResponse = driverService.update(id, driverCreateRequest);
+        return ResponseEntity.ok().body(driverResponse);
     }
 
-
     @PatchMapping("{id}")
-    public DriverResponse updatePartial(@PathVariable UUID id, @Valid @RequestBody DriverPatchRequest driverPatchRequest){
-        return driverService.updatePartial(id, driverPatchRequest);
+    public ResponseEntity<DriverResponse> updatePartial(@PathVariable UUID id, @Valid @RequestBody DriverPatchRequest driverPatchRequest){
+        DriverResponse driverResponse = driverService.updatePartial(id, driverPatchRequest);
+        return ResponseEntity.ok().body(driverResponse);
     }
 }

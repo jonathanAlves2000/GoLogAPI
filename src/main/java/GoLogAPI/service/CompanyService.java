@@ -3,6 +3,7 @@ package GoLogAPI.service;
 import GoLogAPI.dto.company.CompanyCreateRequest;
 import GoLogAPI.dto.company.CompanyPatchRequest;
 import GoLogAPI.dto.company.CompanyResponse;
+import GoLogAPI.dto.company.CompanyResponseList;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.CompanyMapper;
 import GoLogAPI.model.Address;
@@ -12,6 +13,8 @@ import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.validation.CompanyValidator;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -45,6 +48,11 @@ public class CompanyService {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(message + id));
         return companyMapper.toResponse(company);
+    }
+
+    public List<CompanyResponseList> listAll(){
+        List<Company> companies = companyRepository.findAll();
+        return companyMapper.toResponses(companies);
     }
 
     public void delete(UUID id){

@@ -3,6 +3,7 @@ package GoLogAPI.service;
 import GoLogAPI.dto.user.UserCreateRequest;
 import GoLogAPI.dto.user.UserPatchRequest;
 import GoLogAPI.dto.user.UserResponse;
+import GoLogAPI.dto.user.UserResponseList;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.UserMapper;
 import GoLogAPI.model.Company;
@@ -14,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -57,6 +59,11 @@ public class UserService {
        User user = userRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException(message + id));
        return userMapper.toResponse(user);
+    }
+
+    public List<UserResponseList> listAll(){
+        List<User> users = userRepository.findAll();
+        return userMapper.toResponses(users);
     }
 
     public UserResponse update(UUID id, UserCreateRequest userCreateRequest){
