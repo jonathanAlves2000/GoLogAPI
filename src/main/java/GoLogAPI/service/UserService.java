@@ -27,8 +27,6 @@ public class UserService {
     private UserValidator userValidator;
     private PasswordEncoder passwordEncoder;
 
-    String message = "Registro não encontrado para o Id: ";
-
     public UserService(UserRepository userRepository, CompanyRepository companyRepository ,UserMapper userMapper, UserValidator userValidator, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
@@ -39,7 +37,7 @@ public class UserService {
 
     public UserResponse save(UserCreateRequest userCreateRequest){
         Company company = companyRepository.findById(userCreateRequest.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException(message + userCreateRequest.companyId()));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + userCreateRequest.companyId()));
         userValidator.validate(userCreateRequest);
         String passwordEnconder = passwordEncoder.encode(userCreateRequest.password());
         User user = userMapper.toEntity(userCreateRequest);
@@ -51,13 +49,13 @@ public class UserService {
 
     public void delete(UUID id){
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         userRepository.delete(user);
     }
 
     public UserResponse get(UUID id){
        User user = userRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException(message + id));
+                orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
        return userMapper.toResponse(user);
     }
 
@@ -68,11 +66,11 @@ public class UserService {
 
     public UserResponse update(UUID id, UserCreateRequest userCreateRequest){
       userRepository.findById(id)
-              .orElseThrow(() -> new ResourceNotFoundException(message + id));
+              .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
       userValidator.validate(userCreateRequest);
       User user = userMapper.toEntity(userCreateRequest);
       Company company = companyRepository.findById(userCreateRequest.companyId())
-              .orElseThrow(() -> new ResourceNotFoundException(message + userCreateRequest.companyId()));
+              .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + userCreateRequest.companyId()));
       user.setCompany(company);
       user.setId(id);
       userRepository.save(user);
@@ -82,7 +80,7 @@ public class UserService {
     @Transactional
     public UserResponse updatePartial(UUID id, UserPatchRequest userPatchRequest){
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
 
         if(userPatchRequest.name() != null) user.setName(userPatchRequest.name());
         if(userPatchRequest.userProfile() != null) user.setUserProfile(userPatchRequest.userProfile());
@@ -91,7 +89,7 @@ public class UserService {
         if(userPatchRequest.password() != null) user.setPassword(userPatchRequest.password());
         if(userPatchRequest.companyId() != null){
             Company company = companyRepository.findById(userPatchRequest.companyId())
-                    .orElseThrow(() -> new ResourceNotFoundException(message + userPatchRequest.companyId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + userPatchRequest.companyId()));
             user.setCompany(company);
         }
         userRepository.save(user);

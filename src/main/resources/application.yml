@@ -5,8 +5,8 @@ spring:
   datasource:
     url:  jdbc:postgresql://${DB_HOST:localhost}:5432/gologdb
     driver-class-name: org.postgresql.Driver
-    username: "admin"
-    password: "123"
+    username: ${DB_USER:admin}
+    password: ${DB_PASS:123}
 
   session:
     store-type: none
@@ -25,4 +25,4 @@ logging:
 api:
   security:
     token:
-      secret: "${JWT_SECRET:minha-chave-secreta-104734@*%&}"
+      secret: ${JWT_SECRET:minha-chave-secreta-104734@*%&}

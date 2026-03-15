@@ -32,8 +32,8 @@ public class Equipament extends Audit {
     @Column(name = "model")
     private String model;
 
-    @Column(name = "namber_axles")
-    private Integer namberAxles;
+    @Column(name = "number_axles")
+    private Integer numberAxles;
 
     @Column(name = "maximum_capacity")
     private Double maximumCapacity;

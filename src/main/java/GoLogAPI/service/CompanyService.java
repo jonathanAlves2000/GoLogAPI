@@ -1,9 +1,6 @@
 package GoLogAPI.service;
 
-import GoLogAPI.dto.company.CompanyCreateRequest;
-import GoLogAPI.dto.company.CompanyPatchRequest;
-import GoLogAPI.dto.company.CompanyResponse;
-import GoLogAPI.dto.company.CompanyResponseList;
+import GoLogAPI.dto.company.*;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.CompanyMapper;
 import GoLogAPI.model.Address;
@@ -25,8 +22,6 @@ public class CompanyService {
     private CompanyMapper companyMapper;
     private CompanyValidator companyValidator;
 
-    String message = "Registro não encontrado para o Id: ";
-
     public CompanyService(CompanyRepository companyRepository, AddressRepository addressRepository, CompanyMapper companyMapper, CompanyValidator companyValidator){
         this.companyRepository = companyRepository;
         this.addressRepository = addressRepository;
@@ -38,7 +33,7 @@ public class CompanyService {
         companyValidator.validate(companyCreateRequest);
         Company company = companyMapper.toEntity(companyCreateRequest);
         Address address = addressRepository.findById(companyCreateRequest.addressId())
-                        .orElseThrow(() -> new  ResourceNotFoundException(message + companyCreateRequest.addressId()));
+                        .orElseThrow(() -> new  ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + companyCreateRequest.addressId()));
         company.setAddress(address);
         companyRepository.save(company);
         return companyMapper.toResponse(company);
@@ -46,7 +41,7 @@ public class CompanyService {
 
     public CompanyResponse get(UUID id){
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         return companyMapper.toResponse(company);
     }
 
@@ -57,15 +52,15 @@ public class CompanyService {
 
     public void delete(UUID id){
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         companyRepository.delete(company);
     }
 
     public CompanyResponse update(UUID id, CompanyCreateRequest companyCreateRequest){
         companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         Address address = addressRepository.findById(companyCreateRequest.addressId())
-                .orElseThrow(() -> new ResourceNotFoundException(message + companyCreateRequest.addressId()));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + companyCreateRequest.addressId()));
         Company company = companyMapper.toEntity(companyCreateRequest);
         company.setAddress(address);
         company.setId(id);
@@ -76,7 +71,7 @@ public class CompanyService {
     @Transactional
     public CompanyResponse updatePartial(UUID id, CompanyPatchRequest companyPatchRequest){
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
 
         if(companyPatchRequest.cnpjCpf() != null) company.setCnpjCpf(companyPatchRequest.cnpjCpf());
         if(companyPatchRequest.isCliente() != null) company.setIsCliente(companyPatchRequest.isCliente());
@@ -85,7 +80,7 @@ public class CompanyService {
         if(companyPatchRequest.phoneNumber() != null) company.setPhoneNumber(companyPatchRequest.phoneNumber());
         if(companyPatchRequest.addressId() != null){
             Address address = addressRepository.findById(companyPatchRequest.addressId())
-                    .orElseThrow(() -> new ResourceNotFoundException(message + companyPatchRequest.addressId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + companyPatchRequest.addressId()));
             company.setAddress(address);
         }
         companyRepository.save(company);

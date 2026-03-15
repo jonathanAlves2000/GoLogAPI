@@ -1,15 +1,11 @@
 package GoLogAPI.controller;
 
-import GoLogAPI.dto.company.CompanyCreateRequest;
-import GoLogAPI.dto.company.CompanyPatchRequest;
-import GoLogAPI.dto.company.CompanyResponse;
-import GoLogAPI.dto.company.CompanyResponseList;
+import GoLogAPI.dto.company.*;
 import GoLogAPI.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;

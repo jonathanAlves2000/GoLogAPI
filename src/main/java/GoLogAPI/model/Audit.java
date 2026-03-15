@@ -17,7 +17,7 @@ public abstract class Audit{
     private Instant createdAt;
 
     @Column(name = "created_by", updatable = false)
-    private UUID createdBy;
+    private String createdBy;
 
     @Column(name = "updated_at")
     private Instant updatedAt;
@@ -42,13 +42,15 @@ public abstract class Audit{
         updatedBy = getUserAuthenticatedName();
     }
 
-    private UUID getUserAuthenticatedId(){
+    private String getUserAuthenticatedId(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken){
             return null;
         }
+
         User userLogin = (User) auth.getPrincipal();
-        return userLogin.getId();
+        return userLogin.getName();
     }
 
     private String getUserAuthenticatedName(){

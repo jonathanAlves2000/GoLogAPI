@@ -4,7 +4,6 @@ import GoLogAPI.model.UserProfile;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
-
 import java.util.UUID;
 
 @Schema(name = "Create User")

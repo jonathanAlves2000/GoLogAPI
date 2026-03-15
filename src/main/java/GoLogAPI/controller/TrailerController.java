@@ -27,7 +27,7 @@ public class TrailerController {
         TrailerResponse trailerResponse = trailerService.save(trailerCreateRequest);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("{id}")
-                .buildAndExpand(trailerResponse.id())
+                .buildAndExpand(trailerResponse.getId())
                 .toUri();
         return ResponseEntity.created(uri).body(trailerResponse);
     }

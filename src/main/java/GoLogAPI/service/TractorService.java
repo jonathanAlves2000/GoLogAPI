@@ -19,8 +19,6 @@ public class TractorService {
     private TractorMapper tractorMapper;
     private TractorValidator tractorValidator;
 
-    String message = "Registro não encontrado para o Id: ";
-
     public TractorService(TractorRepository tractorRepository, TractorMapper tractorMapper, TractorValidator tractorValidator){
         this.tractorRepository = tractorRepository;
         this.tractorMapper = tractorMapper;
@@ -36,19 +34,19 @@ public class TractorService {
 
     public TractorResponse get(UUID id){
         Tractor tractor = tractorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         return tractorMapper.toResponse(tractor);
     }
 
     public void delete(UUID id){
         Tractor tractor = tractorRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                        .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         tractorRepository.delete(tractor);
     }
 
     public TractorResponse update(UUID id, TractorCreateRequest tractorCreateRequest){
         tractorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         tractorValidator.validate(tractorCreateRequest);
         Tractor tractor = tractorMapper.toEntity(tractorCreateRequest);
         tractor.setId(id);
@@ -58,13 +56,13 @@ public class TractorService {
 
     public TractorResponse updatePartial(UUID id, TractorPatchRequest tractorPatchRequest){
         Tractor tractor = tractorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
 
         if(tractorPatchRequest.plate() != null) tractor.setPlate(tractorPatchRequest.plate());
         if(tractorPatchRequest.renavam() != null) tractor.setRenavam(tractorPatchRequest.renavam());
         if(tractorPatchRequest.model() != null) tractor.setModel(tractorPatchRequest.model());
         if(tractorPatchRequest.maximumCapacity() != null) tractor.setMaximumCapacity(tractorPatchRequest.maximumCapacity());
-        if(tractorPatchRequest.namberAxles() != null) tractor.setNamberAxles(tractorPatchRequest.namberAxles());
+        if(tractorPatchRequest.namberAxles() != null) tractor.setNumberAxles(tractorPatchRequest.namberAxles());
         if(tractorPatchRequest.typeFuel() != null) tractor.setTypeFuel(tractorPatchRequest.typeFuel());
 
         tractor.setId(id);

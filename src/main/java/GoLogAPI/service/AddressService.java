@@ -21,8 +21,6 @@ public class AddressService {
     private AddressMapper addressMapper;
     private AddressValidator addressValidator;
 
-    String message = "Registro não encontrado para o Id: ";
-
     public AddressService(AddressRepository addressRepository, AddressMapper addressMapper, AddressValidator addressValidator){
         this.addressRepository = addressRepository;
         this.addressMapper = addressMapper;
@@ -38,7 +36,7 @@ public class AddressService {
 
     public AddressResponse get(UUID id){
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         return addressMapper.toResponse(address);
     }
 
@@ -49,14 +47,14 @@ public class AddressService {
 
     public void delete(UUID id){
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         addressRepository.delete(address);
     }
 
     public AddressResponse update(UUID id, AddressCreateRequest addressCreateRequest){
         addressValidator.validate(addressCreateRequest);
         addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
         Address address = addressMapper.toEntity(addressCreateRequest);
         address.setId(id);
         addressRepository.save(address);
@@ -66,7 +64,7 @@ public class AddressService {
     @Transactional
     public AddressResponse updatePartial(UUID id, AddressPacthRequest addressPacthRequest){
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(message + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
 
         if(addressPacthRequest.cep() != null) address.setCep(addressPacthRequest.cep());
         if(addressPacthRequest.city() != null) address.setCity(addressPacthRequest.city());
