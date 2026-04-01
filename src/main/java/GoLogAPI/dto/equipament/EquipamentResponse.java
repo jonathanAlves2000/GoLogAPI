@@ -8,8 +8,8 @@ import lombok.AllArgsConstructor;
 
 @Getter
 @Setter
-@NoArgsConstructor // Necessário para frameworks como Jackson e Hibernate
-@AllArgsConstructor // Permite o uso do super() nas classes filhas
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class EquipamentResponse {
 
     private UUID id;
@@ -18,5 +18,4 @@ public abstract class EquipamentResponse {
     private String model;
     private Integer numberAxles;
     private Double maximumCapacity;
-
 }

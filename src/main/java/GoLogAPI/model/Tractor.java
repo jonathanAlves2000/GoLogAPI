@@ -11,6 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 public class Tractor extends Equipament{
 
-    @Column(name = "type_fuel")
+    @Column(name = "type_fuel", nullable = false)
     private String typeFuel;
 }

@@ -3,8 +3,6 @@ package GoLogAPI.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "trailer_table")
 @Getter
@@ -13,6 +11,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Trailer extends Equipament {
 
-    @Column(name = "maximum_volume")
+    @Column(name = "maximum_volume", nullable = false)
     private Double maximumVolume;
 }

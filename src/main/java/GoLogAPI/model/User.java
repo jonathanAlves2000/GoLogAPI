@@ -27,24 +27,24 @@ public class User extends Audit implements UserDetails {
     @Column(name = "id", unique = true)
     private UUID id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name= "email")
+    @Column(name= "email", nullable = false)
     private String email;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "cpf")
+    @Column(name = "cpf", nullable = false)
     private String cpf;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "user_profile")
+    @Column(name = "user_profile", nullable = false)
     private UserProfile userProfile;
 
     @ManyToOne
-    @JoinColumn(name = "company_id")
+    @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
     @Override

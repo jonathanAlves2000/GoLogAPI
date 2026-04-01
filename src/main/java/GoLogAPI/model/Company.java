@@ -22,23 +22,23 @@ public class Company extends Audit{
     @Column(name = "id", unique = true)
     private UUID id;
 
-    @Column(name = "legal_name")
+    @Column(name = "legal_name", nullable = false)
     private String legalName;
 
-    @Column(name = "is_cliente")
+    @Column(name = "is_cliente", nullable = false)
     private Boolean isCliente;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "cnpj_cpf")
+    @Column(name = "cnpj_cpf", nullable = false)
     private String cnpjCpf;
 
     @OneToOne
-    @JoinColumn(name = "address_id")
+    @JoinColumn(name = "address_id", nullable = false)
     private Address address;
 
 }

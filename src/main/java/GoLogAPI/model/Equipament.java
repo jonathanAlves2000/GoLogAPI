@@ -20,21 +20,21 @@ public class Equipament extends Audit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private UUID id;
 
-    @Column(name = "plate")
+    @Column(name = "plate", nullable = false)
     private String plate;
 
-    @Column(name = "renavam")
+    @Column(name = "renavam", nullable = false)
     private String renavam;
 
-    @Column(name = "model")
+    @Column(name = "model", nullable = false)
     private String model;
 
-    @Column(name = "number_axles")
+    @Column(name = "number_axles", nullable = false)
     private Integer numberAxles;
 
-    @Column(name = "maximum_capacity")
+    @Column(name = "maximum_capacity", nullable = false)
     private Double maximumCapacity;
 }

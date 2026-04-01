@@ -23,14 +23,14 @@ public class Driver extends Audit {
     @Column(name = "id", unique = true)
     private UUID id;
 
-    @Column(name = "cnh_number")
+    @Column(name = "cnh_number", nullable = false)
     private String cnhNumber;
 
-    @Column(name = "cnh_expiration")
+    @Column(name = "cnh_expiration", nullable = false)
     private LocalDate cnhExpiration;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
 }
