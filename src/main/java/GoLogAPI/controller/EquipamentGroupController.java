@@ -10,7 +10,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/equipamentGroup")
 public class EquipamentGroupController {
 
@@ -31,7 +31,7 @@ public class EquipamentGroupController {
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<EquipamentGroupResponse> get(@PathVariable UUID id){
+    public ResponseEntity<EquipamentGroupResponse> get(@PathVariable("id") UUID id){
        EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.get(id);
        return ResponseEntity.ok(equipamentGroupResponse);
     }

@@ -4,7 +4,6 @@ import GoLogAPI.dto.user.UserCreateRequest;
 import GoLogAPI.dto.user.UserPatchRequest;
 import GoLogAPI.dto.user.UserResponse;
 import GoLogAPI.dto.user.UserResponseList;
-import GoLogAPI.model.User;
 import GoLogAPI.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

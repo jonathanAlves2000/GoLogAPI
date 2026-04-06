@@ -2,4 +2,5 @@
 *.cmd text eol=crlf
 * text=auto
 *.gitattributes text eol=lf
+*.env
 
