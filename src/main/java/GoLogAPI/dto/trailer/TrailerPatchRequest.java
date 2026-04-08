@@ -12,7 +12,7 @@ public record TrailerPatchRequest(
 
         String model,
 
-        Integer namberAxles,
+        Integer numberAxles,
 
         Double maximumCapacity,
 

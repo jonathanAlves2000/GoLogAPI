@@ -28,7 +28,7 @@ public class TractorController {
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<TractorResponse> get(@PathVariable UUID id){
+    public ResponseEntity<TractorResponse> get(@PathVariable("id") UUID id){
         TractorResponse tractorResponse = tractorService.get(id);
         return ResponseEntity.ok(tractorResponse);
     }
@@ -40,13 +40,13 @@ public class TractorController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<TractorResponse> update(@PathVariable UUID id, @Valid @RequestBody TractorCreateRequest tractorCreateRequest){
+    public ResponseEntity<TractorResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody TractorCreateRequest tractorCreateRequest){
         TractorResponse tractorResponse = tractorService.update(id, tractorCreateRequest);
         return ResponseEntity.ok(tractorResponse);
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<TractorResponse> updatePartial(@PathVariable UUID id, @RequestBody TractorPatchRequest tractorPatchRequest){
+    public ResponseEntity<TractorResponse> updatePartial(@PathVariable("id") UUID id, @RequestBody TractorPatchRequest tractorPatchRequest){
         TractorResponse tractorResponse = tractorService.updatePartial(id, tractorPatchRequest);
         return ResponseEntity.ok(tractorResponse);
     }

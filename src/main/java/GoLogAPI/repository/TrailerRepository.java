@@ -5,5 +5,6 @@ import GoLogAPI.model.Trailer;
 import java.util.UUID;
 
 public interface TrailerRepository extends JpaRepository<Trailer, UUID> {
-
+    boolean existsByPlate(String plate);
+    boolean existsByRenavam(String renavam);
 }

@@ -14,8 +14,8 @@ public class TractorResponse extends EquipamentResponse {
     private String typeFuel;
 
     public TractorResponse(UUID id, String plate, String renavam, String model,
-                           Integer namberAxles, Double maximumCapacity, String typeFuel) {
-        super(id, plate, renavam, model, namberAxles, maximumCapacity);
+                           Integer numberAxles, Double maximumCapacity, String typeFuel) {
+        super(id, plate, renavam, model, numberAxles, maximumCapacity);
         this.typeFuel = typeFuel;
     }
 }

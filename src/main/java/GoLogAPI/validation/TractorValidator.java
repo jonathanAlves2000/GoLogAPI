@@ -31,16 +31,12 @@ public class TractorValidator {
 
     public void plate(String plate, List<String> errors){
         boolean exists = tractorRepository.existsByPlate(plate);
-        if(exists){
-            errors.add("Placa de tração já cadastrada!");
-        }
+        if(exists) errors.add("Placa de tração já cadastrada!");
     }
 
     public void renavam(String renavam, List<String> errors){
         boolean exists = tractorRepository.existsByRenavam(renavam);
-        if(exists){
-            errors.add("Renavam já cadastrado!");
-        }
+        if(exists) errors.add("Renavam já cadastrado!");
     }
 
 }

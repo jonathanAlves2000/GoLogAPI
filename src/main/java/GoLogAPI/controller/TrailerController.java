@@ -32,26 +32,26 @@ public class TrailerController {
         return ResponseEntity.created(uri).body(trailerResponse);
     }
 
-    @RequestMapping(value = {"id"}, method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<TrailerResponse> get(@PathVariable UUID id){
+    @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
+    public ResponseEntity<TrailerResponse> get(@PathVariable("id") UUID id){
         TrailerResponse trailerResponse = trailerService.get(id);
         return ResponseEntity.ok().body(trailerResponse);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id){
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         trailerService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<TrailerResponse> update(@PathVariable UUID id, @Valid @RequestBody TrailerCreateRequest trailerCreateRequest){
+    public ResponseEntity<TrailerResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody TrailerCreateRequest trailerCreateRequest){
         TrailerResponse trailerResponse = trailerService.update(id, trailerCreateRequest);
         return ResponseEntity.ok().body(trailerResponse);
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<TrailerResponse> updatePartial(@PathVariable UUID id, @RequestBody TrailerPatchRequest trailerPatchRequest){
+    public ResponseEntity<TrailerResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody TrailerPatchRequest trailerPatchRequest){
         TrailerResponse trailerResponse = trailerService.updatePartial(id, trailerPatchRequest);
         return ResponseEntity.ok().body(trailerResponse);
     }

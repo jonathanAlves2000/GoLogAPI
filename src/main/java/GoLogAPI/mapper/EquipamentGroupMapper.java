@@ -9,7 +9,7 @@ import GoLogAPI.model.Tractor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {TrailerMapper.class, TractorMapper.class})
+@Mapper(componentModel = "spring", uses = {EquipamentMapper.class})
 public interface EquipamentGroupMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -19,15 +19,5 @@ public interface EquipamentGroupMapper {
     EquipamentGroup toEntity(EquipamentGroupCreateRequest equipamentGroupCreateRequest);
 
     EquipamentGroupResponse toResponse(EquipamentGroup equipamentGroup);
-    
-    default EquipamentResponse mapEquipament(Equipament equipament) {
-        if (equipament == null) return null;
 
-        if (equipament instanceof Tractor tractor) {
-            return org.mapstruct.factory.Mappers.getMapper(TractorMapper.class).toResponse(tractor);
-        } else if (equipament instanceof GoLogAPI.model.Trailer trailer) {
-            return org.mapstruct.factory.Mappers.getMapper(TrailerMapper.class).toResponse(trailer);
-        }
-        return null;
-    }
 }

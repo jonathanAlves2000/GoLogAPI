@@ -17,7 +17,7 @@ public record TractorPatchRequest(
         String model,
 
         @NotNull(message = "Campo numero de eixos vazio")
-        Integer namberAxles,
+        Integer numberAxles,
 
         @NotNull(message = "Campo capcidade maxima vazio")
         Double maximumCapacity,

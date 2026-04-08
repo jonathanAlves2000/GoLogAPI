@@ -35,7 +35,7 @@ public class AddressController {
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<AddressResponse> get(@PathVariable UUID id){
+    public ResponseEntity<AddressResponse> get(@PathVariable("id") UUID id){
         AddressResponse addressResponse = addressService.get(id);
         return ResponseEntity.ok(addressResponse);
     }
@@ -47,19 +47,19 @@ public class AddressController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id){
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         addressService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<AddressResponse> update(@PathVariable UUID id, @Valid @RequestBody AddressCreateRequest addressCreateRequest){
+    public ResponseEntity<AddressResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody AddressCreateRequest addressCreateRequest){
         AddressResponse addressResponse = addressService.update(id, addressCreateRequest);
         return ResponseEntity.ok().body(addressResponse);
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<AddressResponse> updatePartial(@PathVariable UUID id, @Valid @RequestBody AddressPacthRequest addressPacthRequest){
+    public ResponseEntity<AddressResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody AddressPacthRequest addressPacthRequest){
         AddressResponse addressResponse = addressService.updatePartial(id, addressPacthRequest);
         return ResponseEntity.ok().body(addressResponse);
     }

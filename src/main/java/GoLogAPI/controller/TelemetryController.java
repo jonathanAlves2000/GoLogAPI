@@ -33,25 +33,25 @@ public class TelemetryController {
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<TelemetryReponse> get(@PathVariable UUID id){
+    public ResponseEntity<TelemetryReponse> get(@PathVariable("id") UUID id){
         TelemetryReponse telemetryReponse = telemetryService.get(id);
         return ResponseEntity.ok(telemetryReponse);
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id){
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         telemetryService.delete(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping
-    public ResponseEntity<TelemetryReponse> update(@PathVariable UUID id, @Valid TelemetryCreateRequest telemetryCreateRequest){
+    public ResponseEntity<TelemetryReponse> update(@PathVariable("id") UUID id, @Valid TelemetryCreateRequest telemetryCreateRequest){
         TelemetryReponse telemetryReponse = telemetryService.update(id, telemetryCreateRequest);
         return ResponseEntity.ok(telemetryReponse);
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<TelemetryReponse> updatePartial(@PathVariable UUID id, TelemetryPatchRequest telemetryPatchRequest){
+    public ResponseEntity<TelemetryReponse> updatePartial(@PathVariable("id") UUID id, TelemetryPatchRequest telemetryPatchRequest){
         TelemetryReponse telemetryReponse = telemetryService.updatePartial(id, telemetryPatchRequest);
         return ResponseEntity.ok(telemetryReponse);
     }

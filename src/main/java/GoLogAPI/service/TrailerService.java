@@ -7,6 +7,7 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.TrailerMapper;
 import GoLogAPI.model.Trailer;
 import GoLogAPI.repository.TrailerRepository;
+import GoLogAPI.validation.TrailerValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -16,14 +17,17 @@ public class TrailerService {
 
     TrailerRepository trailerRepository;
     TrailerMapper trailerMapper;
+    TrailerValidator trailerValidator;
 
-    public TrailerService(TrailerRepository trailerRepository, TrailerMapper trailerMapper){
+    public TrailerService(TrailerRepository trailerRepository,
+                          TrailerMapper trailerMapper, TrailerValidator trailerValidator){
         this.trailerRepository = trailerRepository;
         this.trailerMapper = trailerMapper;
+        this.trailerValidator = trailerValidator;
     }
 
     public TrailerResponse save(TrailerCreateRequest trailerCreateRequest){
-
+        trailerValidator.validate(trailerCreateRequest);
         Trailer trailer = trailerMapper.toEntity(trailerCreateRequest);
         trailerRepository.save(trailer);
         return trailerMapper.toResponse(trailer);
@@ -57,7 +61,7 @@ public class TrailerService {
         if(trailerPatchRequest.plate() != null) trailer.setPlate(trailerPatchRequest.plate());
         if(trailerPatchRequest.renavam() != null) trailer.setRenavam(trailerPatchRequest.renavam());
         if(trailerPatchRequest.model() != null) trailer.setModel(trailerPatchRequest.model());
-        if(trailerPatchRequest.namberAxles() != null) trailer.setModel(trailerPatchRequest.model());
+        if(trailerPatchRequest.numberAxles() != null) trailer.setNumberAxles(trailerPatchRequest.numberAxles());
         if(trailerPatchRequest.maximumCapacity() != null) trailer.setMaximumCapacity(trailerPatchRequest.maximumCapacity());
 
         trailer.setId(id);

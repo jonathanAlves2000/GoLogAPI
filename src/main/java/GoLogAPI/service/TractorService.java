@@ -62,7 +62,7 @@ public class TractorService {
         if(tractorPatchRequest.renavam() != null) tractor.setRenavam(tractorPatchRequest.renavam());
         if(tractorPatchRequest.model() != null) tractor.setModel(tractorPatchRequest.model());
         if(tractorPatchRequest.maximumCapacity() != null) tractor.setMaximumCapacity(tractorPatchRequest.maximumCapacity());
-        if(tractorPatchRequest.namberAxles() != null) tractor.setNumberAxles(tractorPatchRequest.namberAxles());
+        if(tractorPatchRequest.numberAxles() != null) tractor.setNumberAxles(tractorPatchRequest.numberAxles());
         if(tractorPatchRequest.typeFuel() != null) tractor.setTypeFuel(tractorPatchRequest.typeFuel());
 
         tractor.setId(id);

@@ -37,21 +37,21 @@ public class EquipamentGroupController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id){
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         equipamentGroupService.delete(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("{id}")
     public ResponseEntity<EquipamentGroupResponse> update(
-            @PathVariable UUID id, @RequestBody EquipamentGroupCreateRequest equipamentGroupCreateRequest){
+            @PathVariable("id") UUID id, @RequestBody EquipamentGroupCreateRequest equipamentGroupCreateRequest){
         EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.update(id, equipamentGroupCreateRequest);
         return ResponseEntity.ok(equipamentGroupResponse);
     }
 
     @PatchMapping("{id}")
     public ResponseEntity<EquipamentGroupResponse> updatePartial(
-            @PathVariable UUID id, @RequestBody EquipamentGroupPatchRequest equipamentGroupPatchRequest){
+            @PathVariable("id") UUID id, @RequestBody EquipamentGroupPatchRequest equipamentGroupPatchRequest){
         EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.updatePartial(id, equipamentGroupPatchRequest);
         return ResponseEntity.ok(equipamentGroupResponse);
     }

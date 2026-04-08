@@ -31,7 +31,7 @@ public class CompanyController {
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<CompanyResponse> get(@PathVariable UUID id){
+    public ResponseEntity<CompanyResponse> get(@PathVariable("id") UUID id){
         CompanyResponse companyResponse = companyService.get(id);
         return ResponseEntity.ok(companyResponse);
     }
@@ -48,12 +48,12 @@ public class CompanyController {
     }
 
     @PutMapping("{id}")
-    public CompanyResponse update(@PathVariable UUID id, @Valid @RequestBody CompanyCreateRequest companyCreateRequest){
+    public CompanyResponse update(@PathVariable("id") UUID id, @Valid @RequestBody CompanyCreateRequest companyCreateRequest){
         return companyService.update(id, companyCreateRequest);
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<CompanyResponse> updatePartial(@PathVariable UUID id, @Valid @RequestBody CompanyPatchRequest companyPatchRequest){
+    public ResponseEntity<CompanyResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody CompanyPatchRequest companyPatchRequest){
         CompanyResponse companyResponse = companyService.updatePartial(id, companyPatchRequest);
         return ResponseEntity.ok().body(companyResponse);
     }

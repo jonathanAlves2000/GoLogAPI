@@ -5,6 +5,7 @@ import GoLogAPI.model.Equipament;
 import GoLogAPI.service.EquipamentService;
 import org.mapstruct.control.MappingControl;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +22,7 @@ public class EquipamentController {
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<EquipamentResponse> get(UUID id){
+    public ResponseEntity<EquipamentResponse> get(@PathVariable("id") UUID id){
         EquipamentResponse equipamentResponse = equipamentService.get(id);
         return ResponseEntity.ok(equipamentResponse);
     }

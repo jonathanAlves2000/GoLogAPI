@@ -14,8 +14,8 @@ public class TrailerResponse extends EquipamentResponse {
     private Double maximumVolume;
 
     public TrailerResponse(UUID id, String plate, String renavam, String model,
-                           Integer namberAxles, Double maximumCapacity, Double maximumVolume) {
-        super(id, plate, renavam, model, namberAxles, maximumCapacity);
+                           Integer numberAxles, Double maximumCapacity, Double maximumVolume) {
+        super(id, plate, renavam, model, numberAxles, maximumCapacity);
         this.maximumVolume = maximumVolume;
     }
 }

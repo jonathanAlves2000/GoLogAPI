@@ -46,7 +46,7 @@ public class UserController {
 
         @Operation(summary = "Display", description = "Display User")
         @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-        public ResponseEntity<UserResponse> get(@PathVariable UUID id){
+        public ResponseEntity<UserResponse> get(@PathVariable("id") UUID id){
             UserResponse userResponse = userService.get(id);
             return ResponseEntity.ok(userResponse);
         }
@@ -59,21 +59,21 @@ public class UserController {
 
         @Operation(summary = "Delete", description = "Delete User")
         @DeleteMapping("{id}")
-        public ResponseEntity<Void> delete(@PathVariable UUID id){
+        public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
             userService.delete(id);
             return ResponseEntity.noContent().build();
         }
 
         @Operation(summary = "Update", description = "Update User")
         @PutMapping("{id}")
-        public ResponseEntity<UserResponse> update(@PathVariable UUID id, @Valid @RequestBody UserCreateRequest userCreateRequest){
+        public ResponseEntity<UserResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody UserCreateRequest userCreateRequest){
             UserResponse userResponse = userService.update(id, userCreateRequest);
             return ResponseEntity.ok().body(userResponse);
         }
 
         @Operation(summary = "Update", description = "Update User Data")
         @PatchMapping("{id}")
-        public ResponseEntity<UserResponse> updatePartial(@PathVariable UUID id, @Valid @RequestBody UserPatchRequest userPatchRequest){
+        public ResponseEntity<UserResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody UserPatchRequest userPatchRequest){
             UserResponse userResponse = userService.updatePartial(id, userPatchRequest);
             return ResponseEntity.ok().body(userResponse);
         }
