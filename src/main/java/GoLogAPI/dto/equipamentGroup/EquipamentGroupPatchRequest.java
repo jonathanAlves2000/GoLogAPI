@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public record EquipamentGroupPatchRequest(
         String observation,
-        UUID equipamentId1,
-        UUID equipamentId2,
-        UUID equipamentId3
+        UUID equipament1Id,
+        UUID equipament2Id,
+        UUID equipament3Id
 ) { }

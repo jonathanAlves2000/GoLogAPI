@@ -8,9 +8,9 @@ public record EquipamentGroupCreateRequest(
         String observation,
 
         @NotNull
-        UUID equipamentId1,
+        UUID equipament1Id,
 
-        UUID equipamentId2,
+        UUID equipament2Id,
 
-        UUID equipamentId3
+        UUID equipament3Id
 ){}

@@ -28,7 +28,6 @@ public interface EquipamentGroupMapper {
         } else if (equipament instanceof GoLogAPI.model.Trailer trailer) {
             return org.mapstruct.factory.Mappers.getMapper(TrailerMapper.class).toResponse(trailer);
         }
-
         return null;
     }
 }

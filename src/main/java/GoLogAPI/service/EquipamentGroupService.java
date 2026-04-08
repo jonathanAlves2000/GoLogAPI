@@ -9,7 +9,6 @@ import GoLogAPI.model.Equipament;
 import GoLogAPI.model.EquipamentGroup;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.EquipamentRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -31,18 +30,18 @@ public class EquipamentGroupService {
     public EquipamentGroupResponse save(EquipamentGroupCreateRequest equipamentGroupCreateRequest){
         EquipamentGroup equipamentGroup = equipamentGroupMapper.toEntity(equipamentGroupCreateRequest);
 
-        Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipamentId1())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipamentId1()));
+        Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipament1Id()));
         equipamentGroup.setEquipament1(equipament1);
 
-        if(equipamentGroupCreateRequest.equipamentId2() != null) {
-            Equipament equipament2 = equipamentRepository.findById(equipamentGroupCreateRequest.equipamentId2())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipamentId2()));
+        if(equipamentGroupCreateRequest.equipament2Id() != null) {
+            Equipament equipament2 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament2Id())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipament2Id()));
             equipamentGroup.setEquipament2(equipament2);
         }
-        if(equipamentGroupCreateRequest.equipamentId3() != null){
-            Equipament equipament3 = equipamentRepository.findById(equipamentGroupCreateRequest.equipamentId3())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipamentId3()));
+        if(equipamentGroupCreateRequest.equipament3Id() != null){
+            Equipament equipament3 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament3Id())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipament3Id()));
             equipamentGroup.setEquipament3(equipament3);
         }
         equipamentGroupRepository.save(equipamentGroup);
@@ -65,18 +64,18 @@ public class EquipamentGroupService {
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
 
-        Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipamentId1())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipamentId1()));
+        Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipament1Id()));
         equipamentGroup.setEquipament1(equipament1);
 
-        if(equipamentGroupCreateRequest.equipamentId2() != null) {
-            Equipament equipament2 = equipamentRepository.findById(equipamentGroupCreateRequest.equipamentId2())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipamentId2()));
+        if(equipamentGroupCreateRequest.equipament2Id() != null) {
+            Equipament equipament2 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament2Id())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipament2Id()));
             equipamentGroup.setEquipament2(equipament2);
         }
-        if(equipamentGroupCreateRequest.equipamentId3() != null){
-            Equipament equipament3 = equipamentRepository.findById(equipamentGroupCreateRequest.equipamentId3())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipamentId3()));
+        if(equipamentGroupCreateRequest.equipament3Id() != null){
+            Equipament equipament3 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament3Id())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipament3Id()));
             equipamentGroup.setEquipament3(equipament3);
         }
 
@@ -89,19 +88,19 @@ public class EquipamentGroupService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
 
         if(equipamentGroupPatchRequest.observation() != null) equipamentGroup.setObservation(equipamentGroupPatchRequest.observation());
-        if(equipamentGroupPatchRequest.equipamentId1() != null){
-            Equipament equipament1 = equipamentRepository.findById(equipamentGroupPatchRequest.equipamentId1())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupPatchRequest.equipamentId1()));
+        if(equipamentGroupPatchRequest.equipament1Id() != null){
+            Equipament equipament1 = equipamentRepository.findById(equipamentGroupPatchRequest.equipament1Id())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupPatchRequest.equipament1Id()));
             equipamentGroup.setEquipament1(equipament1);
         }
-        if(equipamentGroupPatchRequest.equipamentId2() != null){
-            Equipament equipament2 = equipamentRepository.findById(equipamentGroupPatchRequest.equipamentId2())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupPatchRequest.equipamentId2()));
+        if(equipamentGroupPatchRequest.equipament2Id() != null){
+            Equipament equipament2 = equipamentRepository.findById(equipamentGroupPatchRequest.equipament2Id())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupPatchRequest.equipament2Id()));
             equipamentGroup.setEquipament2(equipament2);
         }
-        if(equipamentGroupPatchRequest.equipamentId3() != null){
-            Equipament equipament3 = equipamentRepository.findById(equipamentGroupPatchRequest.equipamentId3())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupPatchRequest.equipamentId3()));
+        if(equipamentGroupPatchRequest.equipament3Id() != null){
+            Equipament equipament3 = equipamentRepository.findById(equipamentGroupPatchRequest.equipament3Id())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupPatchRequest.equipament3Id()));
             equipamentGroup.setEquipament3(equipament3);
         }
 
