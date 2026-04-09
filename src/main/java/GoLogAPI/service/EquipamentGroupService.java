@@ -9,6 +9,7 @@ import GoLogAPI.model.Equipament;
 import GoLogAPI.model.EquipamentGroup;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.EquipamentRepository;
+import GoLogAPI.validation.EquipamentGroupValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -19,17 +20,20 @@ public class EquipamentGroupService {
     EquipamentGroupRepository equipamentGroupRepository;
     EquipamentGroupMapper equipamentGroupMapper;
     EquipamentRepository equipamentRepository;
+    EquipamentGroupValidator equipamentGroupValidator;
 
     public EquipamentGroupService(EquipamentGroupRepository equipamentGroupRepository,
-    EquipamentGroupMapper equipamentGroupMapper,EquipamentRepository equipamentRepository){
+    EquipamentGroupMapper equipamentGroupMapper,EquipamentRepository equipamentRepository,
+    EquipamentGroupValidator equipamentGroupValidator){
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.equipamentGroupMapper = equipamentGroupMapper;
         this.equipamentRepository = equipamentRepository;
+        this.equipamentGroupValidator= equipamentGroupValidator;
     }
 
     public EquipamentGroupResponse save(EquipamentGroupCreateRequest equipamentGroupCreateRequest){
         EquipamentGroup equipamentGroup = equipamentGroupMapper.toEntity(equipamentGroupCreateRequest);
-
+        equipamentGroupValidator.validate(equipamentGroupCreateRequest);
         Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + equipamentGroupCreateRequest.equipament1Id()));
         equipamentGroup.setEquipament1(equipament1);

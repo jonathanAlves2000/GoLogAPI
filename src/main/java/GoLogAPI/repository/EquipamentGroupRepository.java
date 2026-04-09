@@ -28,4 +28,13 @@ public interface EquipamentGroupRepository extends JpaRepository<EquipamentGroup
         AND eg.active = true
     """)
     boolean isEquipamentUsed(@Param("id") UUID id);
+
+    @Query(value = """
+    SELECT EXISTS (
+        SELECT 1 FROM tractor_table t
+        JOIN equipament_table e ON t.id = e.id
+        WHERE t.id = :id AND e.active = true
+    )
+    """, nativeQuery = true)
+    boolean isNotTractor(@Param("id") UUID id);
 }

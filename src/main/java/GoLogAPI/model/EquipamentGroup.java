@@ -38,4 +38,7 @@ public class EquipamentGroup extends Audit{
     @ManyToOne
     @JoinColumn(name = "equipament3_id")
     private Equipament equipament3;
+
+    /*@Column(name = "in_use",nullable = false)
+    private String inUse;*/
 }

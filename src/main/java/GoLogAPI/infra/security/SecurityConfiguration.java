@@ -19,9 +19,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
     private SecurityFilter securityFilter;
+    private CouncorrencyLimiterFilter councorrencyLimiterFilter;
 
-    public SecurityConfiguration(SecurityFilter securityFilter){
+    public SecurityConfiguration(SecurityFilter securityFilter, CouncorrencyLimiterFilter councorrencyLimiterFilter){
         this.securityFilter = securityFilter;
+        this.councorrencyLimiterFilter = councorrencyLimiterFilter;
     }
 
     @Bean
@@ -37,6 +39,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/user").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(councorrencyLimiterFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
     @Bean

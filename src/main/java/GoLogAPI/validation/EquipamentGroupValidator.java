@@ -1,6 +1,7 @@
 package GoLogAPI.validation;
 
 import GoLogAPI.dto.equipamentGroup.EquipamentGroupCreateRequest;
+import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +21,17 @@ public class EquipamentGroupValidator {
     ArrayList<String> errors = new ArrayList<>();
 
     public void validate(EquipamentGroupCreateRequest equipamentGroupCreateRequest){
-        tractorValidate(equipamentGroupCreateRequest.equipament1Id(), errors);
+        isTractor(equipamentGroupCreateRequest.equipament1Id());
+        isEquipamentUsed(equipamentGroupCreateRequest.equipament1Id(), errors);
         isEquipamentUsed(equipamentGroupCreateRequest.equipament2Id(), errors);
         isEquipamentUsed(equipamentGroupCreateRequest.equipament3Id(), errors);
+        isNotTractor(equipamentGroupCreateRequest.equipament2Id(), errors);
+        isNotTractor(equipamentGroupCreateRequest.equipament3Id(), errors);
+
+        if(!errors.isEmpty()) throw new ConflictException(errors);
     }
 
-    public void tractorValidate(UUID equipamentId, List<String> errors){
+    public void isTractor(UUID equipamentId){
         boolean isTractor = equipamentGroupRepository.isTractor(equipamentId);
         if(!isTractor) errors.add("O primeiro equipamento deve ser obrigatoriamente uma tração!");
     }
@@ -33,6 +39,13 @@ public class EquipamentGroupValidator {
     private void isEquipamentUsed(UUID id, List<String> erros) {
         if(id == null) return;
         boolean isUsed = equipamentGroupRepository.isEquipamentUsed(id);
+        System.out.println("teste de validação" + isUsed);
         if(isUsed) errors.add("Equipamento já está em uso por outro grupo ativo!");
+    }
+
+    public void isNotTractor(UUID id, List<String> errors){
+        if(id == null) return;
+        boolean isTractor = equipamentGroupRepository.isNotTractor(id);
+        if(isTractor) errors.add("Equipamentos secundarios não podem ser tração!");
     }
 }
