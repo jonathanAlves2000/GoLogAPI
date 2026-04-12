@@ -1,6 +1,7 @@
 package GoLogAPI.validation;
 
 import GoLogAPI.dto.user.UserCreateRequest;
+import GoLogAPI.dto.user.UserRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.UserRepository;
 import org.springframework.stereotype.Component;
@@ -16,14 +17,12 @@ public class UserValidator {
         this.userRepository = userRepository;
     }
 
-    List<String> errors = new ArrayList<>();
-
-    public void validate(UserCreateRequest userCreateRequest){
-
-        name(userCreateRequest.name(), errors);
-        email(userCreateRequest.email(), errors);
-        password(userCreateRequest.password(), errors);
-        cpf(userCreateRequest.cpf(), errors);
+    public void validate(UserRequest userRequest){
+        List<String> errors = new ArrayList<>();
+        name(userRequest.name(), errors);
+        email(userRequest.email(), errors);
+        password(userRequest.password(), errors);
+        cpf(userRequest.cpf(), errors);
 
         if(!errors.isEmpty()){
             throw new ConflictException(errors);

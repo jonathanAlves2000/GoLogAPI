@@ -3,7 +3,6 @@ package GoLogAPI.controller;
 import GoLogAPI.service.EquipamentGroupService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import GoLogAPI.dto.equipamentGroup.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -51,8 +50,8 @@ public class EquipamentGroupController {
 
     @PatchMapping("{id}")
     public ResponseEntity<EquipamentGroupResponse> updatePartial(
-            @PathVariable("id") UUID id, @RequestBody EquipamentGroupPatchRequest equipamentGroupPatchRequest){
-        EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.updatePartial(id, equipamentGroupPatchRequest);
+            @PathVariable("id") UUID id, @RequestBody EquipamentGroupUpdateRequest equipamentGroupUpdateRequest){
+        EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.updatePartial(id, equipamentGroupUpdateRequest);
         return ResponseEntity.ok(equipamentGroupResponse);
     }
 

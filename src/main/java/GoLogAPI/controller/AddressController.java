@@ -1,7 +1,7 @@
 package GoLogAPI.controller;
 
 import GoLogAPI.dto.address.AddressCreateRequest;
-import GoLogAPI.dto.address.AddressPacthRequest;
+import GoLogAPI.dto.address.AddressUpdateRequest;
 import GoLogAPI.dto.address.AddressResponse;
 import GoLogAPI.service.AddressService;
 import jakarta.validation.Valid;
@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,9 +58,8 @@ public class AddressController {
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<AddressResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody AddressPacthRequest addressPacthRequest){
-        AddressResponse addressResponse = addressService.updatePartial(id, addressPacthRequest);
+    public ResponseEntity<AddressResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody AddressUpdateRequest addressUpdateRequest){
+        AddressResponse addressResponse = addressService.updatePartial(id, addressUpdateRequest);
         return ResponseEntity.ok().body(addressResponse);
     }
-
 }

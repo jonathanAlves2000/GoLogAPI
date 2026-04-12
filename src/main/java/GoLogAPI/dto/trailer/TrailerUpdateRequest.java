@@ -2,7 +2,7 @@ package GoLogAPI.dto.trailer;
 
 import jakarta.validation.constraints.Pattern;
 
-public record TrailerPatchRequest(
+public record TrailerUpdateRequest(
 
         @Pattern(regexp = "^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$", message = "Placa inválida")
         String plate,
@@ -17,4 +17,4 @@ public record TrailerPatchRequest(
         Double maximumCapacity,
 
         Double maximumVolume
-) { }
+) implements TrailerRequest{ }

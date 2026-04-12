@@ -1,7 +1,7 @@
 package GoLogAPI.controller;
 
 import GoLogAPI.dto.driver.DriverCreateRequest;
-import GoLogAPI.dto.driver.DriverPatchRequest;
+import GoLogAPI.dto.driver.DriverUpdateRequest;
 import GoLogAPI.dto.driver.DriverResponseList;
 import GoLogAPI.dto.driver.DriverResponse;
 import GoLogAPI.service.DriverService;
@@ -59,8 +59,8 @@ public class DriverController {
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<DriverResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody DriverPatchRequest driverPatchRequest){
-        DriverResponse driverResponse = driverService.updatePartial(id, driverPatchRequest);
+    public ResponseEntity<DriverResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody DriverUpdateRequest driverUpdateRequest){
+        DriverResponse driverResponse = driverService.updatePartial(id, driverUpdateRequest);
         return ResponseEntity.ok().body(driverResponse);
     }
 }

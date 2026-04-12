@@ -42,5 +42,5 @@ public record AddressCreateRequest(
 
          @Pattern(regexp = "^[A-Za-z0-9\\s]+$", message = "Complemento invalido, utilize somente letras e numeros")
          String complement
-)
+) implements AddressRequest
 { }

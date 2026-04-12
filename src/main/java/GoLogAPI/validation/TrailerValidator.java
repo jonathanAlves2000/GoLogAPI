@@ -1,6 +1,7 @@
 package GoLogAPI.validation;
 
 import GoLogAPI.dto.trailer.TrailerCreateRequest;
+import GoLogAPI.dto.trailer.TrailerRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.TrailerRepository;
 import org.springframework.stereotype.Component;
@@ -17,11 +18,10 @@ public class TrailerValidator {
         this.trailerRepository = trailerRepository;
     }
 
-    List<String> errors = new ArrayList<>();
-
-    public void validate(TrailerCreateRequest trailerCreateRequest){
-        plate(trailerCreateRequest.plate(), errors);
-        renavam(trailerCreateRequest.renavam(), errors);
+    public void validate(TrailerRequest trailerRequest){
+        List<String> errors = new ArrayList<>();
+        plate(trailerRequest.plate(), errors);
+        renavam(trailerRequest.renavam(), errors);
 
         if(!errors.isEmpty()) {
             throw new ConflictException(errors);

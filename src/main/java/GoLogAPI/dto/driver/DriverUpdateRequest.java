@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.util.UUID;
 
-public record DriverPatchRequest(
+public record DriverUpdateRequest(
 
         @Pattern(regexp = "\\+?\\d{11}", message = "CNH invalida, minimo 11 digitos")
         String cnhNumber,
@@ -17,5 +17,4 @@ public record DriverPatchRequest(
         LocalDate cnhExpiration,
 
         UUID userId
-) {
-}
+) implements DriverRequest { }

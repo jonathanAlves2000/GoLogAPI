@@ -10,7 +10,7 @@ public record CompanyCreateRequest(
         @Size(min = 10, max = 100, message = "Nome deve ter de 10 a 100 letras")
         String legalName,
 
-        @NotNull(message = "IsCliente vazio")
+        @NotNull(message = "Status de cliente vazio")
         Boolean isCliente,
 
         @NotBlank(message = "Telefone vazio")
@@ -27,4 +27,4 @@ public record CompanyCreateRequest(
 
         @NotNull(message = "AddressId nulo")
         UUID addressId
-) { }
+) implements CompanyRequest { }

@@ -1,7 +1,7 @@
 package GoLogAPI.controller;
 
 import GoLogAPI.dto.trailer.TrailerCreateRequest;
-import GoLogAPI.dto.trailer.TrailerPatchRequest;
+import GoLogAPI.dto.trailer.TrailerUpdateRequest;
 import GoLogAPI.dto.trailer.TrailerResponse;
 import GoLogAPI.service.TrailerService;
 import jakarta.validation.Valid;
@@ -51,8 +51,8 @@ public class TrailerController {
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<TrailerResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody TrailerPatchRequest trailerPatchRequest){
-        TrailerResponse trailerResponse = trailerService.updatePartial(id, trailerPatchRequest);
+    public ResponseEntity<TrailerResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody TrailerUpdateRequest trailerUpdateRequest){
+        TrailerResponse trailerResponse = trailerService.updatePartial(id, trailerUpdateRequest);
         return ResponseEntity.ok().body(trailerResponse);
     }
 

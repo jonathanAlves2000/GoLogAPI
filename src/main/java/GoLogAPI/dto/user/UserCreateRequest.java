@@ -31,4 +31,4 @@ public record UserCreateRequest(
 
         @NotNull(message = "CompanyId nulo")
         UUID companyId
-) {}
+) implements UserRequest {}

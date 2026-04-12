@@ -1,6 +1,6 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.address.AddressCreateRequest;
+import GoLogAPI.dto.address.AddressRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.AddressRepository;
 import org.springframework.stereotype.Component;
@@ -16,10 +16,9 @@ public class AddressValidator {
         this.addressRepository = addressRepository;
     }
 
-    List<String> erros = new ArrayList<>();
-
-    public void validate(AddressCreateRequest addressCreateRequest){
-        cepNumber(addressCreateRequest.cep(), addressCreateRequest.number(), erros);
+    public void validate(AddressRequest addressRequest){
+        List<String> erros = new ArrayList<>();
+        cepNumber(addressRequest.cep(), addressRequest.number(), erros);
         if(!erros.isEmpty()){
             throw new ConflictException(erros);
         }

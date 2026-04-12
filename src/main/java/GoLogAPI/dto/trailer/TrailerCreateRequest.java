@@ -25,4 +25,4 @@ public record TrailerCreateRequest(
 
         @NotNull
         Double maximumVolume
-) { }
+) implements TrailerRequest{ }
