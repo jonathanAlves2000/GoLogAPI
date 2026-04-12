@@ -35,19 +35,19 @@ public class TrailerService {
 
     public TrailerResponse get(UUID id){
         Trailer trailer = trailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         return trailerMapper.toResponse(trailer);
     }
 
     public void delete(UUID id){
         Trailer trailer = trailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         trailerRepository.delete(trailer);
     }
 
     public TrailerResponse update(UUID id, TrailerCreateRequest trailerCreateRequest) {
         trailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         Trailer trailer = trailerMapper.toEntity(trailerCreateRequest);
         trailer.setId(id);
         trailerRepository.save(trailer);
@@ -56,7 +56,7 @@ public class TrailerService {
 
     public TrailerResponse updatePartial(UUID id, TrailerPatchRequest trailerPatchRequest){
         Trailer trailer = trailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
         if(trailerPatchRequest.plate() != null) trailer.setPlate(trailerPatchRequest.plate());
         if(trailerPatchRequest.renavam() != null) trailer.setRenavam(trailerPatchRequest.renavam());

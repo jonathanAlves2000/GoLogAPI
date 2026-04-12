@@ -13,7 +13,7 @@ public class ConflictException extends RuntimeException {
         errorList.clear();
     }
 
-    public List<String> getError(){
+    public List<String> getErrors(){
         return errors;
     }
 }

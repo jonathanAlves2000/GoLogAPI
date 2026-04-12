@@ -35,7 +35,7 @@ public class DriverService {
         driverValidator.validate(driverCreateRequest);
         Driver driver = driverMapper.toEntity(driverCreateRequest);
         User user = userRepository.findById(driverCreateRequest.userId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + driverCreateRequest.userId()));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, driverCreateRequest.userId()));
         driver.setUser(user);
         driverRepository.save(driver);
         return driverMapper.toResponse(driver);
@@ -43,7 +43,7 @@ public class DriverService {
 
     public DriverResponse get(UUID id){
         Driver driver = driverRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         return driverMapper.toResponse(driver);
     }
 
@@ -54,16 +54,16 @@ public class DriverService {
 
     public void delete(UUID id){
         Driver driver = driverRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE+ id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         driverRepository.delete(driver);
     }
 
     public DriverResponse update(UUID id, DriverCreateRequest driverCreateRequest){
         driverRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         Driver driver = driverMapper.toEntity(driverCreateRequest);
         User user = userRepository.findById(driverCreateRequest.userId())
-                        .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                        .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         driver.setUser(user);
         driver.setId(id);
         driverRepository.save(driver);
@@ -72,13 +72,13 @@ public class DriverService {
 
     public DriverResponse updatePartial(UUID id, DriverPatchRequest driverPatchRequest){
         Driver driver = driverRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
         if(driverPatchRequest.cnhNumber() != null) driver.setCnhNumber(driverPatchRequest.cnhNumber());
         if(driverPatchRequest.cnhExpiration() != null) driver.setCnhExpiration((driverPatchRequest.cnhExpiration()));
         if(driverPatchRequest.userId() != null){
             User user = userRepository.findById(driverPatchRequest.userId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + driverPatchRequest.userId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, driverPatchRequest.userId()));
             driver.setUser(user);
         }
         driverRepository.save(driver);

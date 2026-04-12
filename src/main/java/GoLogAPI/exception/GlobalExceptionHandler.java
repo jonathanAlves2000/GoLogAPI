@@ -1,6 +1,9 @@
 package GoLogAPI.exception;
 
-import GoLogAPI.dto.login.ErrorResponse;
+import GoLogAPI.dto.exeption.ConflictReponse;
+import GoLogAPI.dto.exeption.NotFoundResponse;
+import GoLogAPI.dto.exeption.AuthErrorReponse;
+import GoLogAPI.service.MessageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,33 +15,42 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<List<String>> handleValidationDto(MethodArgumentNotValidException ex){
+    public ResponseEntity<List<String>> handleValidationDto(MethodArgumentNotValidException ex) {
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getDefaultMessage())
                 .toList();
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity
+                .badRequest()
+                .body(errors);
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<List<String>> handleConflict(ConflictException exception){
+    public ResponseEntity<ConflictReponse> handleConflict(ConflictException exception) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(exception.getError());
+                .body(new ConflictReponse(exception.getErrors()));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<String> handleNotFound(ResourceNotFoundException exception){
+    public ResponseEntity<NotFoundResponse> handleNotFound(ResourceNotFoundException exception) {
+        var responseBody = new NotFoundResponse(
+                exception.getMessage(),
+                exception.getId()
+        );
+
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(exception.getMessage());
+                .body(responseBody);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity handleBadCredentials(){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ErrorResponse("E-mail ou senha invalidos"));
-        }
+    public ResponseEntity handleBadCredentials() {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new AuthErrorReponse(MessageException.INVALID_CREDENTIALS_MESSAGE));
+    }
 }

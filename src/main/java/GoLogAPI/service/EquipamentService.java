@@ -22,7 +22,7 @@ public class EquipamentService {
 
     public EquipamentResponse get(UUID id){
         Equipament equipament = equipamentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         return equipamentMapper.toResponse(equipament);
     }
 }

@@ -10,7 +10,7 @@ import java.util.concurrent.Semaphore;
 @Component
 public class CouncorrencyLimiterFilter implements Filter{
 
-    private final Semaphore semaphore = new Semaphore(10); // Máximo de 10 requisições simultâneas
+    private final Semaphore semaphore = new Semaphore(1000); // Máximo de 10 requisições simultâneas
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

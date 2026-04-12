@@ -38,17 +38,13 @@ public class TokenService {
                 .toInstant(ZoneOffset.of("-03:00"));
     }
 
-    public String getSubject(String tokenJWT){
-        try{
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.require(algorithm)
-                    .withIssuer("golog-api")
-                    .build()
-                    .verify(tokenJWT)
-                    .getSubject();
-        }catch(JWTVerificationException exception){
-            throw new RuntimeException("Token JWT inválido ou inspirado", exception);
-        }
+    public String getSubject(String tokenJWT) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.require(algorithm)
+                .withIssuer("golog-api")
+                .build()
+                .verify(tokenJWT)
+                .getSubject();
     }
 
 }

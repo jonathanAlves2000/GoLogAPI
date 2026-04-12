@@ -30,7 +30,7 @@ public class TelemetryService {
     public TelemetryReponse save(TelemetryCreateRequest telemetryCreateRequest){
        Telemetry telemetry = telemetryMapper.toEntity(telemetryCreateRequest);
        Equipament equipament = equipamentRepository.findById(telemetryCreateRequest.equipamentId())
-                       .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + telemetryCreateRequest.equipamentId()));
+                       .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, telemetryCreateRequest.equipamentId()));
        telemetry.setEquipamentId(equipament);
        telemetryRepository.save(telemetry);
        return telemetryMapper.toResponse(telemetry);
@@ -38,22 +38,22 @@ public class TelemetryService {
 
     public TelemetryReponse get(UUID id){
         Telemetry telemetry = telemetryRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         return telemetryMapper.toResponse(telemetry);
     }
 
     public void delete(UUID id){
         Telemetry telemetry = telemetryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         telemetryRepository.delete(telemetry);
     }
 
     public TelemetryReponse update(UUID id, TelemetryCreateRequest telemetryCreateRequest){
         Telemetry telemetry = telemetryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
         Equipament equipament = equipamentRepository.findById(telemetryCreateRequest.equipamentId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + telemetryCreateRequest.equipamentId()));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, telemetryCreateRequest.equipamentId()));
 
         telemetry.setEquipamentId(equipament);
         telemetryRepository.save(telemetry);
@@ -62,7 +62,7 @@ public class TelemetryService {
 
     public TelemetryReponse updatePartial(UUID id, TelemetryPatchRequest telemetryPatchRequest){
         Telemetry telemetry = telemetryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
         if(telemetryPatchRequest.alert() != null) telemetry.setAlert(telemetryPatchRequest.alert());
         if(telemetryPatchRequest.data1() != null) telemetry.setData1(telemetryPatchRequest.data1());
@@ -73,7 +73,7 @@ public class TelemetryService {
         if(telemetryPatchRequest.longitude() != null) telemetry.setLongitude(telemetryPatchRequest.longitude());
         if(telemetryPatchRequest.equipamentId() != null){
             Equipament equipament = equipamentRepository.findById(telemetryPatchRequest.equipamentId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + telemetryPatchRequest.equipamentId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, telemetryPatchRequest.equipamentId()));
             telemetry.setEquipamentId(equipament);
         }
         telemetryRepository.save(telemetry);

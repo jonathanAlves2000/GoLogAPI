@@ -33,7 +33,7 @@ public class CompanyService {
         companyValidator.validate(companyCreateRequest);
         Company company = companyMapper.toEntity(companyCreateRequest);
         Address address = addressRepository.findById(companyCreateRequest.addressId())
-                        .orElseThrow(() -> new  ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + companyCreateRequest.addressId()));
+                        .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyCreateRequest.addressId()));
         company.setAddress(address);
         companyRepository.save(company);
         return companyMapper.toResponse(company);
@@ -41,7 +41,7 @@ public class CompanyService {
 
     public CompanyResponse get(UUID id){
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         return companyMapper.toResponse(company);
     }
 
@@ -52,15 +52,15 @@ public class CompanyService {
 
     public void delete(UUID id){
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         companyRepository.delete(company);
     }
 
     public CompanyResponse update(UUID id, CompanyCreateRequest companyCreateRequest){
         companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         Address address = addressRepository.findById(companyCreateRequest.addressId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + companyCreateRequest.addressId()));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyCreateRequest.addressId()));
         Company company = companyMapper.toEntity(companyCreateRequest);
         company.setAddress(address);
         company.setId(id);
@@ -71,7 +71,7 @@ public class CompanyService {
     @Transactional
     public CompanyResponse updatePartial(UUID id, CompanyPatchRequest companyPatchRequest){
         Company company = companyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + id));
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
         if(companyPatchRequest.cnpjCpf() != null) company.setCnpjCpf(companyPatchRequest.cnpjCpf());
         if(companyPatchRequest.isCliente() != null) company.setIsCliente(companyPatchRequest.isCliente());
@@ -80,7 +80,7 @@ public class CompanyService {
         if(companyPatchRequest.phoneNumber() != null) company.setPhoneNumber(companyPatchRequest.phoneNumber());
         if(companyPatchRequest.addressId() != null){
             Address address = addressRepository.findById(companyPatchRequest.addressId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageConstants.NOT_FOUND_MESSAGE + companyPatchRequest.addressId()));
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyPatchRequest.addressId()));
             company.setAddress(address);
         }
         companyRepository.save(company);
