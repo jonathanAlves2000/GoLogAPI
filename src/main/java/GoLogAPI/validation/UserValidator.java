@@ -1,12 +1,13 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.user.UserCreateRequest;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import GoLogAPI.dto.user.UserRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.UserRepository;
-import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class UserValidator {

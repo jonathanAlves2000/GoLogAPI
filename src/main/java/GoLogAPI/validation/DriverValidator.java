@@ -1,13 +1,13 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.driver.DriverCreateRequest;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import GoLogAPI.dto.driver.DriverRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.DriverRepository;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class DriverValidator {

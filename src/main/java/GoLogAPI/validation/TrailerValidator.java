@@ -1,13 +1,13 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.trailer.TrailerCreateRequest;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import GoLogAPI.dto.trailer.TrailerRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.TrailerRepository;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class TrailerValidator {

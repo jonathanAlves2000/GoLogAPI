@@ -1,13 +1,13 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.tractor.TractorCreateRequest;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import GoLogAPI.dto.tractor.TractorRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.TractorRepository;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class TractorValidator {

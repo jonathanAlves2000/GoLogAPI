@@ -1,5 +1,6 @@
 package GoLogAPI.model;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.SQLDelete;
@@ -11,17 +12,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Table(name = "equipament_group_table")

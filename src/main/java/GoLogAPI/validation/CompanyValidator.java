@@ -1,13 +1,13 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.company.CompanyCreateRequest;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import GoLogAPI.dto.company.CompanyRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.CompanyRepository;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class CompanyValidator {

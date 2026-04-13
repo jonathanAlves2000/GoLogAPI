@@ -16,15 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import GoLogAPI.dto.telemetry.TelemetryCreateRequest;
-import GoLogAPI.dto.telemetry.TelemetryUpdateRequest;
 import GoLogAPI.dto.telemetry.TelemetryReponse;
+import GoLogAPI.dto.telemetry.TelemetryUpdateRequest;
 import GoLogAPI.service.TelemetryService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import java.net.URI;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/telemetry")

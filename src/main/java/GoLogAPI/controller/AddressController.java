@@ -18,17 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import GoLogAPI.dto.address.AddressCreateRequest;
-import GoLogAPI.dto.address.AddressUpdateRequest;
 import GoLogAPI.dto.address.AddressResponse;
+import GoLogAPI.dto.address.AddressUpdateRequest;
 import GoLogAPI.service.AddressService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/address")
