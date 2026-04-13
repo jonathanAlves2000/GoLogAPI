@@ -1,11 +1,11 @@
 package GoLogAPI.mapper;
 
-import GoLogAPI.dto.tractor.TractorResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import GoLogAPI.dto.trailer.TrailerCreateRequest;
 import GoLogAPI.dto.trailer.TrailerResponse;
-import org.mapstruct.Mapper;
 import GoLogAPI.model.Trailer;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "Spring")
 public interface TrailerMapper {

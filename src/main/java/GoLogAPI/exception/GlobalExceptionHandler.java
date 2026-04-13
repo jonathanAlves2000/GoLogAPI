@@ -48,9 +48,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity handleBadCredentials() {
+    public ResponseEntity<AuthErrorReponse> handleBadCredentials() {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(new AuthErrorReponse(MessageException.INVALID_CREDENTIALS_MESSAGE));
+    }
+    
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleGeneralException(Exception ex) {
+        ex.printStackTrace(); 
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Ocorreu um erro interno inesperado.");
     }
 }

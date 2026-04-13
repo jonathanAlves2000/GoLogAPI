@@ -16,13 +16,11 @@ public class UserValidator {
         this.userRepository = userRepository;
     }
 
-    List<String> errors = new ArrayList<>();
-
     public void validate(UserCreateRequest userCreateRequest){
+        List<String> errors = new ArrayList<>();
 
         name(userCreateRequest.name(), errors);
         email(userCreateRequest.email(), errors);
-        password(userCreateRequest.password(), errors);
         cpf(userCreateRequest.cpf(), errors);
 
         if(!errors.isEmpty()){

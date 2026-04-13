@@ -1,15 +1,15 @@
 package GoLogAPI.controller;
 
-import GoLogAPI.dto.equipament.EquipamentResponse;
-import GoLogAPI.model.Equipament;
-import GoLogAPI.service.EquipamentService;
-import org.mapstruct.control.MappingControl;
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import java.util.UUID;
+
+import GoLogAPI.dto.equipament.EquipamentResponse;
+import GoLogAPI.service.EquipamentService;
 
 @RestController
 @RequestMapping("/equipament")

@@ -1,15 +1,22 @@
 package GoLogAPI.model;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity(name = "telemetry_table")
 @Getter
@@ -17,7 +24,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @SQLDelete(sql = "UPDATE telemetry_table SET active=false WHERE id = ?")
-@Where(clause = "active = true")
+@SQLRestriction("active = true")
 public class Telemetry {
 
     @Id

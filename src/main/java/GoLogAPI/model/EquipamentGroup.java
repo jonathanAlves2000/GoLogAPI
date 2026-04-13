@@ -1,13 +1,22 @@
 package GoLogAPI.model;
 
-import jakarta.persistence.*;
+import java.util.UUID;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-import java.util.UUID;
 
 @Entity
 @Table(name = "equipament_group_table")
@@ -16,7 +25,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @SQLDelete(sql = "UPDATE equipament_group_table SET active=false WHERE id = ?")
-@Where(clause = "active = true")
+@SQLRestriction("active = true")
 public class EquipamentGroup extends Audit{
 
     @Id

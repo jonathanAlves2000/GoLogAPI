@@ -1,12 +1,12 @@
 package GoLogAPI.repository;
 
-import GoLogAPI.model.EquipamentGroup;
-import org.hibernate.annotations.processing.Pattern;
+import java.util.UUID;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.UUID;
+import GoLogAPI.model.EquipamentGroup;
 
 public interface EquipamentGroupRepository extends JpaRepository<EquipamentGroup, UUID> {
 

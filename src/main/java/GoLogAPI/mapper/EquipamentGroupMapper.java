@@ -1,13 +1,11 @@
 package GoLogAPI.mapper;
 
-import GoLogAPI.dto.equipament.EquipamentResponse;
-import GoLogAPI.dto.equipamentGroup.EquipamentGroupCreateRequest;
-import GoLogAPI.dto.equipamentGroup.EquipamentGroupResponse;
-import GoLogAPI.model.Equipament;
-import GoLogAPI.model.EquipamentGroup;
-import GoLogAPI.model.Tractor;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import GoLogAPI.dto.equipamentGroup.EquipamentGroupCreateRequest;
+import GoLogAPI.dto.equipamentGroup.EquipamentGroupResponse;
+import GoLogAPI.model.EquipamentGroup;
 
 @Mapper(componentModel = "spring", uses = {EquipamentMapper.class})
 public interface EquipamentGroupMapper {

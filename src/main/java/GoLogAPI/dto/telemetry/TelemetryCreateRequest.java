@@ -1,11 +1,10 @@
 package GoLogAPI.dto.telemetry;
 
-import GoLogAPI.model.Equipament;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record TelemetryCreateRequest(
         @NotNull(message = "A data não pode estar nula!")

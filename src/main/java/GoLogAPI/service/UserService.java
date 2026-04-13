@@ -86,7 +86,10 @@ public class UserService {
         if(userPatchRequest.userProfile() != null) user.setUserProfile(userPatchRequest.userProfile());
         if(userPatchRequest.cpf() != null) user.setCpf(userPatchRequest.cpf());
         if(userPatchRequest.email() != null) user.setEmail(userPatchRequest.email());
-        if(userPatchRequest.password() != null) user.setPassword(userPatchRequest.password());
+        if(userPatchRequest.password() != null) {
+            String encodedPassword = passwordEncoder.encode(userPatchRequest.password());
+            user.setPassword(encodedPassword);
+        }
         if(userPatchRequest.companyId() != null){
             Company company = companyRepository.findById(userPatchRequest.companyId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userPatchRequest.companyId()));
