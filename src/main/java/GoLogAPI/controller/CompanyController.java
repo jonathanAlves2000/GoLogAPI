@@ -53,8 +53,8 @@ public class CompanyController {
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<CompanyResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody CompanyPatchRequest companyPatchRequest){
-        CompanyResponse companyResponse = companyService.updatePartial(id, companyPatchRequest);
+    public ResponseEntity<CompanyResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody CompanyUpdateRequest companyUpdateRequest){
+        CompanyResponse companyResponse = companyService.updatePartial(id, companyUpdateRequest);
         return ResponseEntity.ok().body(companyResponse);
     }
 }

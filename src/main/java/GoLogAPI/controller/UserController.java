@@ -1,7 +1,7 @@
 package GoLogAPI.controller;
 
 import GoLogAPI.dto.user.UserCreateRequest;
-import GoLogAPI.dto.user.UserPatchRequest;
+import GoLogAPI.dto.user.UserUpdateRequest;
 import GoLogAPI.dto.user.UserResponse;
 import GoLogAPI.dto.user.UserResponseList;
 import GoLogAPI.service.UserService;
@@ -73,8 +73,8 @@ public class UserController {
 
         @Operation(summary = "Update", description = "Update User Data")
         @PatchMapping("{id}")
-        public ResponseEntity<UserResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody UserPatchRequest userPatchRequest){
-            UserResponse userResponse = userService.updatePartial(id, userPatchRequest);
+        public ResponseEntity<UserResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody UserUpdateRequest userUpdateRequest){
+            UserResponse userResponse = userService.updatePartial(id, userUpdateRequest);
             return ResponseEntity.ok().body(userResponse);
         }
 

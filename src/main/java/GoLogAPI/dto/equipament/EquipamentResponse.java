@@ -11,7 +11,6 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class EquipamentResponse {
-
     private UUID id;
     private String plate;
     private String renavam;

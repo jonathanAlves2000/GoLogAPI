@@ -69,18 +69,19 @@ public class CompanyService {
     }
 
     @Transactional
-    public CompanyResponse updatePartial(UUID id, CompanyPatchRequest companyPatchRequest){
+    public CompanyResponse updatePartial(UUID id, CompanyUpdateRequest companyUpdateRequest){
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        companyValidator.validate(companyUpdateRequest);
 
-        if(companyPatchRequest.cnpjCpf() != null) company.setCnpjCpf(companyPatchRequest.cnpjCpf());
-        if(companyPatchRequest.isCliente() != null) company.setIsCliente(companyPatchRequest.isCliente());
-        if(companyPatchRequest.email() != null) company.setEmail(companyPatchRequest.email());
-        if(companyPatchRequest.legalName() != null) company.setLegalName(companyPatchRequest.legalName());
-        if(companyPatchRequest.phoneNumber() != null) company.setPhoneNumber(companyPatchRequest.phoneNumber());
-        if(companyPatchRequest.addressId() != null){
-            Address address = addressRepository.findById(companyPatchRequest.addressId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyPatchRequest.addressId()));
+        if(companyUpdateRequest.cnpjCpf() != null) company.setCnpjCpf(companyUpdateRequest.cnpjCpf());
+        if(companyUpdateRequest.isCliente() != null) company.setIsCliente(companyUpdateRequest.isCliente());
+        if(companyUpdateRequest.email() != null) company.setEmail(companyUpdateRequest.email());
+        if(companyUpdateRequest.legalName() != null) company.setLegalName(companyUpdateRequest.legalName());
+        if(companyUpdateRequest.phoneNumber() != null) company.setPhoneNumber(companyUpdateRequest.phoneNumber());
+        if(companyUpdateRequest.addressId() != null){
+            Address address = addressRepository.findById(companyUpdateRequest.addressId())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyUpdateRequest.addressId()));
             company.setAddress(address);
         }
         companyRepository.save(company);

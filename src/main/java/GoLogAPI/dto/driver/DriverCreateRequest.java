@@ -22,4 +22,4 @@ public record DriverCreateRequest(
 
         @NotNull(message = "Id do usuario está vazio ou nulo")
         UUID userId
-) { }
+) implements DriverRequest { }

@@ -3,10 +3,9 @@ package GoLogAPI.dto.user;
 import GoLogAPI.model.UserProfile;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.br.CPF;
-
 import java.util.UUID;
 
-public record UserPatchRequest(
+public record UserUpdateRequest(
 
         @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Nome invalido, use somente letras ou letras com acentos")
         @Size(min = 10, max = 100, message = "Nome deve ter de 10 a 100 letras")
@@ -21,8 +20,10 @@ public record UserPatchRequest(
         @CPF
         String cpf,
 
+        @NotNull(message = "Perfil de usuario vazio")
         UserProfile userProfile,
 
+        @NotNull(message = "CompanyId nulo")
         UUID companyId
-) {
-}
+
+) implements UserRequest{ }

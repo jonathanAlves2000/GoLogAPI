@@ -3,7 +3,7 @@ package GoLogAPI.dto.address;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record AddressPacthRequest(
+public record AddressUpdateRequest(
 
         @Pattern(regexp = "^[A-Za-zÀ-ÿ\\s]+$", message = "Nome de rua invalido, utilize somente letras ou letras com acentos")
         @Size(min = 5, max = 100, message = "Nome deve ter de 10 a 100 caracteres")
@@ -34,5 +34,5 @@ public record AddressPacthRequest(
 
         @Pattern(regexp = "^[A-Za-z0-9\\s]+$", message = "Complemento invalido, utilize somente letras e numeros")
         String complement
-)
+) implements AddressRequest
 { }

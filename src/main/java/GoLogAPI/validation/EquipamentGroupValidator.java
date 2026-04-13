@@ -4,7 +4,6 @@ import GoLogAPI.dto.equipamentGroup.EquipamentGroupCreateRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -18,10 +17,9 @@ public class EquipamentGroupValidator {
         this.equipamentGroupRepository = equipamentGroupRepository;
     }
 
-    ArrayList<String> errors = new ArrayList<>();
-
     public void validate(EquipamentGroupCreateRequest equipamentGroupCreateRequest){
-        isTractor(equipamentGroupCreateRequest.equipament1Id());
+        ArrayList<String> errors = new ArrayList<>();
+        isTractor(equipamentGroupCreateRequest.equipament1Id(), errors);
         isEquipamentUsed(equipamentGroupCreateRequest.equipament1Id(), errors);
         isEquipamentUsed(equipamentGroupCreateRequest.equipament2Id(), errors);
         isEquipamentUsed(equipamentGroupCreateRequest.equipament3Id(), errors);
@@ -31,21 +29,20 @@ public class EquipamentGroupValidator {
         if(!errors.isEmpty()) throw new ConflictException(errors);
     }
 
-    public void isTractor(UUID equipamentId){
+    public void isTractor(UUID equipamentId, List<String> error){
         boolean isTractor = equipamentGroupRepository.isTractor(equipamentId);
-        if(!isTractor) errors.add("O primeiro equipamento deve ser obrigatoriamente uma tração!");
+        if(!isTractor) error.add("O primeiro equipamento deve ser obrigatoriamente uma tração!");
     }
 
-    private void isEquipamentUsed(UUID id, List<String> erros) {
+    private void isEquipamentUsed(UUID id, List<String> error) {
         if(id == null) return;
         boolean isUsed = equipamentGroupRepository.isEquipamentUsed(id);
-        System.out.println("teste de validação" + isUsed);
-        if(isUsed) errors.add("Equipamento já está em uso por outro grupo ativo!");
+        if(isUsed) error.add("Equipamento já está em uso por outro grupo ativo!");
     }
 
-    public void isNotTractor(UUID id, List<String> errors){
+    public void isNotTractor(UUID id, List<String> error){
         if(id == null) return;
-        boolean isTractor = equipamentGroupRepository.isNotTractor(id);
-        if(isTractor) errors.add("Equipamentos secundarios não podem ser tração!");
+        boolean isTractor = equipamentGroupRepository.isTractor(id);
+        if(isTractor) error.add("Equipamentos secundarios não podem ser tração!");
     }
 }

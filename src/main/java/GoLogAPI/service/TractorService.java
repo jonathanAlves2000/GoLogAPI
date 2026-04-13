@@ -1,7 +1,7 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.tractor.TractorCreateRequest;
-import GoLogAPI.dto.tractor.TractorPatchRequest;
+import GoLogAPI.dto.tractor.TractorUpdateRequest;
 import GoLogAPI.dto.tractor.TractorResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.TractorMapper;
@@ -54,16 +54,17 @@ public class TractorService {
         return tractorMapper.toResponse(tractor);
     }
 
-    public TractorResponse updatePartial(UUID id, TractorPatchRequest tractorPatchRequest){
+    public TractorResponse updatePartial(UUID id, TractorUpdateRequest tractorUpdateRequest){
         Tractor tractor = tractorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tractorValidator.validate(tractorUpdateRequest);
 
-        if(tractorPatchRequest.plate() != null) tractor.setPlate(tractorPatchRequest.plate());
-        if(tractorPatchRequest.renavam() != null) tractor.setRenavam(tractorPatchRequest.renavam());
-        if(tractorPatchRequest.model() != null) tractor.setModel(tractorPatchRequest.model());
-        if(tractorPatchRequest.maximumCapacity() != null) tractor.setMaximumCapacity(tractorPatchRequest.maximumCapacity());
-        if(tractorPatchRequest.numberAxles() != null) tractor.setNumberAxles(tractorPatchRequest.numberAxles());
-        if(tractorPatchRequest.typeFuel() != null) tractor.setTypeFuel(tractorPatchRequest.typeFuel());
+        if(tractorUpdateRequest.plate() != null) tractor.setPlate(tractorUpdateRequest.plate());
+        if(tractorUpdateRequest.renavam() != null) tractor.setRenavam(tractorUpdateRequest.renavam());
+        if(tractorUpdateRequest.model() != null) tractor.setModel(tractorUpdateRequest.model());
+        if(tractorUpdateRequest.maximumCapacity() != null) tractor.setMaximumCapacity(tractorUpdateRequest.maximumCapacity());
+        if(tractorUpdateRequest.numberAxles() != null) tractor.setNumberAxles(tractorUpdateRequest.numberAxles());
+        if(tractorUpdateRequest.typeFuel() != null) tractor.setTypeFuel(tractorUpdateRequest.typeFuel());
 
         tractor.setId(id);
         tractorRepository.save(tractor);

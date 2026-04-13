@@ -1,7 +1,7 @@
 package GoLogAPI.controller;
 
 import GoLogAPI.dto.tractor.TractorCreateRequest;
-import GoLogAPI.dto.tractor.TractorPatchRequest;
+import GoLogAPI.dto.tractor.TractorUpdateRequest;
 import GoLogAPI.dto.tractor.TractorResponse;
 import GoLogAPI.service.TractorService;
 import jakarta.validation.Valid;
@@ -46,8 +46,8 @@ public class TractorController {
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<TractorResponse> updatePartial(@PathVariable("id") UUID id, @RequestBody TractorPatchRequest tractorPatchRequest){
-        TractorResponse tractorResponse = tractorService.updatePartial(id, tractorPatchRequest);
+    public ResponseEntity<TractorResponse> updatePartial(@PathVariable("id") UUID id, @RequestBody TractorUpdateRequest tractorUpdateRequest){
+        TractorResponse tractorResponse = tractorService.updatePartial(id, tractorUpdateRequest);
         return ResponseEntity.ok(tractorResponse);
     }
 }

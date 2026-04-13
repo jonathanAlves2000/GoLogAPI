@@ -1,7 +1,7 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.trailer.TrailerCreateRequest;
-import GoLogAPI.dto.trailer.TrailerPatchRequest;
+import GoLogAPI.dto.trailer.TrailerUpdateRequest;
 import GoLogAPI.dto.trailer.TrailerResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.TrailerMapper;
@@ -54,15 +54,16 @@ public class TrailerService {
         return trailerMapper.toResponse(trailer);
     }
 
-    public TrailerResponse updatePartial(UUID id, TrailerPatchRequest trailerPatchRequest){
+    public TrailerResponse updatePartial(UUID id, TrailerUpdateRequest trailerUpdateRequest){
         Trailer trailer = trailerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        trailerValidator.validate(trailerUpdateRequest);
 
-        if(trailerPatchRequest.plate() != null) trailer.setPlate(trailerPatchRequest.plate());
-        if(trailerPatchRequest.renavam() != null) trailer.setRenavam(trailerPatchRequest.renavam());
-        if(trailerPatchRequest.model() != null) trailer.setModel(trailerPatchRequest.model());
-        if(trailerPatchRequest.numberAxles() != null) trailer.setNumberAxles(trailerPatchRequest.numberAxles());
-        if(trailerPatchRequest.maximumCapacity() != null) trailer.setMaximumCapacity(trailerPatchRequest.maximumCapacity());
+        if(trailerUpdateRequest.plate() != null) trailer.setPlate(trailerUpdateRequest.plate());
+        if(trailerUpdateRequest.renavam() != null) trailer.setRenavam(trailerUpdateRequest.renavam());
+        if(trailerUpdateRequest.model() != null) trailer.setModel(trailerUpdateRequest.model());
+        if(trailerUpdateRequest.numberAxles() != null) trailer.setNumberAxles(trailerUpdateRequest.numberAxles());
+        if(trailerUpdateRequest.maximumCapacity() != null) trailer.setMaximumCapacity(trailerUpdateRequest.maximumCapacity());
 
         trailer.setId(id);
         trailerRepository.save(trailer);

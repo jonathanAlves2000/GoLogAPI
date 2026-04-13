@@ -1,6 +1,7 @@
 package GoLogAPI.validation;
 
 import GoLogAPI.dto.tractor.TractorCreateRequest;
+import GoLogAPI.dto.tractor.TractorRequest;
 import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.TractorRepository;
 import org.springframework.stereotype.Component;
@@ -17,12 +18,10 @@ public class TractorValidator {
         this.tractorRepository = tractorRepository;
     }
 
-    List<String> errors = new ArrayList<>();
-
-    public void validate(TractorCreateRequest tractorCreateRequest){
-
-        plate(tractorCreateRequest.plate(), errors);
-        renavam(tractorCreateRequest.renavam(), errors);
+    public void validate(TractorRequest tractorRequest){
+        List<String> errors = new ArrayList<>();
+        plate(tractorRequest.plate(), errors);
+        renavam(tractorRequest.renavam(), errors);
 
         if(!errors.isEmpty()){
             throw new ConflictException(errors);

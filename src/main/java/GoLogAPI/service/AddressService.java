@@ -1,7 +1,7 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.address.AddressCreateRequest;
-import GoLogAPI.dto.address.AddressPacthRequest;
+import GoLogAPI.dto.address.AddressUpdateRequest;
 import GoLogAPI.dto.address.AddressResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.AddressMapper;
@@ -62,18 +62,19 @@ public class AddressService {
     }
 
     @Transactional
-    public AddressResponse updatePartial(UUID id, AddressPacthRequest addressPacthRequest){
+    public AddressResponse updatePartial(UUID id, AddressUpdateRequest addressUpdateRequest){
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        addressValidator.validate(addressUpdateRequest);
 
-        if(addressPacthRequest.cep() != null) address.setCep(addressPacthRequest.cep());
-        if(addressPacthRequest.city() != null) address.setCity(addressPacthRequest.city());
-        if(addressPacthRequest.country() != null) address.setCountry(addressPacthRequest.country());
-        if(addressPacthRequest.district() != null) address.setDistrict(addressPacthRequest.district());
-        if(addressPacthRequest.number() != null) address.setNumber(addressPacthRequest.number());
-        if(addressPacthRequest.state() != null) address.setState(addressPacthRequest.state());
-        if(addressPacthRequest.street() != null) address.setStreet(addressPacthRequest.street());
-        if(addressPacthRequest.complement() != null) address.setComplement(addressPacthRequest.complement());
+        if(addressUpdateRequest.cep() != null) address.setCep(addressUpdateRequest.cep());
+        if(addressUpdateRequest.city() != null) address.setCity(addressUpdateRequest.city());
+        if(addressUpdateRequest.country() != null) address.setCountry(addressUpdateRequest.country());
+        if(addressUpdateRequest.district() != null) address.setDistrict(addressUpdateRequest.district());
+        if(addressUpdateRequest.number() != null) address.setNumber(addressUpdateRequest.number());
+        if(addressUpdateRequest.state() != null) address.setState(addressUpdateRequest.state());
+        if(addressUpdateRequest.street() != null) address.setStreet(addressUpdateRequest.street());
+        if(addressUpdateRequest.complement() != null) address.setComplement(addressUpdateRequest.complement());
 
         addressRepository.save(address);
         return addressMapper.toResponse(address);

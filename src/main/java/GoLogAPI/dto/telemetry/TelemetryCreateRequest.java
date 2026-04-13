@@ -10,10 +10,10 @@ public record TelemetryCreateRequest(
         @NotNull(message = "A data não pode estar nula!")
         LocalDateTime dateTime,
 
-        @NotBlank(message = "A latitude não pode estar nula!")
+        @NotBlank(message = "A latitude não pode estar vazia!")
         String latitude,
 
-        @NotBlank(message = "A longitude não pode estar nula!")
+        @NotBlank(message = "A longitude não pode estar vazia!")
         String longitude,
 
         @NotNull(message = "A velocidade não pode estar nula!")
@@ -30,4 +30,4 @@ public record TelemetryCreateRequest(
 
         @NotNull(message = "O ID do equipamento não estar ser nulo!")
         UUID equipamentId
-) { }
+) implements TelemetryRequest{ }

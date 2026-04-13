@@ -25,4 +25,4 @@ public record TractorCreateRequest(
 
         @NotBlank
         String typeFuel
-) { }
+) implements TractorRequest{ }

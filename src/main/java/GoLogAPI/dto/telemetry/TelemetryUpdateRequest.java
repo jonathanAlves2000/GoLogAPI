@@ -3,7 +3,7 @@ package GoLogAPI.dto.telemetry;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record TelemetryPatchRequest(
+public record TelemetryUpdateRequest(
         LocalDateTime dateTime,
         String latitude,
         String longitude,
@@ -13,4 +13,4 @@ public record TelemetryPatchRequest(
         String data2,
         String device,
         UUID equipamentId
-) { }
+) implements TelemetryRequest{ }

@@ -1,7 +1,7 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.driver.DriverCreateRequest;
-import GoLogAPI.dto.driver.DriverPatchRequest;
+import GoLogAPI.dto.driver.DriverUpdateRequest;
 import GoLogAPI.dto.driver.DriverResponseList;
 import GoLogAPI.dto.driver.DriverResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
@@ -70,15 +70,16 @@ public class DriverService {
         return driverMapper.toResponse(driver);
     }
 
-    public DriverResponse updatePartial(UUID id, DriverPatchRequest driverPatchRequest){
+    public DriverResponse updatePartial(UUID id, DriverUpdateRequest driverUpdateRequest){
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        driverValidator.validate(driverUpdateRequest);
 
-        if(driverPatchRequest.cnhNumber() != null) driver.setCnhNumber(driverPatchRequest.cnhNumber());
-        if(driverPatchRequest.cnhExpiration() != null) driver.setCnhExpiration((driverPatchRequest.cnhExpiration()));
-        if(driverPatchRequest.userId() != null){
-            User user = userRepository.findById(driverPatchRequest.userId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, driverPatchRequest.userId()));
+        if(driverUpdateRequest.cnhNumber() != null) driver.setCnhNumber(driverUpdateRequest.cnhNumber());
+        if(driverUpdateRequest.cnhExpiration() != null) driver.setCnhExpiration((driverUpdateRequest.cnhExpiration()));
+        if(driverUpdateRequest.userId() != null){
+            User user = userRepository.findById(driverUpdateRequest.userId())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, driverUpdateRequest.userId()));
             driver.setUser(user);
         }
         driverRepository.save(driver);

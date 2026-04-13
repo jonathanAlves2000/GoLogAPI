@@ -1,7 +1,7 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.user.UserCreateRequest;
-import GoLogAPI.dto.user.UserPatchRequest;
+import GoLogAPI.dto.user.UserUpdateRequest;
 import GoLogAPI.dto.user.UserResponse;
 import GoLogAPI.dto.user.UserResponseList;
 import GoLogAPI.exception.ResourceNotFoundException;
@@ -78,21 +78,19 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponse updatePartial(UUID id, UserPatchRequest userPatchRequest){
+    public UserResponse updatePartial(UUID id, UserUpdateRequest userUpdateRequest){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        userValidator.validate(userUpdateRequest);
 
-        if(userPatchRequest.name() != null) user.setName(userPatchRequest.name());
-        if(userPatchRequest.userProfile() != null) user.setUserProfile(userPatchRequest.userProfile());
-        if(userPatchRequest.cpf() != null) user.setCpf(userPatchRequest.cpf());
-        if(userPatchRequest.email() != null) user.setEmail(userPatchRequest.email());
-        if(userPatchRequest.password() != null) {
-            String encodedPassword = passwordEncoder.encode(userPatchRequest.password());
-            user.setPassword(encodedPassword);
-        }
-        if(userPatchRequest.companyId() != null){
-            Company company = companyRepository.findById(userPatchRequest.companyId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userPatchRequest.companyId()));
+        if(userUpdateRequest.name() != null) user.setName(userUpdateRequest.name());
+        if(userUpdateRequest.userProfile() != null) user.setUserProfile(userUpdateRequest.userProfile());
+        if(userUpdateRequest.cpf() != null) user.setCpf(userUpdateRequest.cpf());
+        if(userUpdateRequest.email() != null) user.setEmail(userUpdateRequest.email());
+        if(userUpdateRequest.password() != null) user.setPassword(userUpdateRequest.password());
+        if(userUpdateRequest.companyId() != null){
+            Company company = companyRepository.findById(userUpdateRequest.companyId())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userUpdateRequest.companyId()));
             user.setCompany(company);
         }
         userRepository.save(user);

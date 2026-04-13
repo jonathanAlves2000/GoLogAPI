@@ -16,10 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import GoLogAPI.dto.telemetry.TelemetryCreateRequest;
-import GoLogAPI.dto.telemetry.TelemetryPatchRequest;
+import GoLogAPI.dto.telemetry.TelemetryUpdateRequest;
 import GoLogAPI.dto.telemetry.TelemetryReponse;
 import GoLogAPI.service.TelemetryService;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/telemetry")
@@ -60,8 +65,8 @@ public class TelemetryController {
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<TelemetryReponse> updatePartial(@PathVariable("id") UUID id, TelemetryPatchRequest telemetryPatchRequest){
-        TelemetryReponse telemetryReponse = telemetryService.updatePartial(id, telemetryPatchRequest);
+    public ResponseEntity<TelemetryReponse> updatePartial(@PathVariable("id") UUID id, TelemetryUpdateRequest telemetryUpdateRequest){
+        TelemetryReponse telemetryReponse = telemetryService.updatePartial(id, telemetryUpdateRequest);
         return ResponseEntity.ok(telemetryReponse);
     }
 }
