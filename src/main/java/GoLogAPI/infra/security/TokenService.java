@@ -1,17 +1,16 @@
 package GoLogAPI.infra.security;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
+import GoLogAPI.model.User;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
-import GoLogAPI.model.User;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Service
 public class TokenService {
@@ -25,7 +24,8 @@ public class TokenService {
             return JWT.create()
                     .withIssuer("golog-api")
                     .withSubject(user.getEmail())
-                    .withClaim("userProfile", user.getUserProfile().name())
+                    .withClaim("user", user.getName())
+                    .withClaim("role", user.getUserProfile().name())
                     .withExpiresAt(dateExpiration())
                     .sign(algorithm);
         }catch (JWTCreationException exception){
@@ -49,4 +49,13 @@ public class TokenService {
                 .getSubject();
     }
 
+    public String getClaim(String tokenJWT, String claimName) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        return JWT.require(algorithm)
+                .withIssuer("golog-api")
+                .build()
+                .verify(tokenJWT)
+                .getClaim(claimName)
+                .asString();
+    }
 }

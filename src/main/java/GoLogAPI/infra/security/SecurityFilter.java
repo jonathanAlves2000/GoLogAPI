@@ -7,11 +7,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -32,9 +34,12 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             if(token != null){
                 try {
-                    var subject = tokenService.getSubject(token);
-                    var userDetails = getUserDetailsService.loadUserByUsername(subject);
-                    var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    var email = tokenService.getSubject(token);
+                    var role = tokenService.getClaim(token, "role");
+                    var name = tokenService.getClaim(token, "name");
+                    //var userDetails = getUserDetailsService.loadUserByUsername(email);
+                    var authority = new SimpleGrantedAuthority(role);
+                    var authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } catch (TokenExpiredException exception) {
                     sendError(response, "Token expirado. Por favor, faça login novamente.");
