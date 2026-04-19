@@ -1,14 +1,19 @@
 package GoLogAPI.service;
 
+import GoLogAPI.dto.supportedType.SupportedTypeCreateRequest;
+import GoLogAPI.dto.supportedType.SupportedTypeResponse;
 import GoLogAPI.dto.equipamentGroup.EquipamentGroupCreateRequest;
 import GoLogAPI.dto.equipamentGroup.EquipamentGroupUpdateRequest;
 import GoLogAPI.dto.equipamentGroup.EquipamentGroupResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.EquipamentGroupMapper;
+import GoLogAPI.mapper.SupportedTypeMapper;
 import GoLogAPI.model.Equipament;
 import GoLogAPI.model.EquipamentGroup;
+import GoLogAPI.model.TypeTransport;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.EquipamentRepository;
+import GoLogAPI.repository.TypeTransportRepository;
 import GoLogAPI.validation.EquipamentGroupValidator;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -23,15 +28,20 @@ public class EquipamentGroupService {
     private final EquipamentGroupMapper equipamentGroupMapper;
     private final EquipamentRepository equipamentRepository;
     private final EquipamentGroupValidator equipamentGroupValidator;
+    private final TypeTransportRepository typeTransportRepository;
+    private final SupportedTypeMapper supportedTypeMapper;
 
 
     public EquipamentGroupService(EquipamentGroupRepository equipamentGroupRepository,
     EquipamentGroupMapper equipamentGroupMapper,EquipamentRepository equipamentRepository,
-    EquipamentGroupValidator equipamentGroupValidator){
+    EquipamentGroupValidator equipamentGroupValidator, TypeTransportRepository typeTransportRepository,
+                                  SupportedTypeMapper supportedTypeMapper){
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.equipamentGroupMapper = equipamentGroupMapper;
         this.equipamentRepository = equipamentRepository;
         this.equipamentGroupValidator= equipamentGroupValidator;
+        this.typeTransportRepository = typeTransportRepository;
+        this.supportedTypeMapper = supportedTypeMapper;
     }
 
     @Transactional
@@ -119,5 +129,18 @@ public class EquipamentGroupService {
         return equipamentGroupMapper.toResponse(equipamentGroup);
     }
 
+    @Transactional
+    public SupportedTypeResponse addTransportType(SupportedTypeCreateRequest supportedTypeCreateRequest){
+        EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(supportedTypeCreateRequest.groupId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, supportedTypeCreateRequest.groupId()));
 
+        TypeTransport typeTransport = typeTransportRepository.findById(supportedTypeCreateRequest.typeId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, supportedTypeCreateRequest.typeId()));
+
+        equipamentGroup.getTypeTransports().add(typeTransport);
+
+        equipamentGroupRepository.save(equipamentGroup);
+
+        return supportedTypeMapper.toResponse(equipamentGroup, typeTransport);
+    }
 }

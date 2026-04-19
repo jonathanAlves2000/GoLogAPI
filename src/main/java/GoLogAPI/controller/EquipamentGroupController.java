@@ -3,6 +3,8 @@ package GoLogAPI.controller;
 import java.net.URI;
 import java.util.UUID;
 
+import GoLogAPI.dto.supportedType.SupportedTypeCreateRequest;
+import GoLogAPI.dto.supportedType.SupportedTypeResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,7 +24,7 @@ import GoLogAPI.service.EquipamentGroupService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/equipamentGroup")
+@RequestMapping("/equipament-group")
 public class EquipamentGroupController {
 
     private final EquipamentGroupService equipamentGroupService;
@@ -65,6 +67,13 @@ public class EquipamentGroupController {
             @PathVariable("id") UUID id, @RequestBody EquipamentGroupUpdateRequest equipamentGroupUpdateRequest){
         EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.updatePartial(id, equipamentGroupUpdateRequest);
         return ResponseEntity.ok(equipamentGroupResponse);
+    }
+
+    @PatchMapping("/association")
+    public ResponseEntity<SupportedTypeResponse> addTransportType(
+            @RequestBody @Valid SupportedTypeCreateRequest supportedTypeCreateRequest){
+        SupportedTypeResponse supportedTypeResponse = equipamentGroupService.addTransportType(supportedTypeCreateRequest);
+        return ResponseEntity.ok(supportedTypeResponse);
     }
 
 }

@@ -7,5 +7,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class MessageException {
     public static String NOT_FOUND_MESSAGE = "Registro não encontrado para o Id: ";
-    public static String INVALID_CREDENTIALS_MESSAGE = "E-mail ou senha invalidos";
+    public static String INVALID_CREDENTIALS_MESSAGE = "E-mail ou senha invalidos.";
+    public static String UNEXPECTED_ERROR_MESSAGE = "Ocorreu um erro interno inesperado.";
 }

@@ -55,10 +55,10 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
-        ex.printStackTrace(); 
+    public ResponseEntity<String> handleGeneralException(Exception exception) {
+        exception.printStackTrace();
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Ocorreu um erro interno inesperado.");
+                .body(MessageException.UNEXPECTED_ERROR_MESSAGE);
     }
 }
