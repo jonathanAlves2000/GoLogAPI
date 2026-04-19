@@ -5,16 +5,17 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.CompanyMapper;
 import GoLogAPI.model.Address;
 import GoLogAPI.model.Company;
+import org.springframework.transaction.annotation.Transactional;
 import GoLogAPI.repository.AddressRepository;
 import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.validation.CompanyValidator;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class CompanyService {
 
     private CompanyRepository companyRepository;
@@ -29,6 +30,7 @@ public class CompanyService {
         this.companyValidator = companyValidator;
     }
 
+    @Transactional
     public CompanyResponse save(CompanyCreateRequest companyCreateRequest){
         companyValidator.validate(companyCreateRequest);
         Company company = companyMapper.toEntity(companyCreateRequest);
@@ -50,12 +52,14 @@ public class CompanyService {
         return companyMapper.toResponses(companies);
     }
 
+    @Transactional
     public void delete(UUID id){
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         companyRepository.delete(company);
     }
 
+    @Transactional
     public CompanyResponse update(UUID id, CompanyCreateRequest companyCreateRequest){
         companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));

@@ -10,11 +10,13 @@ import GoLogAPI.model.EquipamentGroup;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.EquipamentRepository;
 import GoLogAPI.validation.EquipamentGroupValidator;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class EquipamentGroupService {
 
     EquipamentGroupRepository equipamentGroupRepository;
@@ -31,6 +33,7 @@ public class EquipamentGroupService {
         this.equipamentGroupValidator= equipamentGroupValidator;
     }
 
+    @Transactional
     public EquipamentGroupResponse save(EquipamentGroupCreateRequest equipamentGroupCreateRequest){
         EquipamentGroup equipamentGroup = equipamentGroupMapper.toEntity(equipamentGroupCreateRequest);
         equipamentGroupValidator.validate(equipamentGroupCreateRequest);
@@ -58,12 +61,14 @@ public class EquipamentGroupService {
         return equipamentGroupMapper.toResponse(equipamentGroup);
     }
 
+    @Transactional
     public void delete(UUID id){
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         equipamentGroupRepository.delete(equipamentGroup);
     }
 
+    @Transactional
     public EquipamentGroupResponse update(UUID id, EquipamentGroupCreateRequest equipamentGroupCreateRequest){
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -87,6 +92,7 @@ public class EquipamentGroupService {
         return equipamentGroupMapper.toResponse(equipamentGroup);
     }
 
+    @Transactional
     public EquipamentGroupResponse updatePartial(UUID id, EquipamentGroupUpdateRequest equipamentGroupUpdateRequest){
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));

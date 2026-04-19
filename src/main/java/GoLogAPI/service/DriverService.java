@@ -12,11 +12,14 @@ import GoLogAPI.repository.DriverRepository;
 import GoLogAPI.repository.UserRepository;
 import GoLogAPI.validation.DriverValidator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class DriverService {
 
     private UserRepository userRepository;
@@ -31,6 +34,7 @@ public class DriverService {
         this.driverValidator = driverValidator;
     }
 
+    @Transactional
     public DriverResponse save(DriverCreateRequest driverCreateRequest) {
         driverValidator.validate(driverCreateRequest);
         Driver driver = driverMapper.toEntity(driverCreateRequest);
@@ -52,12 +56,14 @@ public class DriverService {
         return driverMapper.toResponses(drivers);
     }
 
+    @Transactional
     public void delete(UUID id){
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         driverRepository.delete(driver);
     }
 
+    @Transactional
     public DriverResponse update(UUID id, DriverCreateRequest driverCreateRequest){
         driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -70,6 +76,7 @@ public class DriverService {
         return driverMapper.toResponse(driver);
     }
 
+    @Transactional
     public DriverResponse updatePartial(UUID id, DriverUpdateRequest driverUpdateRequest){
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));

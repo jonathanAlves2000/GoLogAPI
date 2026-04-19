@@ -9,10 +9,12 @@ import GoLogAPI.model.Trailer;
 import GoLogAPI.repository.TrailerRepository;
 import GoLogAPI.validation.TrailerValidator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class TrailerService {
 
     TrailerRepository trailerRepository;
@@ -26,6 +28,7 @@ public class TrailerService {
         this.trailerValidator = trailerValidator;
     }
 
+    @Transactional
     public TrailerResponse save(TrailerCreateRequest trailerCreateRequest){
         trailerValidator.validate(trailerCreateRequest);
         Trailer trailer = trailerMapper.toEntity(trailerCreateRequest);
@@ -39,12 +42,14 @@ public class TrailerService {
         return trailerMapper.toResponse(trailer);
     }
 
+    @Transactional
     public void delete(UUID id){
         Trailer trailer = trailerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         trailerRepository.delete(trailer);
     }
 
+    @Transactional
     public TrailerResponse update(UUID id, TrailerCreateRequest trailerCreateRequest) {
         trailerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -54,6 +59,7 @@ public class TrailerService {
         return trailerMapper.toResponse(trailer);
     }
 
+    @Transactional
     public TrailerResponse updatePartial(UUID id, TrailerUpdateRequest trailerUpdateRequest){
         Trailer trailer = trailerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));

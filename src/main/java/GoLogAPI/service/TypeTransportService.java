@@ -8,10 +8,13 @@ import GoLogAPI.mapper.TypeTransportMapper;
 import GoLogAPI.model.TypeTransport;
 import GoLogAPI.repository.TypeTranportRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class TypeTransportService {
 
     private TypeTranportRepository typeTranportRepository;
@@ -23,6 +26,7 @@ public class TypeTransportService {
         this.typeTransportMapper = typeTransportMapper;
     }
 
+    @Transactional
     public TypeTransportResponse save(TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransport typeTransport = typeTransportMapper.toEntity(typeTransportCreateRequest);
         typeTranportRepository.save(typeTransport);
@@ -35,12 +39,14 @@ public class TypeTransportService {
         return typeTransportMapper.toResponse(typeTransport);
     }
 
+    @Transactional
     public void delete(UUID id){
        TypeTransport typeTransport = typeTranportRepository.findById(id)
                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
        typeTranportRepository.delete(typeTransport);
     }
 
+    @Transactional
     public TypeTransportResponse update(UUID id, TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransport typeTransport = typeTranportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -49,6 +55,7 @@ public class TypeTransportService {
         return typeTransportMapper.toResponse(typeTransport);
     }
 
+    @Transactional
     public TypeTransportResponse updatePartial(UUID id, TypeTransportUpdateRequest typeTransportUpdateRequest){
         TypeTransport typeTransport = typeTranportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));

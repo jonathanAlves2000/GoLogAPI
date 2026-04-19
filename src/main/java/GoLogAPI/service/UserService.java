@@ -11,14 +11,15 @@ import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.UserRepository;
 import GoLogAPI.model.User;
 import GoLogAPI.validation.UserValidator;
-import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class UserService {
 
     private UserRepository userRepository;
@@ -35,6 +36,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public UserResponse save(UserCreateRequest userCreateRequest){
         Company company = companyRepository.findById(userCreateRequest.companyId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userCreateRequest.companyId()));
@@ -47,6 +49,7 @@ public class UserService {
         return userMapper.toResponse(user);
     }
 
+    @Transactional
     public void delete(UUID id){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -64,6 +67,7 @@ public class UserService {
         return userMapper.toResponses(users);
     }
 
+    @Transactional
     public UserResponse update(UUID id, UserCreateRequest userCreateRequest){
       userRepository.findById(id)
               .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));

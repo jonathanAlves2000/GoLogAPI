@@ -6,10 +6,12 @@ import GoLogAPI.mapper.EquipamentMapper;
 import GoLogAPI.model.Equipament;
 import GoLogAPI.repository.EquipamentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class EquipamentService {
 
     private EquipamentRepository equipamentRepository;

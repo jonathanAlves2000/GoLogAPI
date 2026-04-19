@@ -9,10 +9,12 @@ import GoLogAPI.model.Tractor;
 import GoLogAPI.repository.TractorRepository;
 import GoLogAPI.validation.TractorValidator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class TractorService {
 
     private TractorRepository tractorRepository;
@@ -25,6 +27,7 @@ public class TractorService {
         this.tractorValidator = tractorValidator;
     }
 
+    @Transactional
     public TractorResponse save(TractorCreateRequest tractorCreateRequest){
         tractorValidator.validate(tractorCreateRequest);
         Tractor tractor = tractorMapper.toEntity(tractorCreateRequest);
@@ -38,12 +41,14 @@ public class TractorService {
         return tractorMapper.toResponse(tractor);
     }
 
+    @Transactional
     public void delete(UUID id){
         Tractor tractor = tractorRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         tractorRepository.delete(tractor);
     }
 
+    @Transactional
     public TractorResponse update(UUID id, TractorCreateRequest tractorCreateRequest){
         tractorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -54,6 +59,7 @@ public class TractorService {
         return tractorMapper.toResponse(tractor);
     }
 
+    @Transactional
     public TractorResponse updatePartial(UUID id, TractorUpdateRequest tractorUpdateRequest){
         Tractor tractor = tractorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));

@@ -10,10 +10,12 @@ import GoLogAPI.model.Telemetry;
 import GoLogAPI.repository.EquipamentRepository;
 import GoLogAPI.repository.TelemetryRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class TelemetryService {
 
     public TelemetryRepository telemetryRepository;
@@ -27,6 +29,7 @@ public class TelemetryService {
         this.equipamentRepository = equipamentRepository;
     }
 
+    @Transactional
     public TelemetryReponse save(TelemetryCreateRequest telemetryCreateRequest){
        Telemetry telemetry = telemetryMapper.toEntity(telemetryCreateRequest);
        Equipament equipament = equipamentRepository.findById(telemetryCreateRequest.equipamentId())
@@ -42,12 +45,14 @@ public class TelemetryService {
         return telemetryMapper.toResponse(telemetry);
     }
 
+    @Transactional
     public void delete(UUID id){
         Telemetry telemetry = telemetryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         telemetryRepository.delete(telemetry);
     }
 
+    @Transactional
     public TelemetryReponse update(UUID id, TelemetryCreateRequest telemetryCreateRequest){
         Telemetry telemetry = telemetryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -60,6 +65,7 @@ public class TelemetryService {
         return telemetryMapper.toResponse(telemetry);
     }
 
+    @Transactional
     public TelemetryReponse updatePartial(UUID id, TelemetryUpdateRequest telemetryUpdateRequest){
         Telemetry telemetry = telemetryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
