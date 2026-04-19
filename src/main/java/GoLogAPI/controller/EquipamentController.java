@@ -15,7 +15,7 @@ import GoLogAPI.service.EquipamentService;
 @RequestMapping("/equipament")
 public class EquipamentController {
 
-    private EquipamentService equipamentService;
+    private final EquipamentService equipamentService;
 
     public EquipamentController(EquipamentService equipamentService){
         this.equipamentService = equipamentService;

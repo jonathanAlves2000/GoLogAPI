@@ -18,9 +18,9 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class AddressService {
 
-    private AddressRepository addressRepository;
-    private AddressMapper addressMapper;
-    private AddressValidator addressValidator;
+    private final AddressRepository addressRepository;
+    private final AddressMapper addressMapper;
+    private final AddressValidator addressValidator;
 
     public AddressService(AddressRepository addressRepository, AddressMapper addressMapper, AddressValidator addressValidator){
         this.addressRepository = addressRepository;

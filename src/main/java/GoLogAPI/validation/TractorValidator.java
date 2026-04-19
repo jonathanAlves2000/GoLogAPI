@@ -12,9 +12,9 @@ import GoLogAPI.repository.TractorRepository;
 @Component
 public class TractorValidator {
 
-    TractorRepository tractorRepository;
+    private final TractorRepository tractorRepository;
 
-    public  TractorValidator(TractorRepository tractorRepository){
+    public TractorValidator(TractorRepository tractorRepository){
         this.tractorRepository = tractorRepository;
     }
 

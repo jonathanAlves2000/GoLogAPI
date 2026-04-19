@@ -12,7 +12,7 @@ import GoLogAPI.repository.UserRepository;
 @Component
 public class UserValidator {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public UserValidator(UserRepository userRepository){
         this.userRepository = userRepository;

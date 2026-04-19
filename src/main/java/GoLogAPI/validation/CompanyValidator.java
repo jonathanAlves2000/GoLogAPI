@@ -12,12 +12,11 @@ import GoLogAPI.repository.CompanyRepository;
 @Component
 public class CompanyValidator {
 
-    private CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
 
     public CompanyValidator(CompanyRepository companyRepository){
         this.companyRepository = companyRepository;
     }
-
 
     public void validate(CompanyRequest companyRequest){
         List<String> errors = new ArrayList<>();

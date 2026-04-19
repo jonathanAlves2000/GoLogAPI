@@ -12,7 +12,7 @@ import GoLogAPI.repository.DriverRepository;
 @Component
 public class DriverValidator {
 
-    private DriverRepository driverRepository;
+    private final DriverRepository driverRepository;
 
     public DriverValidator(DriverRepository driverRepository){
         this.driverRepository = driverRepository;

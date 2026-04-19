@@ -12,7 +12,7 @@ import GoLogAPI.repository.TrailerRepository;
 @Component
 public class TrailerValidator {
 
-    private TrailerRepository trailerRepository;
+    private final TrailerRepository trailerRepository;
 
     public TrailerValidator(TrailerRepository trailerRepository){
         this.trailerRepository = trailerRepository;

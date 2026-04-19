@@ -11,7 +11,7 @@ import java.util.UUID;
 @Component
 public class EquipamentGroupValidator {
 
-    private EquipamentGroupRepository equipamentGroupRepository;
+    private final EquipamentGroupRepository equipamentGroupRepository;
 
     public EquipamentGroupValidator(EquipamentGroupRepository equipamentGroupRepository){
         this.equipamentGroupRepository = equipamentGroupRepository;

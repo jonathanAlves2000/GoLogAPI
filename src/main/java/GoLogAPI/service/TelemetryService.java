@@ -18,9 +18,9 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class TelemetryService {
 
-    public TelemetryRepository telemetryRepository;
-    public TelemetryMapper telemetryMapper;
-    public EquipamentRepository equipamentRepository;
+    private final TelemetryRepository telemetryRepository;
+    private final TelemetryMapper telemetryMapper;
+    private final EquipamentRepository equipamentRepository;
 
     public TelemetryService(TelemetryRepository telemetryRepository,
                             TelemetryMapper telemetryMapper, EquipamentRepository equipamentRepository){

@@ -22,11 +22,11 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class UserService {
 
-    private UserRepository userRepository;
-    private CompanyRepository companyRepository;
-    private UserMapper userMapper;
-    private UserValidator userValidator;
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
+    private final UserMapper userMapper;
+    private final UserValidator userValidator;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, CompanyRepository companyRepository ,UserMapper userMapper, UserValidator userValidator, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;

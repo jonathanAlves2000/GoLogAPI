@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequestMapping("/tractor")
 public class TractorController {
 
-    TractorService tractorService;
+    private final TractorService tractorService;
 
     public TractorController(TractorService tractorService){
         this.tractorService = tractorService;

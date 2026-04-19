@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequestMapping("/type-transport")
 public class TypeTransportController {
 
-    private TypeTransportService typeTransportService;
+    private final TypeTransportService typeTransportService;
 
     public TypeTransportController(TypeTransportService typeTransportService){
         this.typeTransportService = typeTransportService;

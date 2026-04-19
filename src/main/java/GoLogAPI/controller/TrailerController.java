@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequestMapping("/trailer")
 public class TrailerController {
 
-    TrailerService trailerService;
+    private final TrailerService trailerService;
 
     public TrailerController(TrailerService trailerService){
         this.trailerService = trailerService;

@@ -17,8 +17,8 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class TypeTransportService {
 
-    private TypeTranportRepository typeTranportRepository;
-    private TypeTransportMapper typeTransportMapper;
+    private final TypeTranportRepository typeTranportRepository;
+    private final TypeTransportMapper typeTransportMapper;
 
     public TypeTransportService(TypeTranportRepository typeTranportRepository,
                                 TypeTransportMapper typeTransportMapper){

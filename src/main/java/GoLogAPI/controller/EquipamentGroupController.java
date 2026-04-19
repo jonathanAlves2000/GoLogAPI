@@ -25,7 +25,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/equipamentGroup")
 public class EquipamentGroupController {
 
-    EquipamentGroupService equipamentGroupService;
+    private final EquipamentGroupService equipamentGroupService;
 
     public EquipamentGroupController(EquipamentGroupService equipamentGroupService){
         this.equipamentGroupService = equipamentGroupService;

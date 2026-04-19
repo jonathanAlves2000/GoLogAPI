@@ -22,10 +22,10 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class DriverService {
 
-    private UserRepository userRepository;
-    private DriverRepository driverRepository;
-    private DriverMapper driverMapper;
-    private DriverValidator driverValidator;
+    private final UserRepository userRepository;
+    private final DriverRepository driverRepository;
+    private final DriverMapper driverMapper;
+    private final DriverValidator driverValidator;
 
     public DriverService(UserRepository userRepository ,DriverRepository driverRepository, DriverMapper driverMapper, DriverValidator driverValidator){
         this.driverRepository = driverRepository;

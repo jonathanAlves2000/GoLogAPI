@@ -17,9 +17,9 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class TrailerService {
 
-    TrailerRepository trailerRepository;
-    TrailerMapper trailerMapper;
-    TrailerValidator trailerValidator;
+    private final TrailerRepository trailerRepository;
+    private final TrailerMapper trailerMapper;
+    private final TrailerValidator trailerValidator;
 
     public TrailerService(TrailerRepository trailerRepository,
                           TrailerMapper trailerMapper, TrailerValidator trailerValidator){

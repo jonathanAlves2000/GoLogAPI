@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public class AddressValidator {
 
-    private AddressRepository addressRepository;
+    private final AddressRepository addressRepository;
 
     public AddressValidator(AddressRepository addressRepository){
         this.addressRepository = addressRepository;

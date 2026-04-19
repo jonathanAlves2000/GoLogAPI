@@ -19,10 +19,11 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class EquipamentGroupService {
 
-    EquipamentGroupRepository equipamentGroupRepository;
-    EquipamentGroupMapper equipamentGroupMapper;
-    EquipamentRepository equipamentRepository;
-    EquipamentGroupValidator equipamentGroupValidator;
+    private final EquipamentGroupRepository equipamentGroupRepository;
+    private final EquipamentGroupMapper equipamentGroupMapper;
+    private final EquipamentRepository equipamentRepository;
+    private final EquipamentGroupValidator equipamentGroupValidator;
+
 
     public EquipamentGroupService(EquipamentGroupRepository equipamentGroupRepository,
     EquipamentGroupMapper equipamentGroupMapper,EquipamentRepository equipamentRepository,
@@ -117,4 +118,6 @@ public class EquipamentGroupService {
         equipamentGroupRepository.save(equipamentGroup);
         return equipamentGroupMapper.toResponse(equipamentGroup);
     }
+
+
 }

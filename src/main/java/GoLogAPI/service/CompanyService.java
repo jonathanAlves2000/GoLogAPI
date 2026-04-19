@@ -18,10 +18,10 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class CompanyService {
 
-    private CompanyRepository companyRepository;
-    private AddressRepository addressRepository;
-    private CompanyMapper companyMapper;
-    private CompanyValidator companyValidator;
+    private final CompanyRepository companyRepository;
+    private final AddressRepository addressRepository;
+    private final CompanyMapper companyMapper;
+    private final CompanyValidator companyValidator;
 
     public CompanyService(CompanyRepository companyRepository, AddressRepository addressRepository, CompanyMapper companyMapper, CompanyValidator companyValidator){
         this.companyRepository = companyRepository;

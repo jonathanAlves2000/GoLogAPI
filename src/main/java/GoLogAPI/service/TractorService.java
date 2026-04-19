@@ -17,9 +17,9 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class TractorService {
 
-    private TractorRepository tractorRepository;
-    private TractorMapper tractorMapper;
-    private TractorValidator tractorValidator;
+    private final TractorRepository tractorRepository;
+    private final TractorMapper tractorMapper;
+    private final TractorValidator tractorValidator;
 
     public TractorService(TractorRepository tractorRepository, TractorMapper tractorMapper, TractorValidator tractorValidator){
         this.tractorRepository = tractorRepository;

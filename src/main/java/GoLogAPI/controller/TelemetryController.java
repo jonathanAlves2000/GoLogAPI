@@ -25,7 +25,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/telemetry")
 public class TelemetryController {
 
-    public TelemetryService telemetryService;
+    private final TelemetryService telemetryService;
 
     public TelemetryController( TelemetryService telemetryService){
         this.telemetryService = telemetryService;

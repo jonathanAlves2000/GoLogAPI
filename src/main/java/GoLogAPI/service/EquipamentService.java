@@ -14,8 +14,8 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class EquipamentService {
 
-    private EquipamentRepository equipamentRepository;
-    private EquipamentMapper equipamentMapper;
+    private final EquipamentRepository equipamentRepository;
+    private final EquipamentMapper equipamentMapper;
 
     public EquipamentService(EquipamentRepository equipamentRepository, EquipamentMapper equipamentMapper){
         this.equipamentRepository = equipamentRepository;
