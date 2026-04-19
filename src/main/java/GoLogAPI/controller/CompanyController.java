@@ -43,8 +43,9 @@ public class CompanyController {
     }
 
     @DeleteMapping("{id}")
-    public void delete(@PathVariable UUID id){
-        this.companyService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable UUID id){
+        companyService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("{id}")

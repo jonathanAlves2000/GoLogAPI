@@ -21,16 +21,11 @@ public class DriverValidator {
     public void validate(DriverRequest driverRequest){
         List<String> errors = new ArrayList<>();
         cnh(driverRequest.cnhNumber(), errors);
-
-        if(!errors.isEmpty()){
-            throw new ConflictException(errors);
-        }
+        if(!errors.isEmpty()) throw new ConflictException(errors);
     }
 
     public void cnh(String cnh, List<String> errors){
         boolean exists = driverRepository.existsByCnhNumber(cnh);
-        if(exists){
-            errors.add("CNH já cadastrada!");
-        }
+        if(exists) errors.add("CNH já cadastrada!");
     }
 }

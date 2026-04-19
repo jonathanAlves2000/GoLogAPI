@@ -71,14 +71,14 @@ public class AddressService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         addressValidator.validate(addressUpdateRequest);
 
-        if(addressUpdateRequest.cep() != null) address.setCep(addressUpdateRequest.cep());
-        if(addressUpdateRequest.city() != null) address.setCity(addressUpdateRequest.city());
-        if(addressUpdateRequest.country() != null) address.setCountry(addressUpdateRequest.country());
-        if(addressUpdateRequest.district() != null) address.setDistrict(addressUpdateRequest.district());
-        if(addressUpdateRequest.number() != null) address.setNumber(addressUpdateRequest.number());
-        if(addressUpdateRequest.state() != null) address.setState(addressUpdateRequest.state());
-        if(addressUpdateRequest.street() != null) address.setStreet(addressUpdateRequest.street());
-        if(addressUpdateRequest.complement() != null) address.setComplement(addressUpdateRequest.complement());
+        if(addressUpdateRequest.cep() != null && !addressUpdateRequest.cep().isBlank()) address.setCep(addressUpdateRequest.cep());
+        if(addressUpdateRequest.city() != null && !addressUpdateRequest.city().isBlank()) address.setCity(addressUpdateRequest.city());
+        if(addressUpdateRequest.country() != null && !addressUpdateRequest.country().isBlank()) address.setCountry(addressUpdateRequest.country());
+        if(addressUpdateRequest.district() != null && !addressUpdateRequest.district().isBlank()) address.setDistrict(addressUpdateRequest.district());
+        if(addressUpdateRequest.number() != null && !addressUpdateRequest.number().isBlank()) address.setNumber(addressUpdateRequest.number());
+        if(addressUpdateRequest.state() != null && !addressUpdateRequest.state().isBlank()) address.setState(addressUpdateRequest.state());
+        if(addressUpdateRequest.street() != null && !addressUpdateRequest.street().isBlank()) address.setStreet(addressUpdateRequest.street());
+        if(addressUpdateRequest.complement() != null && !addressUpdateRequest.complement().isBlank()) address.setComplement(addressUpdateRequest.complement());
 
         addressRepository.save(address);
         return addressMapper.toResponse(address);

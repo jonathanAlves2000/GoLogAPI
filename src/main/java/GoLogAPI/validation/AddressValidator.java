@@ -26,10 +26,7 @@ public class AddressValidator {
 
     public void cepNumber(String cep, String number, List<String> erros){
         boolean exists = addressRepository.existsByCepAndNumber(cep, number);
-
-        if(exists){
-            erros.add("Empresa com o mesmo cep e numero já registrados");
-        }
+        if(exists) erros.add("Empresa com o mesmo cep e numero já registrados");
     }
 
 }

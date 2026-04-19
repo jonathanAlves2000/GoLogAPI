@@ -78,11 +78,11 @@ public class CompanyService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         companyValidator.validate(companyUpdateRequest);
 
-        if(companyUpdateRequest.cnpjCpf() != null) company.setCnpjCpf(companyUpdateRequest.cnpjCpf());
+        if(companyUpdateRequest.cnpjCpf() != null && !companyUpdateRequest.cnpjCpf().isBlank()) company.setCnpjCpf(companyUpdateRequest.cnpjCpf());
         if(companyUpdateRequest.isCliente() != null) company.setIsCliente(companyUpdateRequest.isCliente());
-        if(companyUpdateRequest.email() != null) company.setEmail(companyUpdateRequest.email());
-        if(companyUpdateRequest.legalName() != null) company.setLegalName(companyUpdateRequest.legalName());
-        if(companyUpdateRequest.phoneNumber() != null) company.setPhoneNumber(companyUpdateRequest.phoneNumber());
+        if(companyUpdateRequest.email() != null && !companyUpdateRequest.email().isBlank()) company.setEmail(companyUpdateRequest.email());
+        if(companyUpdateRequest.legalName() != null && !companyUpdateRequest.legalName().isBlank()) company.setLegalName(companyUpdateRequest.legalName());
+        if(companyUpdateRequest.phoneNumber() != null && !companyUpdateRequest.phoneNumber().isBlank()) company.setPhoneNumber(companyUpdateRequest.phoneNumber());
         if(companyUpdateRequest.addressId() != null){
             Address address = addressRepository.findById(companyUpdateRequest.addressId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyUpdateRequest.addressId()));

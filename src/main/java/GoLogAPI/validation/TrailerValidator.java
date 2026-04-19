@@ -22,10 +22,7 @@ public class TrailerValidator {
         List<String> errors = new ArrayList<>();
         plate(trailerRequest.plate(), errors);
         renavam(trailerRequest.renavam(), errors);
-
-        if(!errors.isEmpty()) {
-            throw new ConflictException(errors);
-        }
+        if(!errors.isEmpty()) throw new ConflictException(errors);
     }
 
     public void plate(String plate, List<String> errors){
