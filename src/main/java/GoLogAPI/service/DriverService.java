@@ -82,8 +82,10 @@ public class DriverService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         driverValidator.validate(driverUpdateRequest);
 
-        if(driverUpdateRequest.cnhNumber() != null) driver.setCnhNumber(driverUpdateRequest.cnhNumber());
-        if(driverUpdateRequest.cnhExpiration() != null) driver.setCnhExpiration((driverUpdateRequest.cnhExpiration()));
+        if(driverUpdateRequest.cnhNumber() != null && !driverUpdateRequest.cnhNumber().isBlank())
+            driver.setCnhNumber(driverUpdateRequest.cnhNumber());
+        if(driverUpdateRequest.cnhExpiration() != null)
+            driver.setCnhExpiration((driverUpdateRequest.cnhExpiration()));
         if(driverUpdateRequest.userId() != null){
             User user = userRepository.findById(driverUpdateRequest.userId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, driverUpdateRequest.userId()));

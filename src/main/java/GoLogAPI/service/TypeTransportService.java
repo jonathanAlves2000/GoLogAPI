@@ -60,9 +60,12 @@ public class TypeTransportService {
         TypeTransport typeTransport = typeTransportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        if(typeTransportUpdateRequest.name() != null) typeTransport.setName(typeTransportUpdateRequest.name());
-        if(typeTransportUpdateRequest.description() != null) typeTransport.setDescription(typeTransportUpdateRequest.description());
-        if(typeTransportUpdateRequest.care() != null) typeTransport.setCare(typeTransportUpdateRequest.care());
+        if(typeTransportUpdateRequest.name() != null && typeTransportUpdateRequest.name().isBlank())
+            typeTransport.setName(typeTransportUpdateRequest.name());
+        if(typeTransportUpdateRequest.description() != null)
+            typeTransport.setDescription(typeTransportUpdateRequest.description());
+        if(typeTransportUpdateRequest.care() != null)
+            typeTransport.setCare(typeTransportUpdateRequest.care());
 
         typeTransport.setId(id);
         typeTransportRepository.save(typeTransport);

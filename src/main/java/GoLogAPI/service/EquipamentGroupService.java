@@ -108,7 +108,8 @@ public class EquipamentGroupService {
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        if(equipamentGroupUpdateRequest.observation() != null) equipamentGroup.setObservation(equipamentGroupUpdateRequest.observation());
+        if(equipamentGroupUpdateRequest.observation() != null)
+            equipamentGroup.setObservation(equipamentGroupUpdateRequest.observation());
         if(equipamentGroupUpdateRequest.equipament1Id() != null){
             Equipament equipament1 = equipamentRepository.findById(equipamentGroupUpdateRequest.equipament1Id())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupUpdateRequest.equipament1Id()));

@@ -123,6 +123,7 @@ public class TransportService {
                             MessageException.NOT_FOUND_MESSAGE, transportUpdateRequest.equipamentGroupId()));
             transport.setEquipamentGroup(equipamentGroup);
         }
+        transport.setId(id);
         transportRepository.save(transport);
         return transportMapper.toResponse(transport);
     }

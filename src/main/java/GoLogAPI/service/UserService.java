@@ -87,16 +87,22 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         userValidator.validate(userUpdateRequest);
 
-        if(userUpdateRequest.name() != null) user.setName(userUpdateRequest.name());
-        if(userUpdateRequest.userProfile() != null) user.setUserProfile(userUpdateRequest.userProfile());
-        if(userUpdateRequest.cpf() != null) user.setCpf(userUpdateRequest.cpf());
-        if(userUpdateRequest.email() != null) user.setEmail(userUpdateRequest.email());
-        if(userUpdateRequest.password() != null) user.setPassword(userUpdateRequest.password());
+        if(userUpdateRequest.name() != null && !userUpdateRequest.name().isBlank())
+            user.setName(userUpdateRequest.name());
+        if(userUpdateRequest.userProfile() != null)
+            user.setUserProfile(userUpdateRequest.userProfile());
+        if(userUpdateRequest.cpf() != null && !userUpdateRequest.cpf().isBlank())
+            user.setCpf(userUpdateRequest.cpf());
+        if(userUpdateRequest.email() != null && !userUpdateRequest.email().isBlank())
+            user.setEmail(userUpdateRequest.email());
+        if(userUpdateRequest.password() != null && !userUpdateRequest.password().isBlank())
+            user.setPassword(userUpdateRequest.password());
         if(userUpdateRequest.companyId() != null){
             Company company = companyRepository.findById(userUpdateRequest.companyId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userUpdateRequest.companyId()));
             user.setCompany(company);
         }
+        user.setId(id);
         userRepository.save(user);
         return userMapper.toResponse(user);
     }

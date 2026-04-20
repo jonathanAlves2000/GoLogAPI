@@ -75,8 +75,10 @@ public class TelemetryService {
         if(telemetryUpdateRequest.data2() != null) telemetry.setData2(telemetryUpdateRequest.data2());
         if(telemetryUpdateRequest.device() != null) telemetry.setDevice(telemetryUpdateRequest.device());
         if(telemetryUpdateRequest.dateTime() != null) telemetry.setDateTime(telemetryUpdateRequest.dateTime());
-        if(telemetryUpdateRequest.latitude() != null) telemetry.setLatitude(telemetryUpdateRequest.latitude());
-        if(telemetryUpdateRequest.longitude() != null) telemetry.setLongitude(telemetryUpdateRequest.longitude());
+        if(telemetryUpdateRequest.latitude() != null && !telemetryUpdateRequest.latitude().isBlank())
+            telemetry.setLatitude(telemetryUpdateRequest.latitude());
+        if(telemetryUpdateRequest.longitude() != null && !telemetryUpdateRequest.longitude().isBlank())
+            telemetry.setLongitude(telemetryUpdateRequest.longitude());
         if(telemetryUpdateRequest.equipamentId() != null){
             Equipament equipament = equipamentRepository.findById(telemetryUpdateRequest.equipamentId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, telemetryUpdateRequest.equipamentId()));

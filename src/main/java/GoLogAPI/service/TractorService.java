@@ -65,12 +65,18 @@ public class TractorService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         tractorValidator.validate(tractorUpdateRequest);
 
-        if(tractorUpdateRequest.plate() != null) tractor.setPlate(tractorUpdateRequest.plate());
-        if(tractorUpdateRequest.renavam() != null) tractor.setRenavam(tractorUpdateRequest.renavam());
-        if(tractorUpdateRequest.model() != null) tractor.setModel(tractorUpdateRequest.model());
-        if(tractorUpdateRequest.maximumCapacity() != null) tractor.setMaximumCapacity(tractorUpdateRequest.maximumCapacity());
-        if(tractorUpdateRequest.numberAxles() != null) tractor.setNumberAxles(tractorUpdateRequest.numberAxles());
-        if(tractorUpdateRequest.typeFuel() != null) tractor.setTypeFuel(tractorUpdateRequest.typeFuel());
+        if(tractorUpdateRequest.plate() != null && !tractorUpdateRequest.plate().isBlank())
+            tractor.setPlate(tractorUpdateRequest.plate());
+        if(tractorUpdateRequest.renavam() != null && !tractorUpdateRequest.renavam().isBlank())
+            tractor.setRenavam(tractorUpdateRequest.renavam());
+        if(tractorUpdateRequest.model() != null && !tractorUpdateRequest.model().isBlank())
+            tractor.setModel(tractorUpdateRequest.model());
+        if(tractorUpdateRequest.maximumCapacity() != null)
+            tractor.setMaximumCapacity(tractorUpdateRequest.maximumCapacity());
+        if(tractorUpdateRequest.numberAxles() != null)
+            tractor.setNumberAxles(tractorUpdateRequest.numberAxles());
+        if(tractorUpdateRequest.typeFuel() != null && !tractorUpdateRequest.typeFuel().isBlank())
+            tractor.setTypeFuel(tractorUpdateRequest.typeFuel());
 
         tractor.setId(id);
         tractorRepository.save(tractor);

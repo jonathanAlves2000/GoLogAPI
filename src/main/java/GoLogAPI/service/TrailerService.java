@@ -65,11 +65,16 @@ public class TrailerService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         trailerValidator.validate(trailerUpdateRequest);
 
-        if(trailerUpdateRequest.plate() != null) trailer.setPlate(trailerUpdateRequest.plate());
-        if(trailerUpdateRequest.renavam() != null) trailer.setRenavam(trailerUpdateRequest.renavam());
-        if(trailerUpdateRequest.model() != null) trailer.setModel(trailerUpdateRequest.model());
-        if(trailerUpdateRequest.numberAxles() != null) trailer.setNumberAxles(trailerUpdateRequest.numberAxles());
-        if(trailerUpdateRequest.maximumCapacity() != null) trailer.setMaximumCapacity(trailerUpdateRequest.maximumCapacity());
+        if(trailerUpdateRequest.plate() != null && !trailerUpdateRequest.plate().isBlank())
+            trailer.setPlate(trailerUpdateRequest.plate());
+        if(trailerUpdateRequest.renavam() != null && !trailerUpdateRequest.renavam().isBlank())
+            trailer.setRenavam(trailerUpdateRequest.renavam());
+        if(trailerUpdateRequest.model() != null && !trailerUpdateRequest.model().isBlank())
+            trailer.setModel(trailerUpdateRequest.model());
+        if(trailerUpdateRequest.numberAxles() != null)
+            trailer.setNumberAxles(trailerUpdateRequest.numberAxles());
+        if(trailerUpdateRequest.maximumCapacity() != null)
+            trailer.setMaximumCapacity(trailerUpdateRequest.maximumCapacity());
 
         trailer.setId(id);
         trailerRepository.save(trailer);
