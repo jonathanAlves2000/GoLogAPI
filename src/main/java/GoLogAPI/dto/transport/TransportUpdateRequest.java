@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public record TransportUpdateRequest(
         @Size(min = 5, max = 500,message = "A rota planejada deve ter entre 5 e 500 caracteres")
-        String routReturnPlanned,
+        String routeReturnPlanned,
 
         @Size(min = 5, max = 255, message = "A rota realizada deve ter entre 5 e 255 caracteres")
         String routeReturnCompleted,

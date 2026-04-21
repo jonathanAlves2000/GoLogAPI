@@ -30,10 +30,11 @@ public abstract class Audit{
 
     @PrePersist
     public void onPrePersist(){
+        String username = getUserAuthenticatedName();
         createdAt = Instant.now();
-        createdBy = getUserAuthenticatedId();
+        createdBy = username;
         updatedAt = this.createdAt;
-        updatedBy = getUserAuthenticatedName();
+        updatedBy = username;
     }
 
     @PreUpdate
@@ -42,20 +43,19 @@ public abstract class Audit{
         updatedBy = getUserAuthenticatedName();
     }
 
-    private String getUserAuthenticatedId(){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken){
-            return null;
-        }
-
-        User userLogin = (User) auth.getPrincipal();
-        return userLogin.getName();
-    }
-
     private String getUserAuthenticatedName(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User userLogin = (User) auth.getPrincipal();
-        return (auth != null) ? userLogin.getName() : "System";
+
+        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+            return "System";
+        }
+
+        Object principal = auth.getPrincipal();
+
+        if (principal instanceof String) {
+            return (String) principal;
+        }
+
+        return principal.toString();
     }
 }

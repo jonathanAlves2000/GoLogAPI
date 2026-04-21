@@ -14,6 +14,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "company", ignore = true)
+    @Mapping(target = "authorities", ignore = true)
     User toEntity(UserCreateRequest userCreateRequest);
 
     UserResponse toResponse(User user);

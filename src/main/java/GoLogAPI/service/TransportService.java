@@ -97,8 +97,8 @@ public class TransportService {
         Transport transport = transportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        if(transportUpdateRequest.routReturnPlanned() != null && !transportUpdateRequest.routReturnPlanned().isBlank())
-            transport.setRouteReturnPlanned(transportUpdateRequest.routReturnPlanned());
+        if(transportUpdateRequest.routeReturnPlanned() != null && !transportUpdateRequest.routeReturnPlanned().isBlank())
+            transport.setRouteReturnPlanned(transportUpdateRequest.routeReturnPlanned());
         if(transportUpdateRequest.routeReturnCompleted() != null && !transportUpdateRequest.routeReturnCompleted().isBlank())
             transport.setRouteReturnCompleted(transportUpdateRequest.routeReturnCompleted());
         if(transportUpdateRequest.deliveryQuantity() != null) transport.setDeliveryQuantity(transportUpdateRequest.deliveryQuantity());

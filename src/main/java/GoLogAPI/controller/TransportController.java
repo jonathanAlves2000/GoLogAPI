@@ -6,6 +6,7 @@ import GoLogAPI.dto.transport.TransportResponse;
 import GoLogAPI.dto.transport.TransportUpdateRequest;
 import GoLogAPI.service.TransportService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -34,7 +35,7 @@ public class TransportController {
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<TransportResponse> get(@PathVariable UUID id){
+    public ResponseEntity<TransportResponse> get(@PathVariable @NotNull(message = "Id não pode ser nulo.") UUID id){
         TransportResponse transportResponse = transportService.get(id);
         return ResponseEntity.ok(transportResponse);
     }

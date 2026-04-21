@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
-
 import java.util.UUID;
 
 @Entity
@@ -18,8 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @SQLDelete(sql = "UPDATE transport_table SET active=false WHERE id = ?")
 @SQLRestriction("active = true")
-public class Transport {
-
+public class Transport extends Audit {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", unique = true, nullable = false)
