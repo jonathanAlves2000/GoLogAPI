@@ -35,20 +35,20 @@ public class TransportController {
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
-    public ResponseEntity<TransportResponse> get(@PathVariable @NotNull(message = "Id não pode ser nulo.") UUID id){
+    public ResponseEntity<TransportResponse> get(@PathVariable("id") @NotNull(message = "Id não pode ser nulo.") UUID id){
         TransportResponse transportResponse = transportService.get(id);
         return ResponseEntity.ok(transportResponse);
     }
 
     @DeleteMapping(value = "{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         transportService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "{id}")
     public ResponseEntity<TransportResponse> update(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @RequestBody @Valid TransportCreateRequest transportCreateRequest){
         TransportResponse transportResponse = transportService.update(id, transportCreateRequest);
         return ResponseEntity.ok(transportResponse);
@@ -56,8 +56,8 @@ public class TransportController {
 
     @PatchMapping(value = "{id}")
     public ResponseEntity<TransportResponse> updatePartial(
-            @PathVariable UUID id,
-            @RequestBody TransportUpdateRequest transportUpdateRequest){
+            @PathVariable("id") UUID id,
+            @Valid @RequestBody TransportUpdateRequest transportUpdateRequest){
         TransportResponse transportResponse = transportService.updatePartial(id, transportUpdateRequest);
         return ResponseEntity.ok(transportResponse);
     }

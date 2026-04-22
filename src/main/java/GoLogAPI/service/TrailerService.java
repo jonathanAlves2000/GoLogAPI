@@ -63,6 +63,7 @@ public class TrailerService {
     public TrailerResponse updatePartial(UUID id, TrailerUpdateRequest trailerUpdateRequest){
         Trailer trailer = trailerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+
         trailerValidator.validate(trailerUpdateRequest);
 
         if(trailerUpdateRequest.plate() != null && !trailerUpdateRequest.plate().isBlank())
@@ -76,7 +77,6 @@ public class TrailerService {
         if(trailerUpdateRequest.maximumCapacity() != null)
             trailer.setMaximumCapacity(trailerUpdateRequest.maximumCapacity());
 
-        trailer.setId(id);
         trailerRepository.save(trailer);
         return trailerMapper.toResponse(trailer);
 

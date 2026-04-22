@@ -78,7 +78,6 @@ public class TractorService {
         if(tractorUpdateRequest.typeFuel() != null && !tractorUpdateRequest.typeFuel().isBlank())
             tractor.setTypeFuel(tractorUpdateRequest.typeFuel());
 
-        tractor.setId(id);
         tractorRepository.save(tractor);
         return tractorMapper.toResponse(tractor);
     }

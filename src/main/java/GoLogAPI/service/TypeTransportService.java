@@ -48,9 +48,9 @@ public class TypeTransportService {
 
     @Transactional
     public TypeTransportResponse update(UUID id, TypeTransportCreateRequest typeTransportCreateRequest){
-        TypeTransport typeTransport = typeTransportRepository.findById(id)
+        typeTransportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        typeTransport.setId(id);
+        TypeTransport typeTransport = typeTransportMapper.toEntity(typeTransportCreateRequest);
         typeTransportRepository.save(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
@@ -67,7 +67,6 @@ public class TypeTransportService {
         if(typeTransportUpdateRequest.care() != null)
             typeTransport.setCare(typeTransportUpdateRequest.care());
 
-        typeTransport.setId(id);
         typeTransportRepository.save(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }

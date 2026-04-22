@@ -15,10 +15,12 @@ import GoLogAPI.repository.DriverRepository;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.TransportRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class TransportService {
 
     private final TransportRepository transportRepository;
@@ -38,6 +40,7 @@ public class TransportService {
         this.equipamentGroupRepository = equipamentGroupRepository;
     }
 
+    @Transactional
     public TransportCreateResponse save(TransportCreateRequest transportCreateRequest){
         Transport transport = transportMapper.toEntity(transportCreateRequest);
         Driver driver = driverRepository.findById(transportCreateRequest.driverId())
@@ -62,15 +65,18 @@ public class TransportService {
         return transportMapper.toResponse(transport);
     }
 
+    @Transactional
     public void delete(UUID id){
         Transport transport = transportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         transportRepository.delete(transport);
     }
 
+    @Transactional
     public TransportResponse update(UUID id, TransportCreateRequest transportCreateRequest){
         transportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+
         Transport transport = transportMapper.toEntity(transportCreateRequest);
 
         Driver driver = driverRepository.findById(transportCreateRequest.driverId())
@@ -93,6 +99,7 @@ public class TransportService {
         return transportMapper.toResponse(transport);
     }
 
+    @Transactional
     public TransportResponse updatePartial(UUID id, TransportUpdateRequest transportUpdateRequest){
         Transport transport = transportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -101,10 +108,14 @@ public class TransportService {
             transport.setRouteReturnPlanned(transportUpdateRequest.routeReturnPlanned());
         if(transportUpdateRequest.routeReturnCompleted() != null && !transportUpdateRequest.routeReturnCompleted().isBlank())
             transport.setRouteReturnCompleted(transportUpdateRequest.routeReturnCompleted());
-        if(transportUpdateRequest.deliveryQuantity() != null) transport.setDeliveryQuantity(transportUpdateRequest.deliveryQuantity());
-        if(transportUpdateRequest.totalKilometer() != null) transport.setTotalKilometer(transportUpdateRequest.totalKilometer());
-        if(transportUpdateRequest.timeStopped() != null) transport.setTimeStopped(transportUpdateRequest.timeStopped());
-        if(transportUpdateRequest.totalTime() != null) transport.setTotalTime(transportUpdateRequest.totalTime());
+        if(transportUpdateRequest.deliveryQuantity() != null)
+            transport.setDeliveryQuantity(transportUpdateRequest.deliveryQuantity());
+        if(transportUpdateRequest.totalKilometer() != null)
+            transport.setTotalKilometer(transportUpdateRequest.totalKilometer());
+        if(transportUpdateRequest.timeStopped() != null)
+            transport.setTimeStopped(transportUpdateRequest.timeStopped());
+        if(transportUpdateRequest.totalTime() != null)
+            transport.setTotalTime(transportUpdateRequest.totalTime());
         if(transportUpdateRequest.driverId() != null){
             Driver driver = driverRepository.findById(transportUpdateRequest.driverId())
                     .orElseThrow(() -> new ResourceNotFoundException(
@@ -123,7 +134,7 @@ public class TransportService {
                             MessageException.NOT_FOUND_MESSAGE, transportUpdateRequest.equipamentGroupId()));
             transport.setEquipamentGroup(equipamentGroup);
         }
-        transport.setId(id);
+
         transportRepository.save(transport);
         return transportMapper.toResponse(transport);
     }

@@ -81,8 +81,10 @@ public class EquipamentGroupService {
 
     @Transactional
     public EquipamentGroupResponse update(UUID id, EquipamentGroupCreateRequest equipamentGroupCreateRequest){
-        EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(id)
+        equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+
+        EquipamentGroup equipamentGroup = equipamentGroupMapper.toEntity(equipamentGroupCreateRequest);
 
         Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament1Id()));
@@ -93,12 +95,14 @@ public class EquipamentGroupService {
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament2Id()));
             equipamentGroup.setEquipament2(equipament2);
         }
+
         if(equipamentGroupCreateRequest.equipament3Id() != null){
             Equipament equipament3 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament3Id())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament3Id()));
             equipamentGroup.setEquipament3(equipament3);
         }
 
+        equipamentGroup.setId(id);
         equipamentGroupRepository.save(equipamentGroup);
         return equipamentGroupMapper.toResponse(equipamentGroup);
     }

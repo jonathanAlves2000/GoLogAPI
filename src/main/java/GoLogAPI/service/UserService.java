@@ -85,6 +85,7 @@ public class UserService {
     public UserResponse updatePartial(UUID id, UserUpdateRequest userUpdateRequest){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+
         userValidator.validate(userUpdateRequest);
 
         if(userUpdateRequest.name() != null && !userUpdateRequest.name().isBlank())
@@ -102,7 +103,7 @@ public class UserService {
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userUpdateRequest.companyId()));
             user.setCompany(company);
         }
-        user.setId(id);
+
         userRepository.save(user);
         return userMapper.toResponse(user);
     }

@@ -1,10 +1,7 @@
 package GoLogAPI.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -16,9 +13,10 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @SQLDelete(sql = "UPDATE delivery_type SET active = false WHERE id = ?")
 @SQLRestriction("active = true")
-public class TypeDelivery extends Audit {
+public class DeliveryType extends Audit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

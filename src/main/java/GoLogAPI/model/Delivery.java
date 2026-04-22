@@ -53,7 +53,7 @@ public class Delivery extends Audit {
 
     @ManyToOne
     @JoinColumn(name = "type_delivery_id")
-    private TypeDelivery typeDelivery;
+    private DeliveryType deliveryType;
 
     @ManyToOne
     @JoinColumn(name = "transport_id")

@@ -54,12 +54,15 @@ public class TelemetryService {
 
     @Transactional
     public TelemetryReponse update(UUID id, TelemetryCreateRequest telemetryCreateRequest){
-        Telemetry telemetry = telemetryRepository.findById(id)
+        telemetryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+
+        Telemetry telemetry = telemetryMapper.toEntity(telemetryCreateRequest);
 
         Equipament equipament = equipamentRepository.findById(telemetryCreateRequest.equipamentId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, telemetryCreateRequest.equipamentId()));
 
+        telemetry.setId(id);
         telemetry.setEquipamentId(equipament);
         telemetryRepository.save(telemetry);
         return telemetryMapper.toResponse(telemetry);
