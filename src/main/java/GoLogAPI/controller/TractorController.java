@@ -8,7 +8,9 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.UUID;
 
 @RestController
@@ -24,6 +26,10 @@ public class TractorController {
     @PostMapping
     public ResponseEntity<TractorResponse> save(@Valid @RequestBody TractorCreateRequest tractorCreateRequest){
         TractorResponse tractorResponse = tractorService.save(tractorCreateRequest);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("{id}")
+                .buildAndExpand(tractorResponse.getId())
+                .toUri();
         return ResponseEntity.status(HttpStatus.CREATED).body(tractorResponse);
     }
 

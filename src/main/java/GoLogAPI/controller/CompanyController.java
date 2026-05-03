@@ -25,7 +25,7 @@ public class CompanyController {
       CompanyResponse companyResponse = companyService.save(companyCreateRequest);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("{id}")
-                .buildAndExpand()
+                .buildAndExpand(companyResponse.id())
                 .toUri();
         return ResponseEntity.created(uri).body(companyResponse);
     }

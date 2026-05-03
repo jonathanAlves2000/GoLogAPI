@@ -29,7 +29,7 @@ public class DriverController {
         DriverResponse driverResponse = driverService.save(driverCreateRequest);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("{id}")
-                .buildAndExpand(driverResponse)
+                .buildAndExpand(driverResponse.id())
                 .toUri();
         return ResponseEntity.created(uri).body(driverResponse);
     }

@@ -8,7 +8,7 @@ import org.hibernate.annotations.SQLRestriction;
 import java.util.UUID;
 
 @Entity
-@Table(name = "type_delivery")
+@Table(name = "delivery_type")
 @Setter
 @Getter
 @AllArgsConstructor

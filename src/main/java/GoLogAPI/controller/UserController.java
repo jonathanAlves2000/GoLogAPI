@@ -39,7 +39,7 @@ public class UserController {
             UserResponse userResponse = userService.save(userCreateRequest);
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                     .path("{id}")
-                    .buildAndExpand(userResponse)
+                    .buildAndExpand(userResponse.id())
                     .toUri();
             return ResponseEntity.created(uri).body(userResponse);
         }

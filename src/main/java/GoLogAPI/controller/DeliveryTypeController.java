@@ -1,7 +1,6 @@
 package GoLogAPI.controller;
 
 import GoLogAPI.dto.deliveryType.DeliveryTypeCreateRequest;
-import GoLogAPI.dto.deliveryType.DeliveryTypeRequest;
 import GoLogAPI.dto.deliveryType.DeliveryTypeResponse;
 import GoLogAPI.dto.deliveryType.DeliveryTypeUpdateRequest;
 import GoLogAPI.service.DeliveryTypeService;
@@ -28,7 +27,7 @@ public class DeliveryTypeController {
         DeliveryTypeResponse deliveryTypeResponse = deliveryTypeService.save(deliveryTypeCreateRequest);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("{id}")
-                .buildAndExpand()
+                .buildAndExpand(deliveryTypeResponse.id())
                 .toUri();
         return ResponseEntity.created(uri).body(deliveryTypeResponse);
     }

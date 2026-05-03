@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@SQLDelete(sql = "UPDATE delivey_table SET active = false WHERE id = ?")
+@SQLDelete(sql = "UPDATE delivery_table SET active = false WHERE id = ?")
 @SQLRestriction("active = true")
 public class Delivery extends Audit {
 
@@ -45,7 +45,7 @@ public class Delivery extends Audit {
     private String status;
 
     @Column(name = "delivery_sequence")
-    private String delivery_sequence;
+    private Integer deliverySequence;
 
     @ManyToOne
     @JoinColumn(name = "responsible_id")

@@ -27,7 +27,9 @@ public class DriverService {
     private final DriverMapper driverMapper;
     private final DriverValidator driverValidator;
 
-    public DriverService(UserRepository userRepository ,DriverRepository driverRepository, DriverMapper driverMapper, DriverValidator driverValidator){
+    public DriverService(UserRepository userRepository ,DriverRepository driverRepository,
+                         DriverMapper driverMapper, DriverValidator driverValidator)
+    {
         this.driverRepository = driverRepository;
         this.driverMapper = driverMapper;
         this.userRepository = userRepository;
