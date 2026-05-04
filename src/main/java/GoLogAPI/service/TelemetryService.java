@@ -1,6 +1,7 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.telemetry.TelemetryCreateRequest;
+import GoLogAPI.dto.telemetry.TelemetryResponseList;
 import GoLogAPI.dto.telemetry.TelemetryUpdateRequest;
 import GoLogAPI.dto.telemetry.TelemetryReponse;
 import GoLogAPI.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import GoLogAPI.repository.TelemetryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -43,6 +45,11 @@ public class TelemetryService {
         Telemetry telemetry = telemetryRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         return telemetryMapper.toResponse(telemetry);
+    }
+
+    public List<TelemetryResponseList> getAll(){
+        List<Telemetry> telemetries = telemetryRepository.findAll();
+        return telemetryMapper.toResponseList(telemetries);
     }
 
     @Transactional

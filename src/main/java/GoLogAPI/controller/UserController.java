@@ -52,8 +52,8 @@ public class UserController {
         }
 
         @GetMapping
-        public ResponseEntity<List<UserResponseList>> listAll(){
-            List<UserResponseList> users = userService.listAll();
+        public ResponseEntity<List<UserResponseList>> getAll(){
+            List<UserResponseList> users = userService.getAll();
             return ResponseEntity.ok().body(users);
         }
 

@@ -53,7 +53,7 @@ public class DriverService {
         return driverMapper.toResponse(driver);
     }
 
-    public List<DriverResponseList> listAll(){
+    public List<DriverResponseList> getAll(){
         List<Driver> drivers = driverRepository.findAll();
         return driverMapper.toResponses(drivers);
     }

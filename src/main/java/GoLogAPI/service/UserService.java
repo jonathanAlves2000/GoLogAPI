@@ -62,7 +62,7 @@ public class UserService {
        return userMapper.toResponse(user);
     }
 
-    public List<UserResponseList> listAll(){
+    public List<UserResponseList> getAll(){
         List<User> users = userRepository.findAll();
         return userMapper.toResponses(users);
     }

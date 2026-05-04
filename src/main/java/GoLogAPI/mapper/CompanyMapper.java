@@ -1,6 +1,7 @@
 package GoLogAPI.mapper;
 
 import GoLogAPI.dto.company.CompanyCreateRequest;
+import GoLogAPI.dto.company.CompanyCreateResponse;
 import GoLogAPI.dto.company.CompanyResponse;
 import GoLogAPI.dto.company.CompanyResponseList;
 import GoLogAPI.model.Company;
@@ -17,6 +18,8 @@ public interface CompanyMapper {
     Company toEntity(CompanyCreateRequest companyCreateRequest);
 
     CompanyResponse toResponse(Company company);
+
+    CompanyCreateResponse toCreateResponse(Company company);
 
     List<CompanyResponseList> toResponses(List<Company> companies);
 

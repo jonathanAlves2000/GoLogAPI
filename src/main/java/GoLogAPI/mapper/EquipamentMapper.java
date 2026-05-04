@@ -6,6 +6,9 @@ import GoLogAPI.model.Tractor;
 import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+import java.util.Objects;
+
 @Mapper(componentModel = "spring", uses = {TractorMapper.class, TrailerMapper.class})
 public abstract class EquipamentMapper {
 
@@ -24,5 +27,16 @@ public abstract class EquipamentMapper {
             return trailerMapper.toResponse(trailer);
         }
         return null;
+    }
+
+    public List<EquipamentResponse> toResponseList(List<Equipament> equipaments){
+        if(equipaments == null){
+            return null;
+        }
+
+        return equipaments.stream()
+                .map((equipament) -> toResponse(equipament))
+                .filter((equipamentResponse) -> equipamentResponse!= null)
+                .toList();
     }
 }

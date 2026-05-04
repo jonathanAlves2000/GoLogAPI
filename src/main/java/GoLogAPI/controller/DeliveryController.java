@@ -1,8 +1,5 @@
 package GoLogAPI.controller;
-import GoLogAPI.dto.delivery.DeliveryCreateRequest;
-import GoLogAPI.dto.delivery.DeliveryCreateResponse;
-import GoLogAPI.dto.delivery.DeliveryResponse;
-import GoLogAPI.dto.delivery.DeliveryUpdateRequest;
+import GoLogAPI.dto.delivery.*;
 import GoLogAPI.service.DeliveryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,6 +34,12 @@ public class DeliveryController {
     public ResponseEntity<DeliveryResponse> get(@PathVariable("id") UUID id){
         DeliveryResponse deliveryResponse = deliveryService.get(id);
         return ResponseEntity.ok(deliveryResponse);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DeliveryResponseList>> getAll(){
+        List<DeliveryResponseList> deliveryResponses = deliveryService.getAll();
+        return ResponseEntity.ok().body(deliveryResponses);
     }
 
     @DeleteMapping("{id}")

@@ -31,14 +31,14 @@ public class CompanyService {
     }
 
     @Transactional
-    public CompanyResponse save(CompanyCreateRequest companyCreateRequest){
+    public CompanyCreateResponse save(CompanyCreateRequest companyCreateRequest){
         companyValidator.validate(companyCreateRequest);
         Company company = companyMapper.toEntity(companyCreateRequest);
         Address address = addressRepository.findById(companyCreateRequest.addressId())
                         .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyCreateRequest.addressId()));
         company.setAddress(address);
         companyRepository.save(company);
-        return companyMapper.toResponse(company);
+        return companyMapper.toCreateResponse(company);
     }
 
     public CompanyResponse get(UUID id){
@@ -47,7 +47,7 @@ public class CompanyService {
         return companyMapper.toResponse(company);
     }
 
-    public List<CompanyResponseList> listAll(){
+    public List<CompanyResponseList> getAll(){
         List<Company> companies = companyRepository.findAll();
         return companyMapper.toResponses(companies);
     }
@@ -60,7 +60,7 @@ public class CompanyService {
     }
 
     @Transactional
-    public CompanyResponse update(UUID id, CompanyCreateRequest companyCreateRequest){
+    public CompanyCreateResponse update(UUID id, CompanyCreateRequest companyCreateRequest){
         companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         Address address = addressRepository.findById(companyCreateRequest.addressId())
@@ -69,26 +69,31 @@ public class CompanyService {
         company.setAddress(address);
         company.setId(id);
         companyRepository.save(company);
-        return companyMapper.toResponse(company);
+        return companyMapper.toCreateResponse(company);
     }
 
     @Transactional
-    public CompanyResponse updatePartial(UUID id, CompanyUpdateRequest companyUpdateRequest){
+    public CompanyCreateResponse updatePartial(UUID id, CompanyUpdateRequest companyUpdateRequest){
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         companyValidator.validate(companyUpdateRequest);
 
-        if(companyUpdateRequest.cnpjCpf() != null && !companyUpdateRequest.cnpjCpf().isBlank()) company.setCnpjCpf(companyUpdateRequest.cnpjCpf());
-        if(companyUpdateRequest.isCliente() != null) company.setIsCliente(companyUpdateRequest.isCliente());
-        if(companyUpdateRequest.email() != null && !companyUpdateRequest.email().isBlank()) company.setEmail(companyUpdateRequest.email());
-        if(companyUpdateRequest.legalName() != null && !companyUpdateRequest.legalName().isBlank()) company.setLegalName(companyUpdateRequest.legalName());
-        if(companyUpdateRequest.phoneNumber() != null && !companyUpdateRequest.phoneNumber().isBlank()) company.setPhoneNumber(companyUpdateRequest.phoneNumber());
+        if(companyUpdateRequest.cnpjCpf() != null && !companyUpdateRequest.cnpjCpf().isBlank())
+            company.setCnpjCpf(companyUpdateRequest.cnpjCpf());
+        if(companyUpdateRequest.isCliente() != null)
+            company.setIsCliente(companyUpdateRequest.isCliente());
+        if(companyUpdateRequest.email() != null && !companyUpdateRequest.email().isBlank())
+            company.setEmail(companyUpdateRequest.email());
+        if(companyUpdateRequest.legalName() != null && !companyUpdateRequest.legalName().isBlank())
+            company.setLegalName(companyUpdateRequest.legalName());
+        if(companyUpdateRequest.phoneNumber() != null && !companyUpdateRequest.phoneNumber().isBlank())
+            company.setPhoneNumber(companyUpdateRequest.phoneNumber());
         if(companyUpdateRequest.addressId() != null){
             Address address = addressRepository.findById(companyUpdateRequest.addressId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyUpdateRequest.addressId()));
             company.setAddress(address);
         }
         companyRepository.save(company);
-        return companyMapper.toResponse(company);
+        return companyMapper.toCreateResponse(company);
     }
 }

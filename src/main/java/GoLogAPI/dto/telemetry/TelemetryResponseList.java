@@ -3,7 +3,7 @@ package GoLogAPI.dto.telemetry;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record TelemetryList(
+public record TelemetryResponseList(
         UUID id,
         LocalDateTime dateTime,
         String latitude,

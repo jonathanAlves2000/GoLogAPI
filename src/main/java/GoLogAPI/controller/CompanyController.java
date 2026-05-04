@@ -1,6 +1,7 @@
 package GoLogAPI.controller;
 
 import GoLogAPI.dto.company.*;
+import GoLogAPI.dto.delivery.DeliveryResponseList;
 import GoLogAPI.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,13 +22,13 @@ public class CompanyController {
     }
 
     @PostMapping
-    public ResponseEntity<CompanyResponse> save(@Valid @RequestBody CompanyCreateRequest companyCreateRequest){
-      CompanyResponse companyResponse = companyService.save(companyCreateRequest);
+    public ResponseEntity<CompanyCreateResponse> save(@Valid @RequestBody CompanyCreateRequest companyCreateRequest){
+        CompanyCreateResponse companyCreateResponse = companyService.save(companyCreateRequest);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("{id}")
-                .buildAndExpand(companyResponse.id())
+                .buildAndExpand(companyCreateResponse.id())
                 .toUri();
-        return ResponseEntity.created(uri).body(companyResponse);
+        return ResponseEntity.created(uri).body(companyCreateResponse);
     }
 
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
@@ -37,8 +38,8 @@ public class CompanyController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CompanyResponseList>> listAll(){
-        List<CompanyResponseList> companyResponses = companyService.listAll();
+    public ResponseEntity<List<CompanyResponseList>> getAll(){
+        List<CompanyResponseList> companyResponses = companyService.getAll();
         return ResponseEntity.ok().body(companyResponses);
     }
 
@@ -49,13 +50,14 @@ public class CompanyController {
     }
 
     @PutMapping("{id}")
-    public CompanyResponse update(@PathVariable("id") UUID id, @Valid @RequestBody CompanyCreateRequest companyCreateRequest){
-        return companyService.update(id, companyCreateRequest);
+    public ResponseEntity<CompanyCreateResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody CompanyCreateRequest companyCreateRequest){
+        CompanyCreateResponse companyCreateResponse = companyService.update(id, companyCreateRequest);
+        return ResponseEntity.ok().body(companyCreateResponse);
     }
 
     @PatchMapping("{id}")
-    public ResponseEntity<CompanyResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody CompanyUpdateRequest companyUpdateRequest){
-        CompanyResponse companyResponse = companyService.updatePartial(id, companyUpdateRequest);
-        return ResponseEntity.ok().body(companyResponse);
+    public ResponseEntity<CompanyCreateResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody CompanyUpdateRequest companyUpdateRequest){
+        CompanyCreateResponse companyCreateResponse = companyService.updatePartial(id, companyUpdateRequest);
+        return ResponseEntity.ok().body(companyCreateResponse);
     }
 }

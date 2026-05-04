@@ -1,15 +1,13 @@
 package GoLogAPI.service;
 
-import GoLogAPI.dto.delivery.DeliveryCreateRequest;
-import GoLogAPI.dto.delivery.DeliveryCreateResponse;
-import GoLogAPI.dto.delivery.DeliveryResponse;
-import GoLogAPI.dto.delivery.DeliveryUpdateRequest;
+import GoLogAPI.dto.delivery.*;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.*;
 import GoLogAPI.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -131,6 +129,23 @@ public class DeliveryService {
                 delivery.getCustomerCollects(),
                 delivery.getCustomerDelivery()
         );
+    }
+
+    public List<DeliveryResponseList> getAll(){
+        List<Delivery> deliveries = deliveryRepository.findAll();
+        return deliveries.stream()
+                .map(delivery -> new DeliveryResponseList(
+                        delivery.getId(),
+                        delivery.getWeight(),
+                        delivery.getVolume(),
+                        delivery.getScheduledCollection(),
+                        delivery.getScheduledDelivery(),
+                        delivery.getRoutePlanned(),
+                        delivery.getRouteCompleted(),
+                        delivery.getStatus(),
+                        delivery.getDeliverySequence()
+                ))
+                .toList();
     }
 
     @Transactional

@@ -1,12 +1,10 @@
 package GoLogAPI.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import GoLogAPI.dto.equipament.EquipamentResponse;
 import GoLogAPI.service.EquipamentService;
@@ -25,5 +23,11 @@ public class EquipamentController {
     public ResponseEntity<EquipamentResponse> get(@PathVariable("id") UUID id){
         EquipamentResponse equipamentResponse = equipamentService.get(id);
         return ResponseEntity.ok(equipamentResponse);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<EquipamentResponse>> getAll(){
+        List<EquipamentResponse> equipaments = equipamentService.getAll();
+        return ResponseEntity.ok().body(equipaments);
     }
 }

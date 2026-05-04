@@ -50,8 +50,8 @@ public class AddressController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AddressResponse>> listAll(){
-        List<AddressResponse> addressResponses = addressService.listAll();
+    public ResponseEntity<List<AddressResponse>> getAll(){
+        List<AddressResponse> addressResponses = addressService.getAll();
         return ResponseEntity.ok(addressResponses);
     }
 

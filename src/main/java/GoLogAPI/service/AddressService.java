@@ -42,7 +42,7 @@ public class AddressService {
         return addressMapper.toResponse(address);
     }
 
-    public List<AddressResponse> listAll(){
+    public List<AddressResponse> getAll(){
         List<Address> adddressList = addressRepository.findAll();
         return addressMapper.toResponses(adddressList);
     }
