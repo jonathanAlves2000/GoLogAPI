@@ -6,23 +6,23 @@ import jakarta.validation.constraints.Pattern;
 
 public record TrailerCreateRequest(
 
-        @NotBlank(message = "Campo placa vazio")
+        @NotBlank(message = "Placa do equipamento deve ser informada.")
         @Pattern(regexp = "^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$", message = "Placa inválida")
         String plate,
 
-        @NotBlank(message = "Campo renavan vazio")
-        @Pattern(regexp = "^[0-9]{11}$", message = "O RENAVAM deve conter exatamente 11 dígitos numéricos")
+        @NotBlank(message = "RENAVAM do equipamento deve ser informado.")
+        @Pattern(regexp = "^[0-9]{11}$", message = "RENAVAM deve conter exatamente 11 dígitos numéricos")
         String renavam,
 
-        @NotBlank(message = "Campo modelo vazio")
+        @NotBlank(message = "Modelo deve ser informado.")
         String model,
 
-        @NotNull(message = "Campo numero de eixos vazio")
+        @NotNull(message = "Numero de eixos deve ser informado.")
         Integer numberAxles,
 
-        @NotNull(message = "Campo capcidade maxima vazio")
+        @NotNull(message = "Capacidade maxima deve ser informada.")
         Double maximumCapacity,
 
-        @NotNull
+        @NotNull(message = "Volume maximo deve ser informado.")
         Double maximumVolume
 ) implements TrailerRequest{ }

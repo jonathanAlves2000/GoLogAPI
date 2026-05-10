@@ -1,6 +1,8 @@
 package GoLogAPI.model;
 import java.time.Instant;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +13,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 
 @MappedSuperclass
+@Getter
+@Setter
 public abstract class Audit{
 
     @Column(name = "created_at", updatable = false)

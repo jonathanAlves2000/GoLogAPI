@@ -11,15 +11,15 @@ import java.util.UUID;
 
 public record DriverCreateRequest(
 
-        @NotBlank(message = "Campo numero da CNH vazio")
+        @NotBlank(message = "CNH deve ser informado")
         @Pattern(regexp = "\\+?\\d{11}", message = "CNH invalida, minimo 11 digitos")
         String cnhNumber,
 
-        @NotNull(message = "Campo data de expiração da CNH vazio ou nulo")
+        @NotNull(message = "Data de expiração da CNH deve ser informada.")
         @JsonFormat(pattern = "dd/MM/yyyy")
-        @Future(message = "A data de expiração deve ser maior que hoje")
+        @Future(message = "A data de expiração deve ser maior que a data atual")
         LocalDate cnhExpiration,
 
-        @NotNull(message = "Id do usuario está vazio ou nulo")
+        @NotNull(message = "Id do usuario deve ser informado.")
         UUID userId
 ) implements DriverRequest { }

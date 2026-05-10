@@ -6,21 +6,21 @@ import jakarta.validation.constraints.Pattern;
 
 public record TractorCreateRequest(
 
-        @NotBlank(message = "Campo placa vazio")
+        @NotBlank(message = "Placa do equipamento deve ser informada.")
         @Pattern(regexp = "^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$", message = "Placa inválida")
         String plate,
 
-        @NotBlank(message = "Campo renavan vazio")
+        @NotBlank(message = "RENAVAM do equipamento deve ser informado.")
         @Pattern(regexp = "^[0-9]{11}$", message = "O RENAVAM deve conter exatamente 11 dígitos numéricos")
         String renavam,
 
-        @NotBlank(message = "Campo modelo vazio")
+        @NotBlank(message = "Modelo do equipamento deve ser informado.")
         String model,
 
-        @NotNull(message = "Campo numero de eixos vazio")
+        @NotNull(message = "Quantidade de eixos do equipamento deve ser informada.")
         Integer numberAxles,
 
-        @NotNull(message = "Campo capcidade maxima vazio")
+        @NotNull(message = "Capacidade maxima do equipamento deve ser informada.")
         Double maximumCapacity,
 
         @NotBlank

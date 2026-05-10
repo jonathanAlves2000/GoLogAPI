@@ -25,7 +25,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@SQLDelete(sql = "UPDATE driver_table SET active = false WHERE id = ?")
+@SQLDelete(sql = "UPDATE driver_table SET active=false WHERE id = ?")
 @SQLRestriction("active = true")
 public class Driver extends Audit {
 

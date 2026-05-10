@@ -7,27 +7,27 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record TelemetryCreateRequest(
-        @NotNull(message = "A data não pode estar nula!")
+        @NotNull(message = "Data da telemetria deve ser informada.")
         LocalDateTime dateTime,
 
-        @NotBlank(message = "A latitude não pode estar vazia!")
+        @NotBlank(message = "Latitude deve ser informada.")
         String latitude,
 
-        @NotBlank(message = "A longitude não pode estar vazia!")
+        @NotBlank(message = "Longitude deve ser informada.")
         String longitude,
 
-        @NotNull(message = "A velocidade não pode estar nula!")
+        @NotNull(message = "Velocidade deve ser informada.")
         Double speed,
 
         String alert,
 
-        @NotBlank(message = "O dado 1 não pode estar nulo!")
+        @NotBlank(message = "Dado um deve ser informado.")
         String data1,
 
         String data2,
 
         String device,
 
-        @NotNull(message = "O ID do equipamento não estar ser nulo!")
+        @NotNull(message = "O ID do equipamento deve ser informado.")
         UUID equipamentId
 ) implements TelemetryRequest{ }
