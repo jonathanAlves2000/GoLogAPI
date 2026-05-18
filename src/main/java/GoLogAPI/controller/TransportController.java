@@ -5,6 +5,8 @@ import GoLogAPI.dto.transport.TransportCreateResponse;
 import GoLogAPI.dto.transport.TransportResponse;
 import GoLogAPI.dto.transport.TransportUpdateRequest;
 import GoLogAPI.service.TransportService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/transport")
+@Tag(name = "Transport")
 public class TransportController {
 
     private final TransportService transportService;
@@ -24,6 +27,7 @@ public class TransportController {
         this.transportService = transportService;
     }
 
+    @Operation(summary = "Create", description = "Create New Transport")
     @PostMapping
     public ResponseEntity<TransportCreateResponse> save(@RequestBody @Valid TransportCreateRequest transportCreateRequest) {
         TransportCreateResponse transportCreateResponse = transportService.save(transportCreateRequest);
@@ -34,18 +38,21 @@ public class TransportController {
         return ResponseEntity.created(uri).body(transportCreateResponse);
     }
 
+    @Operation(summary = "Display", description = "Display Transport")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<TransportResponse> get(@PathVariable("id") @NotNull(message = "Id não pode ser nulo.") UUID id){
         TransportResponse transportResponse = transportService.get(id);
         return ResponseEntity.ok(transportResponse);
     }
 
+    @Operation(summary = "Delete", description = "Delete Transport")
     @DeleteMapping(value = "{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         transportService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update", description = "Update Transport")
     @PutMapping(value = "{id}")
     public ResponseEntity<TransportResponse> update(
             @PathVariable("id") UUID id,
@@ -54,6 +61,7 @@ public class TransportController {
         return ResponseEntity.ok(transportResponse);
     }
 
+    @Operation(summary = "Update Partial", description = "Update Partial Transport")
     @PatchMapping(value = "{id}")
     public ResponseEntity<TransportResponse> updatePartial(
             @PathVariable("id") UUID id,

@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/address")
+@Tag(name = "Address")
 public class AddressController {
 
     private final AddressService addressService;
@@ -33,6 +36,7 @@ public class AddressController {
         this.addressService = addressService;
     }
 
+    @Operation(summary = "Create", description = "Create New Address")
     @PostMapping
     public ResponseEntity<AddressResponse> save(@Valid @RequestBody AddressCreateRequest addressCreateRequest){
         AddressResponse addressResponse = addressService.save(addressCreateRequest);
@@ -43,6 +47,7 @@ public class AddressController {
         return ResponseEntity.created(uri).body(addressResponse);
     }
 
+    @Operation(summary = "Display", description = "Display Address")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<AddressResponse> get(@PathVariable("id") UUID id){
         AddressResponse addressResponse = addressService.get(id);
@@ -50,23 +55,27 @@ public class AddressController {
     }
 
     @GetMapping
+    @Operation(summary = "Display List", description = "Display Address List")
     public ResponseEntity<List<AddressResponse>> getAll(){
         List<AddressResponse> addressResponses = addressService.getAll();
         return ResponseEntity.ok(addressResponses);
     }
 
+    @Operation(summary = "Display List", description = "Display Address List")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         addressService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update", description = "Update Address")
     @PutMapping("{id}")
     public ResponseEntity<AddressResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody AddressCreateRequest addressCreateRequest){
         AddressResponse addressResponse = addressService.update(id, addressCreateRequest);
         return ResponseEntity.ok().body(addressResponse);
     }
 
+    @Operation(summary = "Update Partial", description = "Update Address Partial")
     @PatchMapping("{id}")
     public ResponseEntity<AddressResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody AddressUpdateRequest addressUpdateRequest){
         AddressResponse addressResponse = addressService.updatePartial(id, addressUpdateRequest);

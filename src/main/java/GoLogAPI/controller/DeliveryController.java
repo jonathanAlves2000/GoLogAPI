@@ -1,6 +1,8 @@
 package GoLogAPI.controller;
 import GoLogAPI.dto.delivery.*;
 import GoLogAPI.service.DeliveryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/delivery")
+@Tag(name = "Delivery")
 public class DeliveryController {
 
     private final DeliveryService deliveryService;
@@ -20,6 +23,7 @@ public class DeliveryController {
         this.deliveryService = deliveryService;
     }
 
+    @Operation(summary = "Create", description = "Create New Delivery")
     @PostMapping
     public ResponseEntity<DeliveryCreateResponse> save(@Valid @RequestBody DeliveryCreateRequest deliveryCreateRequest){
         DeliveryCreateResponse deliveryCreateResponse = deliveryService.save(deliveryCreateRequest);
@@ -30,30 +34,35 @@ public class DeliveryController {
         return ResponseEntity.created(uri).body(deliveryCreateResponse);
     }
 
+    @Operation(summary = "Display", description = "Display Delivery")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<DeliveryResponse> get(@PathVariable("id") UUID id){
         DeliveryResponse deliveryResponse = deliveryService.get(id);
         return ResponseEntity.ok(deliveryResponse);
     }
 
+    @Operation(summary = "Dispaly List", description = "Display Delivery List")
     @GetMapping
     public ResponseEntity<List<DeliveryResponseList>> getAll(){
         List<DeliveryResponseList> deliveryResponses = deliveryService.getAll();
         return ResponseEntity.ok().body(deliveryResponses);
     }
 
+    @Operation(summary = "Delete", description = "Delete Delivery")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id){
         deliveryService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update", description = "Update Delivery")
     @PutMapping("{id}")
     public ResponseEntity<DeliveryCreateResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody DeliveryCreateRequest deliveryCreateRequest){
         DeliveryCreateResponse deliveryCreateResponse = deliveryService.update(id, deliveryCreateRequest);
         return ResponseEntity.ok().body(deliveryCreateResponse);
     }
 
+    @Operation(summary = "Update", description = "Update Partial Delivery")
     @PatchMapping("{id}")
     public ResponseEntity<DeliveryCreateResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody DeliveryUpdateRequest deliveryUpdateRequest){
         DeliveryCreateResponse deliveryCreateResponse = deliveryService.updatePartial(id, deliveryUpdateRequest);

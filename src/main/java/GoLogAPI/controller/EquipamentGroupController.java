@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import GoLogAPI.dto.supportedType.SupportedTypeCreateRequest;
 import GoLogAPI.dto.supportedType.SupportedTypeResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +27,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/equipament-group")
+@Tag(name = "Equipament Group")
 public class EquipamentGroupController {
 
     private final EquipamentGroupService equipamentGroupService;
@@ -33,6 +36,7 @@ public class EquipamentGroupController {
         this.equipamentGroupService = equipamentGroupService;
     }
 
+    @Operation(summary = "Create", description = "Create New Equipament Group")
     @PostMapping
     public ResponseEntity<EquipamentGroupResponse> save(@Valid @RequestBody EquipamentGroupCreateRequest equipamentGroupCreateRequest){
         EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.save(equipamentGroupCreateRequest);
@@ -43,18 +47,21 @@ public class EquipamentGroupController {
         return ResponseEntity.created(uri).body(equipamentGroupResponse);
     }
 
+    @Operation(summary = "Display", description = "Display Equipament Group")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<EquipamentGroupResponse> get(@PathVariable("id") UUID id){
        EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.get(id);
        return ResponseEntity.ok(equipamentGroupResponse);
     }
 
+    @Operation(summary = "Delete", description = "Delete Equipament Group")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         equipamentGroupService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update", description = "Update Equipament Group")
     @PutMapping("{id}")
     public ResponseEntity<EquipamentGroupResponse> update(
             @PathVariable("id") UUID id, @RequestBody EquipamentGroupCreateRequest equipamentGroupCreateRequest){
@@ -62,6 +69,7 @@ public class EquipamentGroupController {
         return ResponseEntity.ok(equipamentGroupResponse);
     }
 
+    @Operation(summary = "Update Partial", description = "Update Partial Equipament Group")
     @PatchMapping("{id}")
     public ResponseEntity<EquipamentGroupResponse> updatePartial(
             @PathVariable("id") UUID id, @RequestBody EquipamentGroupUpdateRequest equipamentGroupUpdateRequest){
@@ -69,6 +77,7 @@ public class EquipamentGroupController {
         return ResponseEntity.ok(equipamentGroupResponse);
     }
 
+    @Operation(summary = "Update Partial Type Suported", description = "Update Partial Type Suported")
     @PatchMapping("/association")
     public ResponseEntity<SupportedTypeResponse> addTransportType(
             @RequestBody @Valid SupportedTypeCreateRequest supportedTypeCreateRequest){

@@ -29,11 +29,7 @@ public class UserController {
             this.userService = userService;
         }
 
-        @Operation(summary = "Save", description = "Register new user")
-        @ApiResponses({
-                @ApiResponse(responseCode = "201", description = "Successfully registerd"),
-                @ApiResponse(responseCode = "409", description = "User already registered")
-        })
+        @Operation(summary = "Create", description = "Create new user")
         @PostMapping
         public ResponseEntity<UserResponse> save(@Valid @RequestBody UserCreateRequest userCreateRequest){
             UserResponse userResponse = userService.save(userCreateRequest);
@@ -51,6 +47,7 @@ public class UserController {
             return ResponseEntity.ok(userResponse);
         }
 
+        @Operation(summary = "Display List", description = "Display User List")
         @GetMapping
         public ResponseEntity<List<UserResponseList>> getAll(){
             List<UserResponseList> users = userService.getAll();
@@ -71,7 +68,7 @@ public class UserController {
             return ResponseEntity.ok().body(userResponse);
         }
 
-        @Operation(summary = "Update", description = "Update User Data")
+        @Operation(summary = "Update Partial", description = "Update User Partial")
         @PatchMapping("{id}")
         public ResponseEntity<UserResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody UserUpdateRequest userUpdateRequest){
             UserResponse userResponse = userService.updatePartial(id, userUpdateRequest);

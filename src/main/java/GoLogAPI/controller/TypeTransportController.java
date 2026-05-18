@@ -4,6 +4,8 @@ import GoLogAPI.dto.typeTransport.TypeTransportCreateRequest;
 import GoLogAPI.dto.typeTransport.TypeTransportResponse;
 import GoLogAPI.dto.typeTransport.TypeTransportUpdateRequest;
 import GoLogAPI.service.TypeTransportService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/type-transport")
+@Tag(name = "Type Transport")
 public class TypeTransportController {
 
     private final TypeTransportService typeTransportService;
@@ -21,6 +24,7 @@ public class TypeTransportController {
         this.typeTransportService = typeTransportService;
     }
 
+    @Operation(summary = "Create", description = "Create Type Transport")
     @PostMapping
     public ResponseEntity<TypeTransportResponse> save(@Valid @RequestBody TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransportResponse typeTransportResponse = typeTransportService.save(typeTransportCreateRequest);
@@ -31,24 +35,28 @@ public class TypeTransportController {
         return ResponseEntity.created(uri).body(typeTransportResponse);
     }
 
+    @Operation(summary = "Display", description = "Display Type Transport")
     @RequestMapping(value = "{id}", method ={RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<TypeTransportResponse> get(@PathVariable("id") UUID id){
         TypeTransportResponse typeTransportResponse = typeTransportService.get(id);
         return ResponseEntity.ok(typeTransportResponse);
     }
 
+    @Operation(summary = "Delete", description = "Delete Type Transport")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         typeTransportService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update", description = "Update Type Transport")
     @PutMapping("{id}")
     public ResponseEntity<TypeTransportResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransportResponse typeTransportResponse = typeTransportService.update(id, typeTransportCreateRequest);
         return ResponseEntity.ok(typeTransportResponse);
     }
 
+    @Operation(summary = "Update Partial", description = "Update Partial Type Transport")
     @PatchMapping("{id}")
     public ResponseEntity<TypeTransportResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody TypeTransportUpdateRequest TypeTransportUpdateRequest){
         TypeTransportResponse typeTransportResponse = typeTransportService.updatePartial(id, TypeTransportUpdateRequest);

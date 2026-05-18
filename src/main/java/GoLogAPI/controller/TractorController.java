@@ -4,6 +4,8 @@ import GoLogAPI.dto.tractor.TractorCreateRequest;
 import GoLogAPI.dto.tractor.TractorUpdateRequest;
 import GoLogAPI.dto.tractor.TractorResponse;
 import GoLogAPI.service.TractorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/tractor")
+@Tag(name = "Tractor")
 public class TractorController {
 
     private final TractorService tractorService;
@@ -23,6 +26,7 @@ public class TractorController {
         this.tractorService = tractorService;
     }
 
+    @Operation(summary = "Create", description = "Create New Tractor")
     @PostMapping
     public ResponseEntity<TractorResponse> save(@Valid @RequestBody TractorCreateRequest tractorCreateRequest){
         TractorResponse tractorResponse = tractorService.save(tractorCreateRequest);
@@ -33,24 +37,28 @@ public class TractorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(tractorResponse);
     }
 
+    @Operation(summary = "Display", description = "Display Tractor")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<TractorResponse> get(@PathVariable("id") UUID id){
         TractorResponse tractorResponse = tractorService.get(id);
         return ResponseEntity.ok(tractorResponse);
     }
 
+    @Operation(summary = "Delete", description = "Delete Tractor")
     @DeleteMapping
     public ResponseEntity<Void> delete(UUID id){
         tractorService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update", description = "Update Tractor")
     @PutMapping("{id}")
     public ResponseEntity<TractorResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody TractorCreateRequest tractorCreateRequest){
         TractorResponse tractorResponse = tractorService.update(id, tractorCreateRequest);
         return ResponseEntity.ok(tractorResponse);
     }
 
+    @Operation(summary = "Update Partial", description = "Update Partial Tractor")
     @PatchMapping("{id}")
     public ResponseEntity<TractorResponse> updatePartial(@PathVariable("id") UUID id, @RequestBody TractorUpdateRequest tractorUpdateRequest){
         TractorResponse tractorResponse = tractorService.updatePartial(id, tractorUpdateRequest);

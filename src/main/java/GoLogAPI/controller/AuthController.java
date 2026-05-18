@@ -4,6 +4,8 @@ import GoLogAPI.dto.login.LoginRequest;
 import GoLogAPI.dto.login.TokenResponse;
 import GoLogAPI.infra.security.TokenService;
 import GoLogAPI.model.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/login")
+@Tag(name = "Authentication")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -25,6 +28,7 @@ public class AuthController {
         this.tokenService = tokenService;
     }
 
+    @Operation(summary = "Authenticate")
     @PostMapping
     public ResponseEntity<TokenResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
         var authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.email() ,loginRequest.password());

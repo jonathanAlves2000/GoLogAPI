@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import GoLogAPI.dto.telemetry.TelemetryResponseList;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,6 +20,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/telemetry")
+@Tag(name = "Telemetry")
 public class TelemetryController {
 
     private final TelemetryService telemetryService;
@@ -26,6 +29,7 @@ public class TelemetryController {
         this.telemetryService = telemetryService;
     }
 
+    @Operation(summary = "Create", description = "Create New Telemetry")
     @PostMapping
     public ResponseEntity<TelemetryReponse> save(@RequestBody @Valid TelemetryCreateRequest telemetryCreateRequest){
         TelemetryReponse telemetryReponse = telemetryService.save(telemetryCreateRequest);
@@ -36,31 +40,35 @@ public class TelemetryController {
         return ResponseEntity.created(uri).body(telemetryReponse);
     }
 
+    @Operation(summary = "Display", description = "Display Telemetry")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<TelemetryReponse> get(@PathVariable("id") UUID id){
         TelemetryReponse telemetryReponse = telemetryService.get(id);
         return ResponseEntity.ok(telemetryReponse);
     }
 
-    @Operation(summary = "Get List", description = "List Telemeteria")
+    @Operation(summary = "Display List", description = "Display List Telemetry")
     @GetMapping
     public ResponseEntity<List<TelemetryResponseList>> getAll(){
         List<TelemetryResponseList> telemetries = telemetryService.getAll();
         return ResponseEntity.ok().body(telemetries);
     }
 
+    @Operation(summary = "Delete", description = "Delete Telemetry")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         telemetryService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Update", description = "Update Telemetry")
     @PutMapping
     public ResponseEntity<TelemetryReponse> update(@PathVariable("id") UUID id, @Valid TelemetryCreateRequest telemetryCreateRequest){
         TelemetryReponse telemetryReponse = telemetryService.update(id, telemetryCreateRequest);
         return ResponseEntity.ok(telemetryReponse);
     }
 
+    @Operation(summary = "Update Partial", description = "Update Partial Telemetry")
     @PatchMapping("{id}")
     public ResponseEntity<TelemetryReponse> updatePartial(@PathVariable("id") UUID id, TelemetryUpdateRequest telemetryUpdateRequest){
         TelemetryReponse telemetryReponse = telemetryService.updatePartial(id, telemetryUpdateRequest);
