@@ -3,10 +3,12 @@ package GoLogAPI.dto.telemetry;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record TelemetryCreateRequest(
+        @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
         @NotNull(message = "Data da telemetria deve ser informada.")
         LocalDateTime dateTime,
 

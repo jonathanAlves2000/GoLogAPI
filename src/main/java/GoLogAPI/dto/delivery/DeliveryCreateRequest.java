@@ -1,5 +1,6 @@
 package GoLogAPI.dto.delivery;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,18 +17,20 @@ public record DeliveryCreateRequest(
 
     @NotNull(message = "A ata de coleta não poder nula.")
     @FutureOrPresent(message = "A data de coleta deve ser no futuro ou no presente")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime scheduledCollection,
 
     @NotNull(message = "A ata de entrega não poder nula.")
     @FutureOrPresent(message = "A data de entrega deve ser no futuro ou no presente")
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime scheduledDelivery,
 
     @NotBlank(message = "A rota planejada não pode estar vazia.")
-    @Size(min = 5, max = 500, message = "A rota planejada precisa conter entre 5 e 500 caracteres.")
+    @Size(min = 5, max = 10000, message = "A rota planejada precisa conter entre 5 e 10000 caracteres.")
     String routePlanned,
 
     @NotBlank(message = "A rota realizada não pode estar vazia.")
-    @Size(min = 5, max = 500, message = "A rota realizada precisa conter entre 5 e 500 caracteres.")
+    @Size(min = 5, max = 10000, message = "A rota realizada precisa conter entre 5 e 10000 caracteres.")
     String routeCompleted,
 
     @NotBlank(message = "O status da rota não pode estar vazio.")

@@ -35,10 +35,10 @@ public class Delivery extends Audit {
     @Column(name = "scheduled_delivery")
     private LocalDateTime scheduledDelivery;
 
-    @Column(name = "route_planned")
+    @Column(name = "route_planned", columnDefinition = "TEXT")
     private String routePlanned;
 
-    @Column(name = "route_completed")
+    @Column(name = "route_completed", columnDefinition = "TEXT")
     private String routeCompleted;
 
     @Column(name = "status")

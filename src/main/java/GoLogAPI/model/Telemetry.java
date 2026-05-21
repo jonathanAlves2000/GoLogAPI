@@ -20,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @SQLDelete(sql = "UPDATE telemetry_table SET active=false WHERE id = ?")
 @SQLRestriction("active = true")
-public class Telemetry {
+public class Telemetry extends Audit{
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
