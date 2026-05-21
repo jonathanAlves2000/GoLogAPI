@@ -1,8 +1,7 @@
 --
 -- PostgreSQL database dump
 --
-
-\restrict h2Ime1RSPfFXaYRJR5uAJI3JCTPpphW6dEJC8Bi2EefB6s4DuCMHylvbhQ6VzIP
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
 -- Dumped by pg_dump version 18.1
