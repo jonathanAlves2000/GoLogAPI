@@ -1,12 +1,12 @@
 --
 -- PostgreSQL database dump
 --
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
 -- Dumped by pg_dump version 18.1
 
--- Started on 2026-05-21 22:39:32 UTC
+-- Started on 2026-05-22 02:35:13 UTC
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -377,11 +377,11 @@ a92a50c7-b904-4637-b7ca-0f794ad50eaa	t	2026-05-03 15:59:55.55528+00	admin@admin.
 --
 
 COPY public.delivery_table (id, active, created_at, created_by, updated_at, updated_by, delivery_sequence, route_completed, route_planned, scheduled_collection, scheduled_delivery, status, volume, weight, customer_collects, customer_delivery, destination_address_id, origin_address_id, transport_id, type_delivery_id, type_transport, responsible_id) FROM stdin;
-1b152932-83f0-4d6e-8b7b-9cb17c0fce6e	t	2026-05-03 16:01:35.684967+00	admin@admin.com	2026-05-03 16:01:35.684967+00	admin@admin.com	3	\N	[{"step":1,"location":"Centro de Distribuição Principal","timestamp":"2026-05-04T08:15:00Z"}]	2026-05-04 08:00:00	2026-05-05 16:30:00	EM TRANSITO	3.2	145.5	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
-8f720667-5f90-4fb6-919c-a7ee74afe792	t	2026-05-03 16:03:31.795504+00	admin@admin.com	2026-05-03 16:03:31.795504+00	admin@admin.com	3	\N	[{"step":1,"location":"Centro de Distribuição Principal","timestamp":"2026-05-04T08:15:00Z"}]	2026-05-04 08:00:00	2026-05-05 16:30:00	EM TRANSITO	3.2	145.5	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
-a19c183d-a139-40b7-83c1-3c4014b4e5fa	t	2026-05-03 16:04:13.500902+00	admin@admin.com	2026-05-03 16:04:13.500902+00	admin@admin.com	3	\N	[{"step":1,"location":"Centro de Distribuição Principal","timestamp":"2026-05-04T08:15:00Z"}]	2026-05-04 08:00:00	2026-05-05 16:30:00	EM TRANSITO	3.2	145.5	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
 4907c218-f90e-4a0b-8e6b-af55da635d2f	f	2026-05-03 16:05:34.330227+00	admin@admin.com	2026-05-03 18:11:42.699388+00	admin@admin.com	3	[{"step":1,"location":"Centro de Distribuição Principal","timestamp":"2026-05-04T08:15:00Z"}]	[{"step":1,"location":"Centro de Distribuição Principal","coordinates":[-22.9068,-47.0616]},{"step": "location":"Ponto de Entrega A","coordinates":[-22.9123,-47.0541]}]	2026-05-04 08:00:00	2026-05-05 16:30:00	EM TRANSITO	2.2	200	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
-1d1ef086-8077-4570-a4eb-6241fb27f08c	t	2026-05-21 22:31:45.45444+00	admin@admin.com	2026-05-21 22:31:45.45444+00	admin@admin.com	3	[{"step":1,"location":"Centro de Distribuição Principal","timestamp":"2026-05-04T08:15:00Z"},{"step":2,"location":"Ponto de Entrega A","timestamp":"2026-05-04T09:42:10Z"}]	[{"step":1,"location":"Centro de Distribuição Principal","coordinates":[-22.9068,-47.0616],"estimatedArrival":"2026-05-04T08:00:00Z"},{"step":2,"location":"Ponto de Entrega A","coordinates":[-22.9123,-47.0541],"estimatedArrival":"2026-05-04T09:30:00Z"},{"step":3,"location":"Ponto de Entrega B","coordinates":[-22.9205,-47.0422],"estimatedArrival":"2026-05-04T11:15:00Z"},{"step":4,"location":"Destino Final","coordinates":[-22.9312,-47.0285],"estimatedArrival":"2026-05-05T16:30:00Z"}]	2026-05-30 08:00:00	2026-06-05 16:30:00	EM TRANSITO	3.2	145.5	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
+1b152932-83f0-4d6e-8b7b-9cb17c0fce6e	t	2026-05-03 16:01:35.684967+00	admin@admin.com	2026-05-22 02:10:33.840414+00	admin@admin.com	1	-22.365854889440897, -47.38073742269552]	-22.365854889440897, -47.38073742269552	2026-05-30 08:00:00	2026-05-30 16:30:00	EM TRANSITO	100	200	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
+8f720667-5f90-4fb6-919c-a7ee74afe792	t	2026-05-03 16:03:31.795504+00	admin@admin.com	2026-05-22 02:12:16.14092+00	admin@admin.com	2	-22.35994140842475, -47.3778620946733	-22.35994140842475, -47.3778620946733	2026-05-30 08:40:00	2026-05-30 16:50:00	EM TRANSITO	200	500	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
+a19c183d-a139-40b7-83c1-3c4014b4e5fa	t	2026-05-03 16:04:13.500902+00	admin@admin.com	2026-05-22 02:13:37.342467+00	admin@admin.com	3	-22.357123486862434, -47.374514697871305	-22.357123486862434, -47.374514697871305	2026-05-30 09:10:00	2026-05-30 17:20:00	EM TRANSITO	200	500	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
+1d1ef086-8077-4570-a4eb-6241fb27f08c	t	2026-05-21 22:31:45.45444+00	admin@admin.com	2026-05-22 02:26:18.218514+00	admin@admin.com	4	-22.358705968061564, -47.367902378141494	-22.358705968061564, -47.367902378141494	2026-05-30 09:10:00	2026-05-30 17:20:00	EM TRANSITO	150	250	d9d7b435-c256-405b-877c-848f4a22e22a	a92a50c7-b904-4637-b7ca-0f794ad50eaa	6e51b327-bec5-48eb-b881-76daf766ea1e	550e8400-e29b-41d4-a716-446655440000	f8f40685-ddd3-4193-b959-40c88816f22b	ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	2d23232b-898c-43a1-9729-c073883e82eb	c916e36f-4846-41be-9b32-9e0ff8850a29
 \.
 
 
@@ -502,7 +502,7 @@ COPY public.trailer_table (maximum_volume, id) FROM stdin;
 
 COPY public.transport_table (id, delivery_quantity, route_return_planned, route_return_completed, time_stopped, total_kilometer, total_time, driver_id, equipament_group_id, transporter_id, created_at, created_by, updated_at, updated_by, active) FROM stdin;
 5a4629d6-9f62-4a90-9819-bc5a339899f0	5	ROTA SUL - CD ARARAS PARA FILIAL PIRACICABA	ROTA SUL - VIA ANHANGUERA KM 120	0.75	180	4	0fa0d515-0c4b-47be-bfd6-ef042669c0a0	9df01abb-f14a-49ef-955d-2d87185f8a51	d9d7b435-c256-405b-877c-848f4a22e22a	\N	\N	2026-04-21 21:51:48.412192+00	admin@admin.com	t
-f8f40685-ddd3-4193-b959-40c88816f22b	5	ROTA SUL - CD ARARAS PARA FILIAL CAMPINAS	ROTA SUL - VIA ANHANGUERA KM 120	0.75	180	4	0fa0d515-0c4b-47be-bfd6-ef042669c0a0	9df01abb-f14a-49ef-955d-2d87185f8a51	d9d7b435-c256-405b-877c-848f4a22e22a	2026-04-21 21:59:17.906277+00	admin@admin.com	2026-04-21 21:59:17.906277+00	admin@admin.com	t
+f8f40685-ddd3-4193-b959-40c88816f22b	4	-22.365710824950384, -47.380631694828445	-22.365710824950384, -47.380631694828445	50	25	4	0fa0d515-0c4b-47be-bfd6-ef042669c0a0	9df01abb-f14a-49ef-955d-2d87185f8a51	d9d7b435-c256-405b-877c-848f4a22e22a	2026-04-21 21:59:17.906277+00	admin@admin.com	2026-05-22 02:31:50.623153+00	admin@admin.com	t
 \.
 
 
@@ -909,11 +909,11 @@ ALTER TABLE ONLY public.tractor_table
     ADD CONSTRAINT fktpyy3ovef9vtfaubofrwkr6w1 FOREIGN KEY (id) REFERENCES public.equipament_table(id);
 
 
--- Completed on 2026-05-21 22:39:32 UTC
+-- Completed on 2026-05-22 02:35:13 UTC
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict h2Ime1RSPfFXaYRJR5uAJI3JCTPpphW6dEJC8Bi2EefB6s4DuCMHylvbhQ6VzIP
+\unrestrict 7ecEitBg9vUz5j3dpgq4PwTLxUvOol2JnZoqSPZUkWLMQkm9W6rvF52XYcfY4Ej
 
