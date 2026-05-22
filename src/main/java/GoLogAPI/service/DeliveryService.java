@@ -225,6 +225,7 @@ public class DeliveryService {
         );
     }
 
+    @Transactional
     public DeliveryCreateResponse updatePartial(UUID id, DeliveryUpdateRequest deliveryUpdateRequest){
 
         Delivery delivery = deliveryRepository.findById(id)
