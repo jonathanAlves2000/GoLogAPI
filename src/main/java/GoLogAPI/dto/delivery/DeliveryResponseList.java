@@ -15,12 +15,12 @@ public record DeliveryResponseList(
         String routeCompleted,
         String status,
         Integer deliverySequence,
-        UUID user,
-        UUID deliveryType,
-        UUID transport,
-        UUID typeTransport,
-        UUID originAdrress,
-        UUID destinationAddress,
-        UUID customerCollects,
-        UUID customerDelivery
+        User user,
+        DeliveryType deliveryType,
+        Transport transport,
+        TypeTransport typeTransport,
+        Address originAdrress,
+        Address destinationAddress,
+        Company customerCollects,
+        Company customerDelivery
 ) { }

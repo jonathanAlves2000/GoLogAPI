@@ -144,14 +144,14 @@ public class DeliveryService {
                         delivery.getRouteCompleted(),
                         delivery.getStatus(),
                         delivery.getDeliverySequence(),
-                        delivery.getUser().getId(),
-                        delivery.getDeliveryType().getId(),
-                        delivery.getTransport().getId(),
-                        delivery.getTypeTransport().getId(),
-                        delivery.getOriginAdrress().getId(),
-                        delivery.getDestinationAddress().getId(),
-                        delivery.getCustomerCollects().getId(),
-                        delivery.getCustomerDelivery().getId()
+                        delivery.getUser(),
+                        delivery.getDeliveryType(),
+                        delivery.getTransport(),
+                        delivery.getTypeTransport(),
+                        delivery.getOriginAdrress(),
+                        delivery.getDestinationAddress(),
+                        delivery.getCustomerCollects(),
+                        delivery.getCustomerDelivery()
                 ))
                 .toList();
     }
