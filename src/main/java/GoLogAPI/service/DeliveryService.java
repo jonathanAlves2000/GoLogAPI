@@ -143,7 +143,15 @@ public class DeliveryService {
                         delivery.getRoutePlanned(),
                         delivery.getRouteCompleted(),
                         delivery.getStatus(),
-                        delivery.getDeliverySequence()
+                        delivery.getDeliverySequence(),
+                        delivery.getUser().getId(),
+                        delivery.getDeliveryType().getId(),
+                        delivery.getTransport().getId(),
+                        delivery.getTypeTransport().getId(),
+                        delivery.getOriginAdrress().getId(),
+                        delivery.getDestinationAddress().getId(),
+                        delivery.getCustomerCollects().getId(),
+                        delivery.getCustomerDelivery().getId()
                 ))
                 .toList();
     }
