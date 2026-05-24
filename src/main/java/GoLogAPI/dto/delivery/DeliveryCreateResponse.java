@@ -15,12 +15,11 @@ public record DeliveryCreateResponse(
         String routeCompleted,
         String status,
         Integer deliverySequence,
-        UUID user,
-        UUID deliveryType,
-        UUID transport,
-        UUID typeTransport,
-        UUID originAdrress,
-        UUID destinationAddress,
-        UUID customerCollects,
-        UUID customerDelivery
+        UUID userId,
+        UUID deliveryTypeId,
+        UUID transportId,
+        UUID typeTransportId,
+        UUID deliveryAddressId,
+        UUID customerDeliveryId,
+        UUID collectId
 ) { }

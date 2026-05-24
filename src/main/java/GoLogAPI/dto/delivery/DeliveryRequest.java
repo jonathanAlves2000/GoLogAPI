@@ -19,8 +19,7 @@ public interface DeliveryRequest {
     DeliveryType deliveryType();
     Transport transport();
     TypeTransport typeTransport();
-    Address originAdrress();
-    Address destinationAddress();
-    Company customerCollects();
+    Address deliveryAddress();
     Company customerDelivery();
+    Collect collect();
 }

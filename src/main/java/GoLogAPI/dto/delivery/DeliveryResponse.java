@@ -18,8 +18,7 @@ public record DeliveryResponse(
         DeliveryType deliveryType,
         Transport transport,
         TypeTransport typeTransport,
-        Address originAdrress,
-        Address destinationAddress,
-        Company customerCollects,
-        Company customerDelivery
+        Address deliveryAddress,
+        Company customerDelivery,
+        Collect collect
 ) { }

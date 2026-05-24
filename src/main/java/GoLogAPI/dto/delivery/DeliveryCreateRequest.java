@@ -26,11 +26,11 @@ public record DeliveryCreateRequest(
     LocalDateTime scheduledDelivery,
 
     @NotBlank(message = "A rota planejada não pode estar vazia.")
-    @Size(min = 5, max = 10000, message = "A rota planejada precisa conter entre 5 e 10000 caracteres.")
+    @Size(min = 5, max = 50000, message = "A rota planejada precisa conter entre 5 e 50000 caracteres.")
     String routePlanned,
 
     @NotBlank(message = "A rota realizada não pode estar vazia.")
-    @Size(min = 5, max = 10000, message = "A rota realizada precisa conter entre 5 e 10000 caracteres.")
+    @Size(min = 5, max = 50000, message = "A rota realizada precisa conter entre 5 e 50000 caracteres.")
     String routeCompleted,
 
     @NotBlank(message = "O status da rota não pode estar vazio.")
@@ -49,17 +49,14 @@ public record DeliveryCreateRequest(
     UUID transportId,
 
     @NotNull(message = "O Id do tipo de transporte não pode ser nulo.")
-        UUID typeTransportId,
-
-    @NotNull(message = "O Id do endereço de coleta não pode ser nulo.")
-    UUID originAdrressId,
+    UUID typeTransportId,
 
     @NotNull(message = "O Id do endereço de entrega não pode ser nulo.")
-    UUID destinationAddressId,
-
-    @NotNull(message = "O Id do cliente de coleta não pode ser nulo.")
-    UUID customerCollectsId,
+    UUID deliveryAddressId,
 
     @NotNull(message = "O Id do cliente de entrega não pode ser nulo.")
-    UUID customerDeliveryId
+    UUID customerDeliveryId,
+
+    UUID collectId
+
 ) { }

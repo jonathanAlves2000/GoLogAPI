@@ -21,12 +21,13 @@ public class DeliveryService {
     private final DeliveryTypeRepository deliveryTypeRepository;
     private final TypeTransportRepository typeTransportRepository;
     private final TransportRepository transportRepository;
+    private final CollectRepository collectRepository;
 
     public DeliveryService(
             DeliveryRepository deliveryRepository, AddressRepository addressRepository,
             CompanyRepository companyRepository, UserRepository userRepository,
             DeliveryTypeRepository deliveryTypeRepository, TypeTransportRepository typeTransportRepository,
-            TransportRepository transportRepository)
+            TransportRepository transportRepository, CollectRepository collectRepository)
     {
         this.deliveryRepository = deliveryRepository;
         this.addressRepository = addressRepository;
@@ -35,6 +36,7 @@ public class DeliveryService {
         this.deliveryTypeRepository = deliveryTypeRepository;
         this.typeTransportRepository = typeTransportRepository;
         this.transportRepository = transportRepository;
+        this.collectRepository = collectRepository;
     }
 
     @Transactional
@@ -52,17 +54,14 @@ public class DeliveryService {
         TypeTransport typeTransport = typeTransportRepository.findById(deliveryCreateRequest.typeTransportId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.typeTransportId()));
 
-        Address addressOrigin = addressRepository.findById(deliveryCreateRequest.originAdrressId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.originAdrressId()));
-
-        Address addressDestination = addressRepository.findById(deliveryCreateRequest.destinationAddressId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.destinationAddressId()));
-
-        Company customerCollects = companyRepository.findById(deliveryCreateRequest.customerCollectsId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.customerCollectsId()));
+        Address deliveryAddress = addressRepository.findById(deliveryCreateRequest.deliveryAddressId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.deliveryAddressId()));
 
         Company customerDelivery = companyRepository.findById(deliveryCreateRequest.customerDeliveryId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.customerDeliveryId()));
+
+        Collect collect = collectRepository.findById(deliveryCreateRequest.collectId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.collectId()));
 
         Delivery delivery = Delivery.builder()
                 .weight(deliveryCreateRequest.weight())
@@ -77,10 +76,9 @@ public class DeliveryService {
                 .deliveryType(deliveryType)
                 .transport(transport)
                 .typeTransport(typeTransport)
-                .originAdrress(addressOrigin)
-                .destinationAddress(addressDestination)
-                .customerCollects(customerCollects)
+                .deliveryAddress(deliveryAddress)
                 .customerDelivery(customerDelivery)
+                .collect(collect)
                 .build();
 
         deliveryRepository.save(delivery);
@@ -99,10 +97,9 @@ public class DeliveryService {
                 delivery.getDeliveryType().getId(),
                 delivery.getTransport().getId(),
                 delivery.getTypeTransport().getId(),
-                delivery.getOriginAdrress().getId(),
-                delivery.getDestinationAddress().getId(),
-                delivery.getCustomerCollects().getId(),
-                delivery.getCustomerDelivery().getId()
+                delivery.getDeliveryAddress().getId(),
+                delivery.getCustomerDelivery().getId(),
+                delivery.getCollect().getId()
         );
     }
 
@@ -124,10 +121,9 @@ public class DeliveryService {
                 delivery.getDeliveryType(),
                 delivery.getTransport(),
                 delivery.getTypeTransport(),
-                delivery.getOriginAdrress(),
-                delivery.getDestinationAddress(),
-                delivery.getCustomerCollects(),
-                delivery.getCustomerDelivery()
+                delivery.getDeliveryAddress(),
+                delivery.getCustomerDelivery(),
+                delivery.getCollect()
         );
     }
 
@@ -148,10 +144,9 @@ public class DeliveryService {
                         delivery.getDeliveryType(),
                         delivery.getTransport(),
                         delivery.getTypeTransport(),
-                        delivery.getOriginAdrress(),
-                        delivery.getDestinationAddress(),
-                        delivery.getCustomerCollects(),
-                        delivery.getCustomerDelivery()
+                        delivery.getDeliveryAddress(),
+                        delivery.getCustomerDelivery(),
+                        delivery.getCollect()
                 ))
                 .toList();
     }
@@ -181,17 +176,14 @@ public class DeliveryService {
         TypeTransport typeTransport = typeTransportRepository.findById(deliveryCreateRequest.typeTransportId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.typeTransportId()));
 
-        Address addressOrigin = addressRepository.findById(deliveryCreateRequest.originAdrressId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.originAdrressId()));
-
-        Address addressDestination = addressRepository.findById(deliveryCreateRequest.destinationAddressId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.destinationAddressId()));
-
-        Company customerCollects = companyRepository.findById(deliveryCreateRequest.customerCollectsId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.customerCollectsId()));
+        Address deliveryAddress = addressRepository.findById(deliveryCreateRequest.deliveryAddressId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.deliveryAddressId()));
 
         Company customerDelivery = companyRepository.findById(deliveryCreateRequest.customerDeliveryId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.customerDeliveryId()));
+
+        Collect collect = collectRepository.findById(deliveryCreateRequest.collectId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryCreateRequest.collectId()));
 
         delivery.setWeight(deliveryCreateRequest.weight());
         delivery.setVolume(deliveryCreateRequest.volume());
@@ -205,10 +197,9 @@ public class DeliveryService {
         delivery.setDeliveryType(deliveryType);
         delivery.setTransport(transport);
         delivery.setTypeTransport(typeTransport);
-        delivery.setOriginAdrress(addressOrigin);
-        delivery.setDestinationAddress(addressDestination);
-        delivery.setCustomerCollects(customerCollects);
+        delivery.setDeliveryAddress(deliveryAddress);
         delivery.setCustomerDelivery(customerDelivery);
+        delivery.setCollect(collect);
 
         deliveryRepository.save(delivery);
 
@@ -226,10 +217,9 @@ public class DeliveryService {
                 delivery.getDeliveryType().getId(),
                 delivery.getTransport().getId(),
                 delivery.getTypeTransport().getId(),
-                delivery.getOriginAdrress().getId(),
-                delivery.getDestinationAddress().getId(),
-                delivery.getCustomerCollects().getId(),
-                delivery.getCustomerDelivery().getId()
+                delivery.getDeliveryAddress().getId(),
+                delivery.getCustomerDelivery().getId(),
+                delivery.getCollect().getId()
         );
     }
 
@@ -287,28 +277,22 @@ public class DeliveryService {
             delivery.setTypeTransport(typeTransport);
         }
 
-        if(deliveryUpdateRequest.originAdrressId() != null){
-            Address addressOrigin = addressRepository.findById(deliveryUpdateRequest.originAdrressId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryUpdateRequest.originAdrressId()));
-            delivery.setOriginAdrress(addressOrigin);
-        }
-
-        if(deliveryUpdateRequest.destinationAddressId() != null){
-            Address addressDestination = addressRepository.findById(deliveryUpdateRequest.destinationAddressId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryUpdateRequest.destinationAddressId()));
-            delivery.setDestinationAddress(addressDestination);
-        }
-
-        if(deliveryUpdateRequest.customerCollectsId() != null){
-            Company customerCollects = companyRepository.findById(deliveryUpdateRequest.customerCollectsId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryUpdateRequest.customerCollectsId()));
-            delivery.setCustomerCollects(customerCollects);
+        if(deliveryUpdateRequest.deliveryAddressId() != null){
+            Address addressDestination = addressRepository.findById(deliveryUpdateRequest.deliveryAddressId())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryUpdateRequest.deliveryAddressId()));
+            delivery.setDeliveryAddress(addressDestination);
         }
 
         if(deliveryUpdateRequest.customerDeliveryId() != null){
             Company customerDelivery = companyRepository.findById(deliveryUpdateRequest.customerDeliveryId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryUpdateRequest.customerDeliveryId()));
             delivery.setCustomerDelivery(customerDelivery);
+        }
+
+        if(deliveryUpdateRequest.collectId() != null){
+            Collect collect = collectRepository.findById(deliveryUpdateRequest.collectId())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, deliveryUpdateRequest.collectId()));
+            delivery.setCollect(collect);
         }
 
         deliveryRepository.save(delivery);
@@ -327,10 +311,9 @@ public class DeliveryService {
                 delivery.getDeliveryType().getId(),
                 delivery.getTransport().getId(),
                 delivery.getTypeTransport().getId(),
-                delivery.getOriginAdrress().getId(),
-                delivery.getDestinationAddress().getId(),
-                delivery.getCustomerCollects().getId(),
-                delivery.getCustomerDelivery().getId()
+                delivery.getDeliveryAddress().getId(),
+                delivery.getCustomerDelivery().getId(),
+                delivery.getCollect() != null ? delivery.getCollect().getId() : null
         );
     }
 }

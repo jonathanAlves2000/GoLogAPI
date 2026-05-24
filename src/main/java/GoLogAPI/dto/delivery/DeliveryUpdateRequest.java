@@ -17,9 +17,9 @@ public record DeliveryUpdateRequest(
         LocalDateTime scheduledCollection,
         @FutureOrPresent
         LocalDateTime scheduledDelivery,
-        @Size(min = 5, max = 500)
+        @Size(min = 5, max = 50000)
         String routePlanned,
-        @Size(min = 5, max = 500)
+        @Size(min = 5, max = 50000)
         String routeCompleted,
         String status,
         Integer deliverySequence,
@@ -27,9 +27,8 @@ public record DeliveryUpdateRequest(
         UUID deliveryTypeId,
         UUID transportId,
         UUID typeTransportId,
-        UUID originAdrressId,
-        UUID destinationAddressId,
-        UUID customerCollectsId,
-        UUID customerDeliveryId
+        UUID deliveryAddressId,
+        UUID customerDeliveryId,
+        UUID collectId
 ) {
 }

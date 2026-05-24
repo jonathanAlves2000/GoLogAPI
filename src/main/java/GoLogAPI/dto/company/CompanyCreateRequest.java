@@ -14,7 +14,8 @@ public record CompanyCreateRequest(
         Boolean isCliente,
 
         @NotBlank(message = "Telefone vazio")
-        @Pattern(regexp = "^\\([1-9]{2}\\)[0-9]{9}$", message = "Telefone inválido, formato esperado: (11)999999999")
+        @Pattern(regexp = "^\\([1-9]{2}\\)[0-9]{8,9}$",
+                message = "Telefone inválido, formato esperado: (11)999999999 ou (11)33333333")
         String phoneNumber,
 
         @NotBlank(message = "Email vazio")
