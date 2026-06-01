@@ -37,7 +37,7 @@ public class Occurrence extends Audit {
 
     @ManyToOne
     @JoinColumn(name = "delivery_id", nullable = false)
-    private Delivery delivery;
+    private Shipment shipment;
 
     @ManyToOne
     @JoinColumn(name = "transport_id", nullable = false)

@@ -33,6 +33,13 @@ public record AddressUpdateRequest(
         String cep,
 
         @Pattern(regexp = "^[A-Za-z0-9\\s]+$", message = "Complemento invalido, utilize somente letras e numeros")
-        String complement
+        String complement,
+
+        @Size(min = 5, max = 100, message = "Latitude deve ter de 10 a 100 caracteres")
+        String latitude,
+
+        @Size(min = 5, max = 100, message = "Longitude deve ter de 10 a 100 caracteres")
+        String longitude
+
 ) implements AddressRequest
 { }

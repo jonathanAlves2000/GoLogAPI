@@ -10,5 +10,7 @@ public record AddressResponse(
         String state,
         String country,
         String cep,
-        String complement
+        String complement,
+        String latitude,
+        String longitude
 ) { }

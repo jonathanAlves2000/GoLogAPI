@@ -18,7 +18,7 @@ public record OccurrenceUpdateRequest(
         @Size(min = 5, max = 1000)
         String attachment,
 
-        UUID deliveryId,
+        UUID shipmentId,
 
         UUID transportId,
 

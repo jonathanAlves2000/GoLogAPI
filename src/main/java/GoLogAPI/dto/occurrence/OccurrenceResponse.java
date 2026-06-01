@@ -1,11 +1,10 @@
 package GoLogAPI.dto.occurrence;
 
-import GoLogAPI.model.Delivery;
+import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Transport;
 import GoLogAPI.model.User;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record OccurrenceResponse(
@@ -14,7 +13,7 @@ public record OccurrenceResponse(
         String description,
         Instant createdAt,
         String attachment,
-        Delivery delivery,
+        Shipment shipment,
         Transport transport,
         User sender
 ) { }

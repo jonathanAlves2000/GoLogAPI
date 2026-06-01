@@ -17,7 +17,7 @@ public record OccurrenceCreateRequest(
     String attachment,
 
     @NotNull(message = "O Id da entrega deve ser informado.")
-    UUID deliveryId,
+    UUID shipmentId,
 
     @NotNull(message = "O Id do transporte deve ser informado.")
     UUID transportId,

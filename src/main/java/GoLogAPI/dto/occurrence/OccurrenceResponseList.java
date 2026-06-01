@@ -10,7 +10,7 @@ public record OccurrenceResponseList(
         String description,
         Instant createdAt,
         String attachment,
-        UUID deliveryId,
+        UUID shipmentId,
         UUID transportId,
         UUID senderId
 ) { }

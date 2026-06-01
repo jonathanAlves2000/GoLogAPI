@@ -9,4 +9,6 @@ public interface AddressRequest {
     String country();
     String cep();
     String complement();
+    String latitude();
+    String longitude();
 }

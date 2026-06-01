@@ -29,7 +29,7 @@ api:
 
   route-optimization:
     url: "https://routeoptimization.googleapis.com/v1"
-    token: ""
+    token: "AIzaSyBLfhQcj1bmUC2l8Ksx_CY1K7IsF18uVPY"
 
 springdoc:
   packages-to-scan: GoLogAPI.controller

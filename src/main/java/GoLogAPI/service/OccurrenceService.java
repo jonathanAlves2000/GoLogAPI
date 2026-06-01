@@ -4,14 +4,13 @@ import GoLogAPI.dto.occurrence.*;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.OccurrenceMapper;
 import GoLogAPI.model.*;
-import GoLogAPI.repository.DeliveryRepository;
+import GoLogAPI.repository.ShipmentRepository;
 import GoLogAPI.repository.OccurrenceRepository;
 import GoLogAPI.repository.TransportRepository;
 import GoLogAPI.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,28 +19,28 @@ import java.util.UUID;
 public class OccurrenceService {
 
     private final OccurrenceRepository occurrenceRepository;
-    private final DeliveryRepository deliveryRepository;
+    private final ShipmentRepository shipmentRepository;
     private final TransportRepository transportRepository;
     private final UserRepository userRepository;
     private final OccurrenceMapper occurrenceMapper;
 
     public OccurrenceService(
             OccurrenceRepository occurrenceRepository, OccurrenceMapper occurrenceMapper,
-            DeliveryRepository deliveryRepository, UserRepository userRepository,
+            ShipmentRepository shipmentRepository, UserRepository userRepository,
             TransportRepository transportRepository)
     {
         this.occurrenceRepository = occurrenceRepository;
         this.occurrenceMapper = occurrenceMapper;
         this.transportRepository = transportRepository;
         this.userRepository = userRepository;
-        this.deliveryRepository = deliveryRepository;
+        this.shipmentRepository = shipmentRepository;
     }
 
     @Transactional
     public OccurrenceCreateResponse save(OccurrenceCreateRequest occurrenceCreateRequest){
 
-        Delivery delivery = deliveryRepository.findById(occurrenceCreateRequest.deliveryId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.deliveryId()));
+        Shipment shipment = shipmentRepository.findById(occurrenceCreateRequest.shipmentId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.shipmentId()));
 
         Transport transport = transportRepository.findById(occurrenceCreateRequest.transportId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.transportId()));
@@ -51,7 +50,7 @@ public class OccurrenceService {
 
         Occurrence occurrence = occurrenceMapper.toEntity(occurrenceCreateRequest);
 
-        occurrence.setDelivery(delivery);
+        occurrence.setShipment(shipment);
         occurrence.setTransport(transport);
         occurrence.setSender(sender);
 
@@ -84,8 +83,8 @@ public class OccurrenceService {
         occurrenceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        Delivery delivery = deliveryRepository.findById(occurrenceCreateRequest.deliveryId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.deliveryId()));
+        Shipment shipment = shipmentRepository.findById(occurrenceCreateRequest.shipmentId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.shipmentId()));
 
         Transport transport = transportRepository.findById(occurrenceCreateRequest.transportId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.transportId()));
@@ -94,7 +93,7 @@ public class OccurrenceService {
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.senderId()));
 
         Occurrence occurrence = occurrenceMapper.toEntity(occurrenceCreateRequest);
-        occurrence.setDelivery(delivery);
+        occurrence.setShipment(shipment);
         occurrence.setTransport(transport);
         occurrence.setSender(sender);
         occurrence.setId(id);
@@ -118,11 +117,11 @@ public class OccurrenceService {
         if(occurrenceUpdateRequest.attachment() != null && !occurrenceUpdateRequest.attachment().isBlank())
             occurrence.setAttachment(occurrenceUpdateRequest.attachment());
 
-        if(occurrenceUpdateRequest.deliveryId() != null){
-            Delivery delivery = deliveryRepository.findById(occurrenceUpdateRequest.deliveryId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceUpdateRequest.deliveryId()));
+        if(occurrenceUpdateRequest.shipmentId() != null){
+            Shipment shipment = shipmentRepository.findById(occurrenceUpdateRequest.shipmentId())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceUpdateRequest.shipmentId()));
 
-            occurrence.setDelivery(delivery);
+            occurrence.setShipment(shipment);
         }
 
         if(occurrenceUpdateRequest.transportId() != null){

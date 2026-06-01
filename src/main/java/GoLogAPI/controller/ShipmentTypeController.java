@@ -1,0 +1,67 @@
+package GoLogAPI.controller;
+
+import GoLogAPI.dto.shipmentType.DeliveryTypeCreateRequest;
+import GoLogAPI.dto.shipmentType.DeliveryTypeResponse;
+import GoLogAPI.dto.shipmentType.DeliveryTypeUpdateRequest;
+import GoLogAPI.service.ShipmentTypeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/shipment-type")
+@Tag(name = "Shipment Type")
+public class ShipmentTypeController {
+
+    private final ShipmentTypeService shipmentTypeService;
+
+    public ShipmentTypeController(ShipmentTypeService shipmentTypeService){
+        this.shipmentTypeService = shipmentTypeService;
+    }
+
+    @Operation(summary = "Create", description = "Create New Shipment Type")
+    @PostMapping
+    public ResponseEntity<DeliveryTypeResponse> save(@Valid @RequestBody DeliveryTypeCreateRequest deliveryTypeCreateRequest){
+        DeliveryTypeResponse deliveryTypeResponse = shipmentTypeService.save(deliveryTypeCreateRequest);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("{id}")
+                .buildAndExpand(deliveryTypeResponse.id())
+                .toUri();
+        return ResponseEntity.created(uri).body(deliveryTypeResponse);
+    }
+
+    @Operation(summary = "Display", description = "Display Shipment Type")
+    @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
+    public ResponseEntity<DeliveryTypeResponse> get(@PathVariable("id") UUID id){
+        DeliveryTypeResponse deliveryTypeResponse = shipmentTypeService.get(id);
+        return ResponseEntity.ok(deliveryTypeResponse);
+    }
+
+    @Operation(summary = "Delete", description = "Delete Shipment Type")
+    @DeleteMapping(value = "{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
+        shipmentTypeService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Update", description = "Update Shipment Type")
+    @PutMapping(value = "{id}")
+    public ResponseEntity<DeliveryTypeResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody DeliveryTypeCreateRequest deliveryTypeCreateRequest){
+        DeliveryTypeResponse deliveryTypeResponse = shipmentTypeService.update(id, deliveryTypeCreateRequest);
+        return ResponseEntity.ok(deliveryTypeResponse);
+    }
+
+    @Operation(summary = "Update Partial", description = "Update Partial Shipment Type")
+    @PatchMapping(value = "{id}")
+    public ResponseEntity<DeliveryTypeResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody DeliveryTypeUpdateRequest deliveryTypeUpdateRequest){
+        DeliveryTypeResponse deliveryTypeResponse = shipmentTypeService.updatePartial(id, deliveryTypeUpdateRequest);
+        return ResponseEntity.ok(deliveryTypeResponse);
+    }
+
+}

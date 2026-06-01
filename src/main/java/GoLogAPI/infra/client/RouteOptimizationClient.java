@@ -10,19 +10,18 @@ import org.springframework.web.client.RestClient;
 public class RouteOptimizationClient {
 
     private final RestClient restClient;
-    private final ObjectMapper objectMapper;
 
     public RouteOptimizationClient(RestClient.Builder restClientBuilder,
                                    @Value("${api.route-optimization.url}") String baseUrl,
                                    @Value("${api.route-optimization.token}") String token,
-                                   ObjectMapper objectMapper) {
+                                   ObjectMapper objectMapper)
+    {
 
         this.restClient = restClientBuilder
                 .baseUrl(baseUrl)
                 .defaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader("X-Goog-Api-Key", "Bearer " + token)
                 .build();
-        this.objectMapper = objectMapper;
     }
 
     public String fetchOptimizedRoute(Object requestPayload) {

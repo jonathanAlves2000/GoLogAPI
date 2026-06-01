@@ -1,7 +1,7 @@
 package GoLogAPI.validation;
 
-import GoLogAPI.dto.deliveryType.DeliveryTypeRequest;
-import GoLogAPI.repository.DeliveryTypeRepository;
+import GoLogAPI.dto.shipmentType.DeliveryTypeRequest;
+import GoLogAPI.repository.ShipmentTypeRepository;
 import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +9,10 @@ import java.util.List;
 @Component
 public class DeliveryTypeValidator {
 
-    private final DeliveryTypeRepository deliveryTypeRepository;
+    private final ShipmentTypeRepository shipmentTypeRepository;
 
-    public DeliveryTypeValidator(DeliveryTypeRepository deliveryTypeValidator){
-        this.deliveryTypeRepository = deliveryTypeValidator;
+    public DeliveryTypeValidator(ShipmentTypeRepository deliveryTypeValidator){
+        this.shipmentTypeRepository = deliveryTypeValidator;
     }
 
     public void validate(DeliveryTypeRequest deliveryTypeRequest){
@@ -21,7 +21,7 @@ public class DeliveryTypeValidator {
     }
 
     public void name(String name, List<String> errors){
-        boolean exists = deliveryTypeRepository.existsByName(name);
+        boolean exists = shipmentTypeRepository.existsByName(name);
         if(exists) errors.add("Já existe esse nome cadastrado para o tipo de entrega.");
     }
 
