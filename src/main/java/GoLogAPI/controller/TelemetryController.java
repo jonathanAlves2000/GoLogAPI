@@ -7,7 +7,6 @@ import java.util.UUID;
 import GoLogAPI.dto.telemetry.TelemetryResponseList;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.tags.Tags;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -62,8 +61,8 @@ public class TelemetryController {
     }
 
     @Operation(summary = "Update", description = "Update Telemetry")
-    @PutMapping
-    public ResponseEntity<TelemetryReponse> update(@PathVariable("id") UUID id, @Valid TelemetryCreateRequest telemetryCreateRequest){
+    @PutMapping("{id}")
+    public ResponseEntity<TelemetryReponse> update(@PathVariable("id") UUID id, @Valid @RequestBody TelemetryCreateRequest telemetryCreateRequest){
         TelemetryReponse telemetryReponse = telemetryService.update(id, telemetryCreateRequest);
         return ResponseEntity.ok(telemetryReponse);
     }

@@ -28,7 +28,7 @@ api:
       secret: ${JWT_SECRET:minha-chave-secreta-104734@*%&}
 
   route-optimization:
-    url: "https://routeoptimization.googleapis.com/v1"
+    url: https://routeoptimization.googleapis.com/v1
     token: "AIzaSyBLfhQcj1bmUC2l8Ksx_CY1K7IsF18uVPY"
 
 springdoc:

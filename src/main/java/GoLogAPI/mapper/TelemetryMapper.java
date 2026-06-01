@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {EquipamentMapper.class})
 public interface TelemetryMapper {
 
     @Mapping(target = "id", ignore = true)

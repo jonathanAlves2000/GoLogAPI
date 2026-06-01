@@ -4,5 +4,5 @@ import java.util.List;
 
 public record Model(
         List<Vehicle> vehicles,
-        List<ShipmentDto> shipmentDtos
+        List<Shipment> shipments
 ) { }

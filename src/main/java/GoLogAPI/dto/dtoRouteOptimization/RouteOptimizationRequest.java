@@ -1,5 +1,7 @@
 package GoLogAPI.dto.dtoRouteOptimization;
 
 public record RouteOptimizationRequest(
-    Model model
+    Model model,
+    String globalStartTime,
+    String globalEndTime
 ) { }

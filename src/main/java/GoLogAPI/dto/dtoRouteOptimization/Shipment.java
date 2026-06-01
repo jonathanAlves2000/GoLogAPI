@@ -2,7 +2,7 @@ package GoLogAPI.dto.dtoRouteOptimization;
 
 import java.util.List;
 
-public record ShipmentDto(
+public record Shipment(
         String label,
 
         List<Stop> pickups,

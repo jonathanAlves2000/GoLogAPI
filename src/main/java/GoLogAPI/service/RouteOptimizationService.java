@@ -1,13 +1,16 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.dtoRouteOptimization.*;
-import GoLogAPI.dto.dtoRouteOptimization.ShipmentDto;
+import GoLogAPI.dto.dtoRouteOptimization.Shipment;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.infra.client.RouteOptimizationClient;
 import GoLogAPI.model.*;
 import GoLogAPI.repository.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -29,15 +32,18 @@ public class RouteOptimizationService {
         this.telemetryRepository = telemetryRepository;
     }
 
-    public void optimizeRoutes(){
+    public String optimizeRoutes(){
         List<EquipamentGroup> equipaments = equipamentGroupRepository.findAll();
-        List<Shipment> shipment = shipmentRepository.findAll();
+        List<GoLogAPI.model.Shipment> shipment = shipmentRepository.findAll();
         List<Address> addresses = addressRepository.findAll();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
+
 
         List<Vehicle> vehicles = equipaments.stream()
                 .map(equipament -> {
-                    Telemetry telemetry = telemetryRepository.findById(equipament.getId())
-                            .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getId()));
+                    Telemetry telemetry = telemetryRepository.findTopByEquipamentIdOrderByDateTimeDesc(equipament.getEquipament1())
+                            .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));
 
                     return new Vehicle(
                             equipament.getEquipament1().getPlate(),
@@ -50,39 +56,95 @@ public class RouteOptimizationService {
 
                             //Limite de carga
                             new LoadLimits(
-                                    new Weight(String.valueOf(equipament.getEquipament1().getMaximumCapacity()))
+                                    new Weight(String.valueOf(equipament.getEquipament1().getMaximumCapacity().longValue()))
                             )
                     );
                 })
                 .toList();
 
-        List<ShipmentDto> shipmentsList = shipment.stream()
+        List<Shipment> shipments = shipment.stream()
                 .map(shipmentDto -> {
 
-                   return new ShipmentDto(
+                   return new Shipment(
                            String.valueOf(shipmentDto.getId()),
-                            null,
-                            List.of(new Stop(
-                                        new Location(
-                                                shipmentDto.getAddress().getLatitude(),
-                                                shipmentDto.getAddress().getLongitude()
-                                        ),
-                                        "3600",
-                                        List.of(
-                                                new TimeWindow(
-                                                        shipmentDto.getSchedulind()
-                                                                .minusMinutes(15)
-                                                                .toString(),
-                                                        String.valueOf(shipmentDto.getSchedulind())
-                                                )
-                                        )
+
+                            shipmentDto.getTypeOperation() == TypeOperation.COLETA ?
+                                    List.of(
+                                            new Stop(
+                                                    new Location(
+                                                            shipmentDto.getAddress().getLatitude(),
+                                                            shipmentDto.getAddress().getLongitude()
+                                                    ),
+                                                    "3600s",
+                                                    List.of(
+                                                            new TimeWindow(
+                                                                    shipmentDto.getSchedulind()
+                                                                            .minusMinutes(15)
+                                                                            .atOffset(ZoneOffset.of("-03:00"))
+                                                                            .format(formatter),
+                                                                    shipmentDto.getSchedulind()
+                                                                            .atOffset(ZoneOffset.of("-03:00"))
+                                                                            .format(formatter)
+                                                                    )
+                                                    )
+                                            )
                                     )
-                            ),
+                            : null,
+                            shipmentDto.getTypeOperation() == TypeOperation.ENTREGA ?
+                                List.of(new Stop(
+                                            new Location(
+                                                    shipmentDto.getAddress().getLatitude(),
+                                                    shipmentDto.getAddress().getLongitude()
+                                            ),
+                                            "3600s",
+                                            List.of(
+                                                    new TimeWindow(
+                                                            shipmentDto.getSchedulind()
+                                                                    .minusMinutes(15)
+                                                                    .atOffset(ZoneOffset.of("-03:00"))
+                                                                    .format(formatter),
+                                                            shipmentDto.getSchedulind()
+                                                                    .atOffset(ZoneOffset.of("-03:00"))
+                                                                    .format(formatter)
+                                                    )
+                                            )
+                                        )
+                                )
+                            : null,
                             new LoadDemands(
-                                    new WeightAmount(String.valueOf(shipmentDto.getWeight()))
+                                    new WeightAmount(String.valueOf(shipmentDto.getWeight().longValue()))
                             )
                     );
                 })
                 .toList();
+
+        Model model = new Model(
+                vehicles,
+                shipments
+        );
+
+        LocalDate date = shipment.getFirst().getSchedulind().toLocalDate();
+
+        String globalStartTime =date.atTime(0, 0)
+                .atOffset(ZoneOffset.of("-03:00"))
+                .format(formatter);
+
+        String globalEndTime = date.atTime(23, 59, 59)
+                        .atOffset(ZoneOffset.of("-03:00"))
+                        .format(formatter);
+
+        RouteOptimizationRequest request = new RouteOptimizationRequest(
+                model,
+                globalStartTime,
+                globalEndTime
+        );
+
+        System.out.println(request);
+
+        String response = routeOptimizationClient.fetchOptimizedRoute(request);
+
+        System.out.println(response);
+
+        return response;
     }
 }
