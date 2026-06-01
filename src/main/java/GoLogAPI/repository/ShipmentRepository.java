@@ -1,10 +1,12 @@
 package GoLogAPI.repository;
 
 import GoLogAPI.model.Shipment;
+import GoLogAPI.model.TypeOperation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
@@ -17,4 +19,8 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
         Double getTotalWeight();
         Double getTotalVolume();
     }
+
+    List<Shipment> findByTypeOperation(TypeOperation typeOperation);
+    List<Shipment> findByOperationOrigem(Shipment shipment);
+
 }

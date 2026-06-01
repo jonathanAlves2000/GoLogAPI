@@ -1,14 +1,12 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.dtoRouteOptimization.*;
-import GoLogAPI.dto.dtoRouteOptimization.Shipment;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.infra.client.RouteOptimizationClient;
 import GoLogAPI.model.*;
+import GoLogAPI.model.Shipment;
 import GoLogAPI.repository.*;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -34,7 +32,7 @@ public class RouteOptimizationService {
 
     public String optimizeRoutes(){
         List<EquipamentGroup> equipaments = equipamentGroupRepository.findAll();
-        List<GoLogAPI.model.Shipment> shipment = shipmentRepository.findAll();
+        List<Shipment> collects = shipmentRepository.findByTypeOperation(TypeOperation.COLETA);
         List<Address> addresses = addressRepository.findAll();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
@@ -47,104 +45,78 @@ public class RouteOptimizationService {
 
                     return new Vehicle(
                             equipament.getEquipament1().getPlate(),
-
-                            //Localicação inicial
-                            new Location(
-                                    telemetry.getLatitude(),
-                                    telemetry.getLongitude()
-                            ),
-
-                            //Limite de carga
-                            new LoadLimits(
-                                    new Weight(String.valueOf(equipament.getEquipament1().getMaximumCapacity().longValue()))
-                            )
+                            new Location(telemetry.getLatitude(), telemetry.getLongitude()),
+                            new LoadLimits(new Weight(String.valueOf(equipament.getEquipament1().getMaximumCapacity().longValue()))),
+                            List.of(new TimeWindow("2026-06-11T00:00:00-03:00", "2026-06-11T00:00:00-03:00")),
+                            List.of(new TimeWindow("2026-06-11T23:59:59-03:00", "2026-06-11T23:59:59-03:00"))
                     );
                 })
                 .toList();
 
-        List<Shipment> shipments = shipment.stream()
-                .map(shipmentDto -> {
+        List<RouteShipment> shipments = collects.stream()
+                .map(collect -> {
 
-                   return new Shipment(
-                           String.valueOf(shipmentDto.getId()),
+                    List<Shipment> deliveries = shipmentRepository.findByOperationOrigem(collect);
 
-                            shipmentDto.getTypeOperation() == TypeOperation.COLETA ?
-                                    List.of(
-                                            new Stop(
-                                                    new Location(
-                                                            shipmentDto.getAddress().getLatitude(),
-                                                            shipmentDto.getAddress().getLongitude()
-                                                    ),
-                                                    "3600s",
-                                                    List.of(
-                                                            new TimeWindow(
-                                                                    shipmentDto.getSchedulind()
-                                                                            .minusMinutes(15)
-                                                                            .atOffset(ZoneOffset.of("-03:00"))
-                                                                            .format(formatter),
-                                                                    shipmentDto.getSchedulind()
-                                                                            .atOffset(ZoneOffset.of("-03:00"))
-                                                                            .format(formatter)
-                                                                    )
-                                                    )
-                                            )
-                                    )
-                            : null,
-                            shipmentDto.getTypeOperation() == TypeOperation.ENTREGA ?
-                                List.of(new Stop(
-                                            new Location(
-                                                    shipmentDto.getAddress().getLatitude(),
-                                                    shipmentDto.getAddress().getLongitude()
-                                            ),
-                                            "3600s",
-                                            List.of(
-                                                    new TimeWindow(
-                                                            shipmentDto.getSchedulind()
-                                                                    .minusMinutes(15)
-                                                                    .atOffset(ZoneOffset.of("-03:00"))
-                                                                    .format(formatter),
-                                                            shipmentDto.getSchedulind()
-                                                                    .atOffset(ZoneOffset.of("-03:00"))
-                                                                    .format(formatter)
-                                                    )
-                                            )
-                                        )
-                                )
-                            : null,
-                            new LoadDemands(
-                                    new WeightAmount(String.valueOf(shipmentDto.getWeight().longValue()))
+                    Stop pickupStop = new Stop(
+                            new Location(collect.getAddress().getLatitude(), collect.getAddress().getLongitude()),
+                            "3600s",
+                            List.of(new TimeWindow(
+                                    collect.getSchedulind().minusHours(1).atOffset(ZoneOffset.of("-03:00")).format(formatter),
+                                    collect.getSchedulind().atOffset(ZoneOffset.of("-03:00")).format(formatter)
+                            ))
+                    );
+
+                    List<PickupRequest> pickups = List.of(
+                            new PickupRequest(
+                                    pickupStop,
+                                    new LoadDemands(new WeightAmount(String.valueOf(collect.getWeight().longValue())))
                             )
+                    );
+
+                    List<DeliveryRequest> deliveryRequests = deliveries.stream()
+                            .map(delivery -> {
+
+                                Stop deliveryStop = new Stop(
+                                        new Location(delivery.getAddress().getLatitude(), delivery.getAddress().getLongitude()),
+                                        "3600s",
+                                        List.of(new TimeWindow(
+                                                delivery.getSchedulind().minusHours(1).atOffset(ZoneOffset.of("-03:00")).format(formatter),
+                                                delivery.getSchedulind().atOffset(ZoneOffset.of("-03:00")).format(formatter)
+                                        ))
+                                );
+
+                                long negativeWeight = Math.abs(delivery.getWeight().longValue());
+
+                                return new DeliveryRequest(
+                                        deliveryStop,
+                                        new LoadDemands(new WeightAmount(String.valueOf(negativeWeight)))
+                                );
+                            })
+                            .toList();
+
+                    return new RouteShipment(
+                            collect.getId().toString(),
+                            pickups,
+                            deliveryRequests
                     );
                 })
                 .toList();
+
+        String globalStartTime = "2026-06-11T00:00:00-03:00";
+        String globalEndTime = "2026-06-11T23:59:59-03:00";
+        ValueFunction valueFunction = new ValueFunction(1.0);
+        Objective distanceObjective = new Objective(valueFunction);
 
         Model model = new Model(
                 vehicles,
-                shipments
-        );
-
-        LocalDate date = shipment.getFirst().getSchedulind().toLocalDate();
-
-        String globalStartTime =date.atTime(0, 0)
-                .atOffset(ZoneOffset.of("-03:00"))
-                .format(formatter);
-
-        String globalEndTime = date.atTime(23, 59, 59)
-                        .atOffset(ZoneOffset.of("-03:00"))
-                        .format(formatter);
-
-        RouteOptimizationRequest request = new RouteOptimizationRequest(
-                model,
+                shipments,
                 globalStartTime,
                 globalEndTime
         );
 
-        System.out.println(request);
-
+        RouteOptimizationRequest request = new RouteOptimizationRequest(model, true);
         String response = routeOptimizationClient.fetchOptimizedRoute(request);
-
-        System.out.println(response);
-
         return response;
     }
 }

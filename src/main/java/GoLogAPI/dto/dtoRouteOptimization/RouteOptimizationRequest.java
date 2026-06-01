@@ -1,7 +1,8 @@
 package GoLogAPI.dto.dtoRouteOptimization;
 
+import java.util.List;
+
 public record RouteOptimizationRequest(
     Model model,
-    String globalStartTime,
-    String globalEndTime
+    Boolean populatePolylines
 ) { }
