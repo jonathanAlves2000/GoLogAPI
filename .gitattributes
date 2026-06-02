@@ -3,5 +3,5 @@
 * text=auto
 *.gitattributes text eol=lf
 *.env
-*.ApiRouteOptimization.json
+ApiRouteOptimization.json
 
