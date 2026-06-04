@@ -19,12 +19,23 @@ public class EquipamentGroupValidator {
 
     public void validate(EquipamentGroupCreateRequest equipamentGroupCreateRequest){
         ArrayList<String> errors = new ArrayList<>();
-        isTractor(equipamentGroupCreateRequest.equipament1Id(), errors);
-        isEquipamentUsed(equipamentGroupCreateRequest.equipament1Id(), errors);
-        isEquipamentUsed(equipamentGroupCreateRequest.equipament2Id(), errors);
-        isEquipamentUsed(equipamentGroupCreateRequest.equipament3Id(), errors);
-        isNotTractor(equipamentGroupCreateRequest.equipament2Id(), errors);
-        isNotTractor(equipamentGroupCreateRequest.equipament3Id(), errors);
+        if(equipamentGroupCreateRequest.equipament1Id() != null)
+            isTractor(equipamentGroupCreateRequest.equipament1Id(), errors);
+
+        if(equipamentGroupCreateRequest.equipament1Id() != null)
+            isEquipamentUsed(equipamentGroupCreateRequest.equipament1Id(), errors);
+
+        if(equipamentGroupCreateRequest.equipament2Id() != null)
+            isEquipamentUsed(equipamentGroupCreateRequest.equipament2Id(), errors);
+
+        if(equipamentGroupCreateRequest.equipament3Id() != null)
+            isEquipamentUsed(equipamentGroupCreateRequest.equipament3Id(), errors);
+
+        if(equipamentGroupCreateRequest.equipament2Id() != null)
+            isNotTractor(equipamentGroupCreateRequest.equipament2Id(), errors);
+
+        if(equipamentGroupCreateRequest.equipament3Id() != null)
+            isNotTractor(equipamentGroupCreateRequest.equipament3Id(), errors);
 
         if(!errors.isEmpty()) throw new ConflictException(errors);
     }

@@ -7,7 +7,6 @@ public record Vehicle(
         Location startLocation,
         LoadLimits loadLimits,
         List<TimeWindow> startTimeWindows,
-        List<TimeWindow> endTimeWindows
-        //Double costPerKilometer
-        //Double costPerHour
+        List<TimeWindow> endTimeWindows,
+        Double costPerKilometer
 ) { }

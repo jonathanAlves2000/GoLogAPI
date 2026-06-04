@@ -20,14 +20,20 @@ public class CompanyValidator {
 
     public void validate(CompanyRequest companyRequest){
         List<String> errors = new ArrayList<>();
-        legalName(companyRequest.legalName(), errors);
-        phoneNumber(companyRequest.phoneNumber(), errors);
-        email(companyRequest.email(), errors);
-        cnpjCpf(companyRequest.cnpjCpf(), errors);
+        if(companyRequest.legalName() != null && !companyRequest.legalName().isBlank())
+            legalName(companyRequest.legalName(), errors);
 
-        if(!errors.isEmpty()){
+        if(companyRequest.phoneNumber() != null && !companyRequest.phoneNumber().isBlank())
+            phoneNumber(companyRequest.phoneNumber(), errors);
+
+        if(companyRequest.email() != null && !companyRequest.email().isBlank())
+            email(companyRequest.email(), errors);
+
+        if(companyRequest.cnpjCpf() != null && !companyRequest.cnpjCpf().isBlank())
+            cnpjCpf(companyRequest.cnpjCpf(), errors);
+
+        if(!errors.isEmpty())
             throw new ConflictException(errors);
-        }
     }
 
     public void legalName(String legalName, List<String> errors){

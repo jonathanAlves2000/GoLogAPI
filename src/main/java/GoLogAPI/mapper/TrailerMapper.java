@@ -7,10 +7,11 @@ import GoLogAPI.dto.trailer.TrailerCreateRequest;
 import GoLogAPI.dto.trailer.TrailerResponse;
 import GoLogAPI.model.Trailer;
 
-@Mapper(componentModel = "Spring")
+@Mapper(componentModel = "Spring", uses = {CompanyMapper.class})
 public interface TrailerMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "company", ignore = true)
     Trailer toEntity(TrailerCreateRequest trailerCreateRequest);
 
     TrailerResponse toResponse(Trailer trailer);

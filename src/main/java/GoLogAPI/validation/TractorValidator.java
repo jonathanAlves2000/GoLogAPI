@@ -20,8 +20,13 @@ public class TractorValidator {
 
     public void validate(TractorRequest tractorRequest){
         List<String> errors = new ArrayList<>();
-        plate(tractorRequest.plate(), errors);
-        renavam(tractorRequest.renavam(), errors);
+
+        if(tractorRequest.plate() != null && !tractorRequest.plate().isBlank())
+            plate(tractorRequest.plate(), errors);
+
+        if(tractorRequest.renavam() != null && !tractorRequest.renavam().isBlank())
+            renavam(tractorRequest.renavam(), errors);
+
         if(!errors.isEmpty())throw new ConflictException(errors);
     }
 

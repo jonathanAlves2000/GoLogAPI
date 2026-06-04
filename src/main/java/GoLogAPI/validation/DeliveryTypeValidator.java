@@ -17,7 +17,8 @@ public class DeliveryTypeValidator {
 
     public void validate(DeliveryTypeRequest deliveryTypeRequest){
         List<String> errors = new ArrayList<>();
-        name(deliveryTypeRequest.name(), errors);
+       if(deliveryTypeRequest.name() != null && !deliveryTypeRequest.name().isBlank())
+           name(deliveryTypeRequest.name(), errors);
     }
 
     public void name(String name, List<String> errors){

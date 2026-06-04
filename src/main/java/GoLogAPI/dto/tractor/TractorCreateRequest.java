@@ -1,8 +1,12 @@
 package GoLogAPI.dto.tractor;
 
+import GoLogAPI.model.TypeFuel;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+
+import java.util.UUID;
 
 public record TractorCreateRequest(
 
@@ -23,6 +27,14 @@ public record TractorCreateRequest(
         @NotNull(message = "Capacidade maxima do equipamento deve ser informada.")
         Double maximumCapacity,
 
-        @NotBlank
-        String typeFuel
+        @Schema(name = "Type Fuel")
+        @NotNull
+        TypeFuel typeFuel,
+
+        @NotNull
+        Double kmPerLiter,
+
+        @NotNull(message = "Empresa do equipamento deve ser informada.")
+        UUID companyId
+
 ) implements TractorRequest{ }

@@ -12,10 +12,12 @@ import java.util.UUID;
 public class TrailerResponse extends EquipamentResponse {
 
     private Double maximumVolume;
+    private UUID compabyId;
 
     public TrailerResponse(UUID id, String plate, String renavam, String model,
-                           Integer numberAxles, Double maximumCapacity, Double maximumVolume) {
+                           Integer numberAxles, Double maximumCapacity, Double maximumVolume, UUID compabyId) {
         super(id, plate, renavam, model, numberAxles, maximumCapacity);
         this.maximumVolume = maximumVolume;
+        this.compabyId = compabyId;
     }
 }

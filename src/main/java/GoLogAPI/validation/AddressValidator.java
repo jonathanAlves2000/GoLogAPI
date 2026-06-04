@@ -18,10 +18,11 @@ public class AddressValidator {
 
     public void validate(AddressRequest addressRequest){
         List<String> erros = new ArrayList<>();
-        cepNumber(addressRequest.cep(), addressRequest.number(), erros);
-        if(!erros.isEmpty()){
+        if(addressRequest.cep() != null && !addressRequest.cep().isBlank())
+            cepNumber(addressRequest.cep(), addressRequest.number(), erros);
+
+        if(!erros.isEmpty())
             throw new ConflictException(erros);
-        }
     }
 
     public void cepNumber(String cep, String number, List<String> erros){

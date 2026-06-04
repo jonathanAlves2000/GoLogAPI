@@ -20,11 +20,20 @@ public class UserValidator {
 
     public void validate(UserRequest userRequest){
         List<String> errors = new ArrayList<>();
-        name(userRequest.name(), errors);
-        email(userRequest.email(), errors);
-        password(userRequest.password(), errors);
-        cpf(userRequest.cpf(), errors);
-        if(!errors.isEmpty())throw new ConflictException(errors);
+        if(userRequest.name() != null && !userRequest.name().isBlank())
+            name(userRequest.name(), errors);
+
+        if(userRequest.email() != null && !userRequest.email().isBlank())
+            email(userRequest.email(), errors);
+
+        if(userRequest.password() != null && !userRequest.password().isBlank())
+            password(userRequest.password(), errors);
+
+        if(userRequest.cpf() != null && !userRequest.cpf().isBlank())
+            cpf(userRequest.cpf(), errors);
+
+        if(!errors.isEmpty())
+            throw new ConflictException(errors);
     }
 
     public void name(String userName, List<String> errors){

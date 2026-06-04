@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.UUID;
+
 public record TrailerCreateRequest(
 
         @NotBlank(message = "Placa do equipamento deve ser informada.")
@@ -24,5 +26,9 @@ public record TrailerCreateRequest(
         Double maximumCapacity,
 
         @NotNull(message = "Volume maximo deve ser informado.")
-        Double maximumVolume
+        Double maximumVolume,
+
+        @NotNull(message = "A Empresa do equipamento deve ser informada.")
+        UUID companyId
+
 ) implements TrailerRequest{ }

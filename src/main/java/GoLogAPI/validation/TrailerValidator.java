@@ -20,8 +20,12 @@ public class TrailerValidator {
 
     public void validate(TrailerRequest trailerRequest){
         List<String> errors = new ArrayList<>();
-        plate(trailerRequest.plate(), errors);
-        renavam(trailerRequest.renavam(), errors);
+        if(trailerRequest.plate() != null && !trailerRequest.plate().isBlank())
+            plate(trailerRequest.plate(), errors);
+
+        if(trailerRequest.renavam() != null && !trailerRequest.renavam().isBlank())
+            renavam(trailerRequest.renavam(), errors);
+
         if(!errors.isEmpty()) throw new ConflictException(errors);
     }
 

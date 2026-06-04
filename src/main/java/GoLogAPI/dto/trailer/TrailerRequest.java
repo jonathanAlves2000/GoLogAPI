@@ -1,5 +1,7 @@
 package GoLogAPI.dto.trailer;
 
+import java.util.UUID;
+
 public interface TrailerRequest {
     String plate();
     String renavam();
@@ -7,4 +9,5 @@ public interface TrailerRequest {
     Integer numberAxles();
     Double maximumCapacity();
     Double maximumVolume();
+    UUID companyId();
 }

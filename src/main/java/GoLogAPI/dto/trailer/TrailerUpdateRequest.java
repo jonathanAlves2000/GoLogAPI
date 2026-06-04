@@ -2,6 +2,8 @@ package GoLogAPI.dto.trailer;
 
 import jakarta.validation.constraints.Pattern;
 
+import java.util.UUID;
+
 public record TrailerUpdateRequest(
 
         @Pattern(regexp = "^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$", message = "Placa inválida")
@@ -16,5 +18,8 @@ public record TrailerUpdateRequest(
 
         Double maximumCapacity,
 
-        Double maximumVolume
+        Double maximumVolume,
+
+        UUID companyId
+
 ) implements TrailerRequest{ }

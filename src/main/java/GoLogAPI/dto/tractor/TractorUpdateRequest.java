@@ -1,6 +1,10 @@
 package GoLogAPI.dto.tractor;
 
+import GoLogAPI.model.Company;
+import GoLogAPI.model.TypeFuel;
 import jakarta.validation.constraints.Pattern;
+
+import java.util.UUID;
 
 public record TractorUpdateRequest(
 
@@ -13,5 +17,8 @@ public record TractorUpdateRequest(
         String model,
         Integer numberAxles,
         Double maximumCapacity,
-        String typeFuel
+        TypeFuel typeFuel,
+        Double kmPerLiter,
+        UUID companyId
+
 ) implements TractorRequest { }
