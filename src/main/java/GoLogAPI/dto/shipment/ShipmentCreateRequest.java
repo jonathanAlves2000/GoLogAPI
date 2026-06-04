@@ -2,6 +2,7 @@ package GoLogAPI.dto.shipment;
 
 import GoLogAPI.model.TypeOperation;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -34,20 +35,20 @@ public record ShipmentCreateRequest(
     @NotNull(message = "O Id so usuario não pode ser nulo.")
     UUID userId,
 
-        @NotNull(message = "O Id do tipo de entrega não pode ser nulo.")
+    @NotNull(message = "O Id do tipo de entrega não pode ser nulo.")
     UUID shipmentTypeId,
 
-        @NotNull(message = "O Id do transporte não pode ser nulo.")
+    @NotNull(message = "O Id do transporte não pode ser nulo.")
     UUID transportId,
 
-        @NotNull(message = "O Id do tipo de transporte não pode ser nulo.")
+    @NotNull(message = "O Id do tipo de transporte não pode ser nulo.")
     UUID typeTransportId,
 
-        @NotNull(message = "O Id do endereço da operação não pode ser nulo.")
+    @NotNull(message = "O Id do endereço da operação não pode ser nulo.")
     UUID addressId,
 
-        @NotNull(message = "O Id do cliente da operação não pode ser nulo.")
+    @NotNull(message = "O Id do cliente da operação não pode ser nulo.")
     UUID customerId,
 
-        UUID operationOrigemId
+    UUID operationOrigemId
 ) { }

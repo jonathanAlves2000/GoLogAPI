@@ -1,19 +1,22 @@
-package GoLogAPI.service;
+package GoLogAPI.service.routeOptimization;
 
-import GoLogAPI.dto.dtoRouteOptimization.*;
+import GoLogAPI.dto.dtoRouteOptimization.request.*;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.infra.client.RouteOptimizationClient;
 import GoLogAPI.model.*;
 import GoLogAPI.model.Shipment;
 import GoLogAPI.repository.*;
+import GoLogAPI.service.MessageException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
-public class RouteOptimizationService {
+@Transactional(readOnly = true)
+public class RouteRequestService {
 
     private final EquipamentGroupRepository equipamentGroupRepository;
     private final ShipmentRepository shipmentRepository;
@@ -22,9 +25,9 @@ public class RouteOptimizationService {
     private final TelemetryRepository telemetryRepository;
     private final TractorRepository tractorRepository;
 
-    public RouteOptimizationService(EquipamentGroupRepository equipamentGroupRepository, ShipmentRepository shipmentRepository,
-                                    AddressRepository addressRepository, RouteOptimizationClient routeOptimizationClient,
-                                    TelemetryRepository telemetryRepository, TractorRepository tractorRepository)
+    public RouteRequestService(EquipamentGroupRepository equipamentGroupRepository, ShipmentRepository shipmentRepository,
+                               AddressRepository addressRepository, RouteOptimizationClient routeOptimizationClient,
+                               TelemetryRepository telemetryRepository, TractorRepository tractorRepository)
     {
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.shipmentRepository = shipmentRepository;
@@ -34,6 +37,7 @@ public class RouteOptimizationService {
         this.tractorRepository = tractorRepository;
     }
 
+    @Transactional
     public String optimizeRoutes(){
         List<EquipamentGroup> equipaments = equipamentGroupRepository.findAll();
         List<Shipment> collects = shipmentRepository.findByTypeOperation(TypeOperation.COLETA);
@@ -44,8 +48,8 @@ public class RouteOptimizationService {
 
         List<Vehicle> vehicles = equipaments.stream()
                 .map(equipament -> {
-                    Telemetry telemetry = telemetryRepository.findTopByEquipamentIdOrderByDateTimeDesc(equipament.getEquipament1())
-                            .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));
+                    /*Telemetry telemetry = telemetryRepository.findTopByEquipamentIdOrderByDateTimeDesc(equipament.getEquipament1())
+                            .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));*/
 
                     Tractor tractor = tractorRepository.findById(equipament.getEquipament1().getId()).
                             orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));
@@ -105,7 +109,7 @@ public class RouteOptimizationService {
                         );
 
                         return new RouteShipment(
-                                delivery.getId().toString(),
+                                collect.getId().toString() + "/" + delivery.getId().toString(),
                                 pickups,
                                 deliveryRequests,
                                 100000.0
@@ -116,8 +120,6 @@ public class RouteOptimizationService {
 
         String globalStartTime = "2026-06-01T00:00:00-03:00";
         String globalEndTime = "2026-06-30T23:59:59-03:00";
-        ValueFunction valueFunction = new ValueFunction(1.0);
-        Objective distanceObjective = new Objective(valueFunction);
 
         Model model = new Model(
                 vehicles,
@@ -126,7 +128,7 @@ public class RouteOptimizationService {
                 globalEndTime
         );
 
-        RouteOptimizationRequest request = new RouteOptimizationRequest(model, true);
+        RouteOptimizationRequest request = new RouteOptimizationRequest(model, true, true);
         String response = routeOptimizationClient.fetchOptimizedRoute(request);
         return response;
     }

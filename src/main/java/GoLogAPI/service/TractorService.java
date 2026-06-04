@@ -39,8 +39,21 @@ public class TractorService {
 
         Company company = companyRepository.findById(tractorCreateRequest.companyId())
                         .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, tractorCreateRequest.companyId()));
-
         tractor.setCompany(company);
+
+        Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
+        Double factorEmission;
+        Double co2EmissionPerKm;
+
+        factorEmission = switch (tractor.getTypeFuel()) {
+            case DIESEL -> 2.68;
+            case ETANOL -> 1.52;
+            case GASOLINA -> 2.28;
+            default -> 0.0;
+        };
+
+        co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
+        tractor.setCo2PerKm(co2EmissionPerKm);
 
         tractorRepository.save(tractor);
         return tractorMapper.toResponse(tractor);
@@ -70,10 +83,23 @@ public class TractorService {
         tractorValidator.validate(tractorCreateRequest);
         Tractor tractor = tractorMapper.toEntity(tractorCreateRequest);
 
+        Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
+        Double factorEmission;
+        Double co2EmissionPerKm;
+
+        factorEmission = switch (tractor.getTypeFuel()) {
+            case DIESEL -> 2.68;
+            case ETANOL -> 1.52;
+            case GASOLINA -> 2.28;
+            default -> 0.0;
+        };
+
+        co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
+        tractor.setCo2PerKm(co2EmissionPerKm);
         tractor.setId(id);
         tractor.setCompany(company);
-
         tractorRepository.save(tractor);
+
         return tractorMapper.toResponse(tractor);
     }
 
@@ -81,9 +107,6 @@ public class TractorService {
     public TractorResponse updatePartial(UUID id, TractorUpdateRequest tractorUpdateRequest){
         Tractor tractor = tractorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-
-        Company company = companyRepository.findById(tractorUpdateRequest.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, tractorUpdateRequest.companyId()));
 
         tractorValidator.validate(tractorUpdateRequest);
 
@@ -118,9 +141,11 @@ public class TractorService {
             tractor.setCo2PerKm(co2EmissionPerKm);
         }
 
-        if(tractorUpdateRequest.companyId() != null)
+        if(tractorUpdateRequest.companyId() != null) {
+            Company company = companyRepository.findById(tractorUpdateRequest.companyId())
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, tractorUpdateRequest.companyId()));
             tractor.setCompany(company);
-
+        }
         tractorRepository.save(tractor);
         return tractorMapper.toResponse(tractor);
     }
