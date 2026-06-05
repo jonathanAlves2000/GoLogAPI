@@ -2,7 +2,6 @@ package GoLogAPI.dto.shipment;
 
 import GoLogAPI.model.TypeOperation;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,11 +24,9 @@ public record ShipmentCreateRequest(
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime schedulind,
 
-    @NotBlank(message = "O status da remessa deve ser informado.")
     @Size(min = 1, max = 30, message = "O status da remessa deve ter entre 1 e 30 caracteres.")
     String status,
 
-    @NotNull(message = "A sequencia da remessa não pode ser nula.")
     Integer shippingSequence,
 
     @NotNull(message = "O Id so usuario não pode ser nulo.")
@@ -38,7 +35,6 @@ public record ShipmentCreateRequest(
     @NotNull(message = "O Id do tipo de entrega não pode ser nulo.")
     UUID shipmentTypeId,
 
-    @NotNull(message = "O Id do transporte não pode ser nulo.")
     UUID transportId,
 
     @NotNull(message = "O Id do tipo de transporte não pode ser nulo.")

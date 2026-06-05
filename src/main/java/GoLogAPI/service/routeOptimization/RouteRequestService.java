@@ -45,7 +45,6 @@ public class RouteRequestService {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
-
         List<Vehicle> vehicles = equipaments.stream()
                 .map(equipament -> {
                     /*Telemetry telemetry = telemetryRepository.findTopByEquipamentIdOrderByDateTimeDesc(equipament.getEquipament1())
@@ -53,7 +52,6 @@ public class RouteRequestService {
 
                     Tractor tractor = tractorRepository.findById(equipament.getEquipament1().getId()).
                             orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));
-
 
                     return new Vehicle(
                             equipament.getEquipament1().getPlate(),

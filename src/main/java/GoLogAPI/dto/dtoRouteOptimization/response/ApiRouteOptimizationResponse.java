@@ -6,5 +6,6 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ApiRouteOptimizationResponse(
-        List<ApiVehicleRoute> routes
+        List<ApiVehicleRoute> routes,
+        ApiGlobalMetrics metrics
 ) { }

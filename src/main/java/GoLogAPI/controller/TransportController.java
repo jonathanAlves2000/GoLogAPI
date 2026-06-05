@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -50,6 +51,13 @@ public class TransportController {
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id) {
         transportService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Display List", description = "Display List Transport")
+    @GetMapping
+    public ResponseEntity<List<TransportResponse>> getAll(){
+        List<TransportResponse> transportResponses = transportService.getAll();
+        return ResponseEntity.ok(transportResponses);
     }
 
     @Operation(summary = "Update", description = "Update Transport")

@@ -18,10 +18,10 @@ public record TransportUpdateRequest(
         Integer totalKilometer,
 
         @PositiveOrZero(message = "O tempo parado não pode ser negativo.")
-        Double timeStopped,
+        Integer timeStopped,
 
         @PositiveOrZero(message = "O tempo total deve ser maior que zero")
-        Double totalTime,
+        Integer totalTime,
 
         UUID driverId,
         UUID transporterId,

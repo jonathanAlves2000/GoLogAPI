@@ -1,7 +1,9 @@
 package GoLogAPI.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
+import GoLogAPI.model.Equipament;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,4 +30,6 @@ public interface EquipamentGroupRepository extends JpaRepository<EquipamentGroup
         AND eg.active = true
     """)
     boolean isEquipamentUsed(@Param("id") UUID id);
+
+    Optional<EquipamentGroup> findByEquipament1Id(UUID id);
 }

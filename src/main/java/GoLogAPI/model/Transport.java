@@ -26,23 +26,44 @@ public class Transport extends Audit {
     @Column(name = "route_return_planned", nullable = false)
     private String routeReturnPlanned;
 
-    @Column(name = "route_return_completed", nullable = false)
+    @Column(name = "route_return_completed", nullable = true)
     private String routeReturnCompleted;
 
-    @Column(name = "delivery_quantity", nullable = false)
-    private Integer deliveryQuantity;
+    @Column(name = "route_planned", nullable = false)
+    private String routePlanned;
 
-    @Column(name = "total_kilometer", nullable = false)
-    private Integer totalKilometer;
+    @Column(name = "route_completed", nullable = true)
+    private String routeCompleted;
 
-    @Column(name = "time_stopped", nullable = false)
-    private Double timeStopped;
+    @Column(name = "shipment_quantity", nullable = false)
+    private Integer shipmentQuantity;
 
-    @Column(name = "total_time", nullable = false)
-    private Double totalTime;
+    @Column(name = "calculed_distance", nullable = false)
+    private Integer calculedDistance;
+
+    @Column(name = "distance_traveled", nullable = true)
+    private Integer distanceTraveled;
+
+    @Column(name = "time_stopped_calculed", nullable = false)
+    private Integer timeStoppedCalculed;
+
+    @Column(name = "time_stopped", nullable = true)
+    private Integer timeStopped;
+
+    @Column(name = "total_time_calculed")
+    private Integer totalTimeCalculed;
+
+    @Column(name = "total_time", nullable = true)
+    private Integer totalTime;
+
+    @Column(name = "total_cost_calculed", nullable = false)
+    private Double totalCostCalculed;
+
+    @Column(name = "total_cost")
+    private Double totalCost;
 
     @ManyToOne
-    @JoinColumn(name = "driver_id", nullable = false)
+    @JoinColumn(name = "driver_id", nullable = true)
     private Driver driver;
 
     @ManyToOne
@@ -52,5 +73,9 @@ public class Transport extends Audit {
     @ManyToOne
     @JoinColumn(name = "equipament_group_id", nullable = false)
     private EquipamentGroup equipamentGroup;
+
+    @Column(name = "code_transport", insertable = false, updatable = false)
+    @org.hibernate.annotations.Generated
+    private Integer codeTransport;
 
 }

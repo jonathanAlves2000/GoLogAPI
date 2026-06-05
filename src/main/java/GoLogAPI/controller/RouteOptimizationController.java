@@ -1,6 +1,6 @@
 package GoLogAPI.controller;
 
-import GoLogAPI.service.routeOptimization.RouteProcessService;
+import GoLogAPI.service.routeOptimization.ProcessRouteService;
 import GoLogAPI.service.routeOptimization.RouteRequestService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class RouteOptimizationController {
 
     private final RouteRequestService routeRequestService;
-    private final RouteProcessService routeProcessService;
+    private final ProcessRouteService processRouteService;
 
-    public RouteOptimizationController(RouteRequestService routeRequestService, RouteProcessService routeProcessService){
+    public RouteOptimizationController(RouteRequestService routeRequestService, ProcessRouteService processRouteService){
         this.routeRequestService = routeRequestService;
-        this.routeProcessService = routeProcessService;
+        this.processRouteService = processRouteService;
     }
 
     @PostMapping
     public String optimizeRoutes(){
         routeRequestService.optimizeRoutes();
-        routeProcessService.saveRoute();
+        processRouteService.processRoute();
         return routeRequestService.optimizeRoutes();
     }
 }

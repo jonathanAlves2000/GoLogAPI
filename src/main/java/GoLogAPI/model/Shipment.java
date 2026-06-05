@@ -69,7 +69,7 @@ public class Shipment extends Audit {
     private ShipmentType shipmentType;
 
     @ManyToOne
-    @JoinColumn(name = "transport_id", nullable = false)
+    @JoinColumn(name = "transport_id", nullable = true)
     private Transport transport;
 
     @ManyToOne

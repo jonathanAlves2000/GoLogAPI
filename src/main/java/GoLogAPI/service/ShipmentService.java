@@ -63,7 +63,7 @@ public class ShipmentService {
                 .typeOperation(shipmentCreateRequest.typeOperation())
                 .volume(shipmentCreateRequest.volume())
                 .schedulind(shipmentCreateRequest.schedulind())
-                .status(shipmentCreateRequest.status())
+                .status("AGUARDANDO INICIO")
                 .shippingSequence(shipmentCreateRequest.shippingSequence())
                 .user(user)
                 .shipmentType(shipmentType)
@@ -124,8 +124,14 @@ public class ShipmentService {
                 shipment.getWeight(),
                 shipment.getVolume(),
                 shipment.getSchedulind(),
+                shipment.getRoutePlanned(),
+                shipment.getRouteCompleted(),
+                shipment.getCalculatedDistance(),
+                shipment.getCalculatedDuration(),
                 shipment.getStatus(),
+                shipment.getCalculatedWait(),
                 shipment.getShippingSequence(),
+                shipment.getCalculatedCost(),
                 shipment.getUser(),
                 shipment.getShipmentType(),
                 shipment.getTransport(),
@@ -145,8 +151,14 @@ public class ShipmentService {
                         shipment.getWeight(),
                         shipment.getVolume(),
                         shipment.getSchedulind(),
+                        shipment.getRoutePlanned(),
+                        shipment.getRouteCompleted(),
+                        shipment.getCalculatedDistance(),
+                        shipment.getCalculatedDuration(),
                         shipment.getStatus(),
                         shipment.getShippingSequence(),
+                        shipment.getCalculatedWait(),
+                        shipment.getCalculatedCost(),
                         shipment.getUser(),
                         shipment.getShipmentType(),
                         shipment.getTransport(),

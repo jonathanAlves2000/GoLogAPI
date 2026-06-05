@@ -1,6 +1,5 @@
 package GoLogAPI.service.routeOptimization;
 
-import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteOptimizationResponse;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteStop;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
@@ -8,56 +7,27 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.Shipment;
 import GoLogAPI.repository.ShipmentRepository;
 import GoLogAPI.repository.TransportRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import GoLogAPI.service.MessageException;
 import com.google.maps.model.LatLng;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import GoLogAPI.service.MessageException;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
-public class RouteProcessService {
+public class ProcessShipmentServcie {
 
-    private final RouteRequestService routeRequestService;
-    private final ObjectMapper objectMapper;
     private final ShipmentRepository shipmentRepository;
-    private final TransportRepository transportRepository;
 
-    public RouteProcessService(RouteRequestService routeRequestService, ObjectMapper objectMapper,
-                               ShipmentRepository shipmentRepository, TransportRepository transportRepository)
+    public ProcessShipmentServcie(ShipmentRepository shipmentRepository)
     {
-        this.routeRequestService = routeRequestService;
-        this.objectMapper = objectMapper;
         this.shipmentRepository = shipmentRepository;
-        this.transportRepository = transportRepository;
-    }
-
-    public void saveRoute() {
-        String routeResponseString = routeRequestService.optimizeRoutes();
-
-        try {
-            ApiRouteOptimizationResponse routeResponseObject = objectMapper.readValue(
-                    routeResponseString,
-                    ApiRouteOptimizationResponse.class
-            );
-
-            if (routeResponseObject != null && routeResponseObject.routes() != null) {
-                processRouteResponse(routeResponseObject.routes());
-            }
-
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Falha ao deserializar o JSON de rotas do Google");
-        }
-
     }
 
     @Transactional
-    public void processRouteResponse(List<ApiVehicleRoute> routes){
+    public void processShipment(List<ApiVehicleRoute> routes){
         for(ApiVehicleRoute vehicleRoute : routes) {
 
             if (vehicleRoute.transitions() == null || vehicleRoute.transitions().isEmpty())
@@ -87,12 +57,11 @@ public class RouteProcessService {
 
                         shipment.setShippingSequence(sequenceOrder);
                         shipmentRepository.save(shipment);
-
                     }
                 }
             }
 
-            if (transitions != null) {
+            if(transitions != null) {
                 for (int i = 0; i < transitions.size(); i++) {
                     ApiRouteTransition routeTransition = transitions.get(i);
 
@@ -136,12 +105,10 @@ public class RouteProcessService {
                     shipment.setCalculatedDuration(duration);
                     shipment.setCalculatedWait(waitDuration);
                     shipmentRepository.save(shipment);
-
                 }
 
             }
         }
-
     }
 
     private Double parseApiRouteDuration (String durationStr) {
@@ -152,5 +119,4 @@ public class RouteProcessService {
 
         return Double.parseDouble(number);
     }
-
 }

@@ -17,6 +17,7 @@ import GoLogAPI.repository.TransportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -65,6 +66,11 @@ public class TransportService {
         return transportMapper.toResponse(transport);
     }
 
+    public List<TransportResponse> getAll(){
+        List<Transport> transports = transportRepository.findAll();
+        return transportMapper.toResponses(transports);
+    }
+
     @Transactional
     public void delete(UUID id){
         Transport transport = transportRepository.findById(id)
@@ -109,9 +115,9 @@ public class TransportService {
         if(transportUpdateRequest.routeReturnCompleted() != null && !transportUpdateRequest.routeReturnCompleted().isBlank())
             transport.setRouteReturnCompleted(transportUpdateRequest.routeReturnCompleted());
         if(transportUpdateRequest.deliveryQuantity() != null)
-            transport.setDeliveryQuantity(transportUpdateRequest.deliveryQuantity());
+            transport.setShipmentQuantity(transportUpdateRequest.deliveryQuantity());
         if(transportUpdateRequest.totalKilometer() != null)
-            transport.setTotalKilometer(transportUpdateRequest.totalKilometer());
+            transport.setDistanceTraveled(transportUpdateRequest.totalKilometer());
         if(transportUpdateRequest.timeStopped() != null)
             transport.setTimeStopped(transportUpdateRequest.timeStopped());
         if(transportUpdateRequest.totalTime() != null)
