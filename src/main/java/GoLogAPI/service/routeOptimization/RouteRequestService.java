@@ -57,10 +57,11 @@ public class RouteRequestService {
                             equipament.getEquipament1().getPlate(),
                             new Location(
                                     equipament.getEquipament1().getCompany().getAddress().getLatitude(),
-                                    equipament.getEquipament1().getCompany().getAddress().getLongitude()),
+                                    equipament.getEquipament1().getCompany().getAddress().getLongitude()
+                            ),
                             new LoadLimits(new Weight(String.valueOf(equipament.getEquipament1().getMaximumCapacity().longValue()))),
-                            List.of(new TimeWindow("2026-06-11T06:00:00-03:00", "2026-06-11T19:00:00-03:00")),
-                            List.of(new TimeWindow("2026-06-11T20:00:00-03:00", "2026-06-11T21:59:00-03:00")),
+                            List.of(new TimeWindow("2026-06-11T05:00:00-03:00", "2026-06-11T20:00:00-03:00")),
+                            List.of(new TimeWindow("2026-06-11T21:00:00-03:00", "2026-06-11T23:00:00-03:00")),
                             tractor.getCo2PerKm()
                     );
                 })

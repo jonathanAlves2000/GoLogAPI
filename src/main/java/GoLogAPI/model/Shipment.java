@@ -39,27 +39,6 @@ public class Shipment extends Audit {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "shipping_sequence", nullable = false)
-    private Integer shippingSequence;
-
-    @Column(name = "route_planned", nullable = true)
-    private String routePlanned;
-
-    @Column(name = "route_completed", nullable = true)
-    private String routeCompleted;
-
-    @Column(name = "calculated_distance", nullable = true)
-    private Double calculatedDistance;
-
-    @Column(name = "calculated_duration", nullable = true)
-    private Double calculatedDuration;
-
-    @Column(name = "calculated_wait", nullable = true)
-    private Double calculatedWait;
-
-    @Column(name = "calculated_cost", nullable = true)
-    private Double calculatedCost;
-
     @ManyToOne
     @JoinColumn(name = "responsible_id", nullable = false)
     private User user;
@@ -67,10 +46,6 @@ public class Shipment extends Audit {
     @ManyToOne
     @JoinColumn(name = "shipment_type_id", nullable = false)
     private ShipmentType shipmentType;
-
-    @ManyToOne
-    @JoinColumn(name = "transport_id", nullable = true)
-    private Transport transport;
 
     @ManyToOne
     @JoinColumn(name = "type_transport_id", nullable = false)

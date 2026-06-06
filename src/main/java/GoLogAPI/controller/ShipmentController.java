@@ -48,6 +48,13 @@ public class ShipmentController {
         return ResponseEntity.ok().body(deliveryResponses);
     }
 
+    @Operation(summary = "Dispaly List Personalized", description = "Display Shipment List Personalized")
+    @GetMapping("/list-personalized")
+    public ResponseEntity<List<ShipmentResponseListPersonalized>> getAllWithQuery(){
+        List<ShipmentResponseListPersonalized> shipmentResponseListQueryList = shipmentService.getAllWithQuery();
+        return ResponseEntity.ok(shipmentResponseListQueryList);
+    }
+
     @Operation(summary = "Delete", description = "Delete Shipment")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id){
@@ -57,9 +64,9 @@ public class ShipmentController {
 
     @Operation(summary = "Update", description = "Update Shipment")
     @PutMapping("{id}")
-    public ResponseEntity<ShipmentCreateResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody ShipmentCreateRequest shipmentCreateRequest){
-        ShipmentCreateResponse shipmentCreateResponse = shipmentService.update(id, shipmentCreateRequest);
-        return ResponseEntity.ok().body(shipmentCreateResponse);
+    public ResponseEntity<ShipmentUpdateResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody ShipmentCreateRequest shipmentCreateRequest){
+        ShipmentUpdateResponse shipmentUpdateResponse = shipmentService.update(id, shipmentCreateRequest);
+        return ResponseEntity.ok().body(shipmentUpdateResponse);
     }
 
     @Operation(summary = "Update", description = "Update Partial Shipment")

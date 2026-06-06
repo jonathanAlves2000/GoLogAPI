@@ -36,89 +36,59 @@ public class ProcessTransportService {
     }
 
     @Transactional
-    public void processTransport(List<ApiVehicleRoute> routes, Double totalCost) {
+    public Transport processTransport(ApiVehicleRoute vehicleRoute, Double totalCost) {
+        if (vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty()) {
+            return null;
+        }
 
-        for(ApiVehicleRoute vehicleRoute : routes) {
+        String vehicleLabel = vehicleRoute.vehicleLabel();
 
-            if(vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty())
-                continue;
+        Integer totalDistance = vehicleRoute.metrics().travelDistanceMeters();
+        Integer totalDuration = parseApiRouteDuration(vehicleRoute.metrics().travelDuration());
+        Integer totalWait = vehicleRoute.metrics().waitDuration() != null ?
+                parseApiRouteDuration(vehicleRoute.metrics().waitDuration().toString()) : 0;
 
-            String vehicleLabel = vehicleRoute.vehicleLabel();
+        Equipament equipament = equipamentRepository.findByPlate(vehicleLabel)
+                .orElseThrow(() -> new RuntimeException("Placa: " + vehicleLabel + " não encontrada"));
 
-            Transport transport = new Transport();
+        EquipamentGroup equipamentGroup = equipamentGroupRepository.findByEquipament1Id(equipament.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getId()));
 
-            transport.setShipmentQuantity(vehicleRoute.visits().size());
+        Company company = companyRepository.findById(equipament.getCompany().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getCompany().getId()));
 
-            Integer totalDistance = vehicleRoute.metrics().travelDistanceMeters();
-            Integer totalDuration = parseApiRouteDuration(vehicleRoute.metrics().travelDuration());
-            Integer totalWait = vehicleRoute.metrics().waitDuration() != null ?
-                    parseApiRouteDuration(vehicleRoute.metrics().waitDuration().toString()) : 0;
+        Transport transport = transportRepository.findByEquipamentGroup(equipamentGroup)
+                .orElse(new Transport());
 
-            Equipament equipament = equipamentRepository.findByPlate(vehicleLabel)
-                            .orElseThrow(() -> new RuntimeException("Placa: " + vehicleLabel + " não encontrada"));
+        transport.setShipmentQuantity(vehicleRoute.visits().size());
+        transport.setCalculedDistance(totalDistance);
+        transport.setTotalTimeCalculed(totalDuration);
+        transport.setTimeStoppedCalculed(totalWait);
+        transport.setTotalCostCalculed(totalCost);
+        transport.setEquipamentGroup(equipamentGroup);
+        transport.setTransporter(company);
 
-            EquipamentGroup equipamentGroup = equipamentGroupRepository.findByEquipament1Id(equipament.getId())
-                            .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE,equipament.getId()));
+        List<LatLng> totalRoutePoints = new ArrayList<>();
 
-            Company company = companyRepository.findById(equipament.getCompany().getId()).
-                    orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE,equipament.getCompany().getId()));
-
-            transport.setCalculedDistance(totalDistance);
-            transport.setTotalTimeCalculed(totalDuration);
-            transport.setTimeStoppedCalculed(totalWait);
-            transport.setTotalCostCalculed(totalCost);
-            transport.setEquipamentGroup(equipamentGroup);
-            transport.setTransporter(company);
-            transportRepository.save(transport);
-
-            if (vehicleRoute.transitions() == null || vehicleRoute.transitions().isEmpty())
-                continue;
-
-            List<LatLng> totalVehiclePoints = new ArrayList<>();
-
-            var transitions = vehicleRoute.transitions();
-            var visits = vehicleRoute.visits();
-
-            if (transitions != null && visits != null) {
-
-                for (int i = 0; i < transitions.size(); i++) {
-                    ApiRouteTransition routeTransition = transitions.get(i);
-
-                    if (i >= visits.size()) {
-                        continue;
-                    }
-
-                    if (routeTransition.routePolyline() == null ||
-                            routeTransition.routePolyline().points() == null ||
-                            routeTransition.routePolyline().points().isEmpty()) {
-                        continue;
-                    }
-
-                    List<LatLng> optimizedPoints = OptimizeListLocation.procesingRouteGoogle(routeTransition.routePolyline().points());
-                    String polylineCode = com.google.maps.internal.PolylineEncoding.encode(optimizedPoints);
-
-                    transport.setRoutePlanned(polylineCode);
-
-                    ApiRouteStop routeStop = visits.get(i);
-                    String labelId = routeStop.shipmentLabel();
-
-                    if(labelId != null && labelId.contains("/")) {
-
-                        String[] ids = labelId.split("/");
-                        UUID idColeta = UUID.fromString(ids[0]);
-                        UUID idEntrega = UUID.fromString(ids[1]);
-                        UUID shipmentId = routeStop.isPickup() ? idColeta : idEntrega;
-
-                        Shipment shipment = shipmentRepository.findById(shipmentId)
-                                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentId));
-
-                        shipment.setTransport(transport);
-
-                        shipmentRepository.save(shipment);
+        if(vehicleRoute.transitions() != null) {
+            for(ApiRouteTransition transition : vehicleRoute.transitions()) {
+                if(transition.routePolyline() != null && transition.routePolyline().points() != null) {
+                    // Decodifica os pontos de cada perna individual
+                    List<LatLng> points = OptimizeListLocation.procesingRouteGoogle(transition.routePolyline().points());
+                    if(points != null) {
+                        totalRoutePoints.addAll(points);
                     }
                 }
             }
         }
+
+        // Se a lista final tiver pontos, codifica tudo em uma única string macro
+        if(!totalRoutePoints.isEmpty()) {
+            String totalPolylineCode = com.google.maps.internal.PolylineEncoding.encode(totalRoutePoints);
+            transport.setRoutePlanned(totalPolylineCode); // Grava a linha completa do dia no Transport!
+        }
+
+        return transportRepository.save(transport);
     }
 
     private Integer parseApiRouteDuration (String durationStr) {

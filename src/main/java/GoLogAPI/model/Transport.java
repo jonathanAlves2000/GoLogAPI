@@ -23,16 +23,16 @@ public class Transport extends Audit {
     @Column(name = "id", unique = true, nullable = false)
     private UUID id;
 
-    @Column(name = "route_return_planned", nullable = false)
+    @Column(name = "route_return_planned", nullable = true)
     private String routeReturnPlanned;
 
     @Column(name = "route_return_completed", nullable = true)
     private String routeReturnCompleted;
 
-    @Column(name = "route_planned", nullable = false)
+    @Column(name = "route_planned", columnDefinition = "TEXT", nullable = false)
     private String routePlanned;
 
-    @Column(name = "route_completed", nullable = true)
+    @Column(name = "route_completed", columnDefinition = "TEXT", nullable = true)
     private String routeCompleted;
 
     @Column(name = "shipment_quantity", nullable = false)

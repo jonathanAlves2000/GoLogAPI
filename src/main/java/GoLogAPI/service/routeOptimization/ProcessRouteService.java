@@ -36,7 +36,6 @@ public class ProcessRouteService {
 
             if(routeResponseObject != null && routeResponseObject.routes() != null) {
                 processShipment.processShipment(routeResponseObject.routes());
-                processTransport.processTransport(routeResponseObject.routes(), routeResponseObject.metrics().totalCost());
             }
 
         } catch (JsonProcessingException e) {

@@ -12,10 +12,8 @@ public interface ShipmentRequest {
     Double volume();
     LocalDateTime schedulind();
     String status();
-    Integer ShippingSequence();
     User user();
     ShipmentType deliveryType();
-    Transport transport();
     TypeTransport typeTransport();
     Address address();
     Company customer();

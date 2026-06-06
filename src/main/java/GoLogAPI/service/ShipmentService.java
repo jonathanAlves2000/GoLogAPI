@@ -21,12 +21,13 @@ public class ShipmentService {
     private final ShipmentTypeRepository shipmentTypeRepository;
     private final TypeTransportRepository typeTransportRepository;
     private final TransportRepository transportRepository;
+    private final RouteStopRepository routeStopRepository;
 
     public ShipmentService(
             ShipmentRepository shipmentRepository, AddressRepository addressRepository,
             CompanyRepository companyRepository, UserRepository userRepository,
             ShipmentTypeRepository shipmentTypeRepository, TypeTransportRepository typeTransportRepository,
-            TransportRepository transportRepository)
+            TransportRepository transportRepository, RouteStopRepository routeStopRepository)
     {
         this.shipmentRepository = shipmentRepository;
         this.addressRepository = addressRepository;
@@ -35,6 +36,7 @@ public class ShipmentService {
         this.shipmentTypeRepository = shipmentTypeRepository;
         this.typeTransportRepository = typeTransportRepository;
         this.transportRepository = transportRepository;
+        this.routeStopRepository = routeStopRepository;
     }
 
     @Transactional
@@ -45,9 +47,6 @@ public class ShipmentService {
 
         ShipmentType shipmentType = shipmentTypeRepository.findById(shipmentCreateRequest.shipmentTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentCreateRequest.shipmentTypeId()));
-
-        Transport transport = transportRepository.findById(shipmentCreateRequest.transportId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentCreateRequest.transportId()));
 
         TypeTransport typeTransport = typeTransportRepository.findById(shipmentCreateRequest.typeTransportId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentCreateRequest.typeTransportId()));
@@ -63,11 +62,9 @@ public class ShipmentService {
                 .typeOperation(shipmentCreateRequest.typeOperation())
                 .volume(shipmentCreateRequest.volume())
                 .schedulind(shipmentCreateRequest.schedulind())
-                .status("AGUARDANDO INICIO")
-                .shippingSequence(shipmentCreateRequest.shippingSequence())
                 .user(user)
+                .status("")
                 .shipmentType(shipmentType)
-                .transport(transport)
                 .address(shipmentAddress)
                 .typeTransport(typeTransport)
                 .customer(customer);
@@ -103,14 +100,12 @@ public class ShipmentService {
                 shipment.getVolume(),
                 shipment.getSchedulind(),
                 shipment.getStatus(),
-                shipment.getShippingSequence(),
                 shipment.getUser().getId(),
                 shipment.getShipmentType().getId(),
-                shipment.getTransport().getId(),
                 shipment.getTypeTransport().getId(),
                 shipment.getAddress().getId(),
                 shipment.getCustomer().getId(),
-                shipment.getOperationOrigem().getId() != null ? shipment.getOperationOrigem().getId() : null
+                shipment.getOperationOrigem() != null ? shipment.getOperationOrigem().getId() : null
         );
     }
 
@@ -118,23 +113,18 @@ public class ShipmentService {
         Shipment shipment = shipmentRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE,id));
 
+        RouteStop routeStop = routeStopRepository.findById(shipment.getId())
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+
         return new ShipmentResponse(
                 shipment.getId(),
                 shipment.getTypeOperation(),
                 shipment.getWeight(),
                 shipment.getVolume(),
                 shipment.getSchedulind(),
-                shipment.getRoutePlanned(),
-                shipment.getRouteCompleted(),
-                shipment.getCalculatedDistance(),
-                shipment.getCalculatedDuration(),
                 shipment.getStatus(),
-                shipment.getCalculatedWait(),
-                shipment.getShippingSequence(),
-                shipment.getCalculatedCost(),
                 shipment.getUser(),
                 shipment.getShipmentType(),
-                shipment.getTransport(),
                 shipment.getTypeTransport(),
                 shipment.getAddress(),
                 shipment.getCustomer(),
@@ -151,22 +141,41 @@ public class ShipmentService {
                         shipment.getWeight(),
                         shipment.getVolume(),
                         shipment.getSchedulind(),
-                        shipment.getRoutePlanned(),
-                        shipment.getRouteCompleted(),
-                        shipment.getCalculatedDistance(),
-                        shipment.getCalculatedDuration(),
                         shipment.getStatus(),
-                        shipment.getShippingSequence(),
-                        shipment.getCalculatedWait(),
-                        shipment.getCalculatedCost(),
                         shipment.getUser(),
                         shipment.getShipmentType(),
-                        shipment.getTransport(),
                         shipment.getTypeTransport(),
                         shipment.getAddress(),
                         shipment.getCustomer(),
-                        shipment.getOperationOrigem() != null ? shipment.getOperationOrigem() : null
+                        shipment.getOperationOrigem()
                 ))
+                .toList();
+    }
+
+    public List<ShipmentResponseListPersonalized> getAllWithQuery() {
+        List<Object[]> results = shipmentRepository.findAllShipmentsWithRoutesAndTransportMandatory();
+
+        return results.stream()
+                .map(result -> {
+                    Shipment shipment = (Shipment) result[0];
+                    RouteStop routeStop = (RouteStop) result[1];
+                    Transport transport = (Transport) result[2];
+
+                    return new ShipmentResponseListPersonalized(
+                            shipment.getId(),
+                            shipment.getTypeOperation(),
+                            shipment.getWeight(),
+                            shipment.getVolume(),
+                            shipment.getSchedulind(),
+                            shipment.getStatus(),
+                            shipment.getShipmentType(),
+                            shipment.getTypeTransport(),
+                            shipment.getCustomer(),
+                            shipment.getOperationOrigem(),
+                            transport,
+                            routeStop
+                    );
+                })
                 .toList();
     }
 
@@ -178,7 +187,7 @@ public class ShipmentService {
     }
 
     @Transactional
-    public ShipmentCreateResponse update(UUID id, ShipmentCreateRequest shipmentCreateRequest){
+    public ShipmentUpdateResponse update(UUID id, ShipmentCreateRequest shipmentCreateRequest){
 
         Shipment shipment = shipmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
@@ -188,9 +197,6 @@ public class ShipmentService {
 
         ShipmentType shipmentType = shipmentTypeRepository.findById(shipmentCreateRequest.shipmentTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentCreateRequest.shipmentTypeId()));
-
-        Transport transport = transportRepository.findById(shipmentCreateRequest.transportId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentCreateRequest.transportId()));
 
         TypeTransport typeTransport = typeTransportRepository.findById(shipmentCreateRequest.typeTransportId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentCreateRequest.typeTransportId()));
@@ -212,10 +218,8 @@ public class ShipmentService {
         shipment.setVolume(shipmentCreateRequest.volume());
         shipment.setSchedulind(shipmentCreateRequest.schedulind());
         shipment.setStatus(shipmentCreateRequest.status());
-        shipment.setShippingSequence(shipmentCreateRequest.shippingSequence());
         shipment.setUser(user);
         shipment.setShipmentType(shipmentType);
-        shipment.setTransport(transport);
         shipment.setTypeTransport(typeTransport);
         shipment.setAddress(deliveryAddress);
         shipment.setCustomer(customerDelivery);
@@ -236,17 +240,15 @@ public class ShipmentService {
             shipmentRepository.save(collect);
         }
 
-        return new ShipmentCreateResponse(
+        return new ShipmentUpdateResponse(
                 shipment.getId(),
                 shipment.getTypeOperation(),
                 shipment.getWeight(),
                 shipment.getVolume(),
                 shipment.getSchedulind(),
                 shipment.getStatus(),
-                shipment.getShippingSequence(),
                 shipment.getUser().getId(),
                 shipment.getShipmentType().getId(),
-                shipment.getTransport().getId(),
                 shipment.getTypeTransport().getId(),
                 shipment.getAddress().getId(),
                 shipment.getCustomer().getId(),
@@ -272,9 +274,6 @@ public class ShipmentService {
         if(shipmentUpdateRequest.status() != null && !shipmentUpdateRequest.status().isBlank())
             shipment.setStatus(shipmentUpdateRequest.status());
 
-        if(shipmentUpdateRequest.shippingSequence() != null)
-            shipment.setShippingSequence(shipmentUpdateRequest.shippingSequence());
-
         if(shipmentUpdateRequest.userId() != null) {
             User user = userRepository.findById(shipmentUpdateRequest.userId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentUpdateRequest.userId()));
@@ -287,11 +286,6 @@ public class ShipmentService {
             shipment.setShipmentType(shipmentType);
         }
 
-        if(shipmentUpdateRequest.transportId() != null){
-            Transport transport = transportRepository.findById(shipmentUpdateRequest.transportId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentUpdateRequest.transportId()));
-            shipment.setTransport(transport);
-        }
 
         if(shipmentUpdateRequest.typeTransportId() != null){
             TypeTransport typeTransport = typeTransportRepository.findById(shipmentUpdateRequest.typeTransportId())
@@ -340,10 +334,8 @@ public class ShipmentService {
                 shipment.getVolume(),
                 shipment.getSchedulind(),
                 shipment.getStatus(),
-                shipment.getShippingSequence(),
                 shipment.getUser().getId(),
                 shipment.getShipmentType().getId(),
-                shipment.getTransport().getId(),
                 shipment.getTypeTransport().getId(),
                 shipment.getAddress().getId(),
                 shipment.getCustomer().getId(),

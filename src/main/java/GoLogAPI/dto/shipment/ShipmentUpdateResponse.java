@@ -5,7 +5,7 @@ import GoLogAPI.model.TypeOperation;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record ShipmentCreateResponse(
+public record ShipmentUpdateResponse(
         UUID id,
         TypeOperation typeOperation,
         Double weight,

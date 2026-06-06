@@ -1,6 +1,7 @@
 package GoLogAPI.dto.shipment;
 
 import GoLogAPI.model.TypeOperation;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -17,6 +18,7 @@ public record ShipmentUpdateRequest(
         @Positive
         Double volume,
         @FutureOrPresent
+        @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
         LocalDateTime schedulind,
         @Size(min = 1, max = 10, message = "O Status da entrega deve ter entre 1 e 10 caracteres.")
         String status,
