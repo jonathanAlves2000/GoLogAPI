@@ -13,6 +13,7 @@ import GoLogAPI.validation.TractorValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -63,6 +64,11 @@ public class TractorService {
         Tractor tractor = tractorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         return tractorMapper.toResponse(tractor);
+    }
+
+    public List<TractorResponse> getAll() {
+        List<Tractor> tractors = tractorRepository.findAll();
+        return tractorMapper.toResponses(tractors);
     }
 
     @Transactional

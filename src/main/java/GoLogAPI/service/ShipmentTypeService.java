@@ -10,6 +10,7 @@ import GoLogAPI.validation.DeliveryTypeValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -55,6 +56,13 @@ public class ShipmentTypeService {
                 shipmentType.getDescription(),
                 shipmentType.getCare()
         );
+    }
+
+    public List<DeliveryTypeResponse> getAll() {
+        List<ShipmentType> shipmentTypes = shipmentTypeRepository.findAll();
+        return shipmentTypes.stream()
+                .map(st -> new DeliveryTypeResponse(st.getId(), st.getName(), st.getDescription(), st.getCare()))
+                .toList();
     }
 
     @Transactional

@@ -6,6 +6,8 @@ import GoLogAPI.model.EquipamentGroup;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = {EquipamentMapper.class, TypeTransportMapper.class})
 public interface EquipamentGroupMapper {
 
@@ -16,4 +18,6 @@ public interface EquipamentGroupMapper {
     EquipamentGroup toEntity(EquipamentGroupCreateRequest equipamentGroupCreateRequest);
 
     EquipamentGroupResponse toResponse(EquipamentGroup equipamentGroup);
+
+    List<EquipamentGroupResponse> toResponses(List<EquipamentGroup> equipamentGroups);
 }

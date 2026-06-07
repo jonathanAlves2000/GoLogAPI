@@ -7,6 +7,8 @@ import GoLogAPI.dto.trailer.TrailerCreateRequest;
 import GoLogAPI.dto.trailer.TrailerResponse;
 import GoLogAPI.model.Trailer;
 
+import java.util.List;
+
 @Mapper(componentModel = "Spring", uses = {CompanyMapper.class})
 public interface TrailerMapper {
 
@@ -15,4 +17,6 @@ public interface TrailerMapper {
     Trailer toEntity(TrailerCreateRequest trailerCreateRequest);
 
     TrailerResponse toResponse(Trailer trailer);
+
+    List<TrailerResponse> toResponses(List<Trailer> trailers);
 }

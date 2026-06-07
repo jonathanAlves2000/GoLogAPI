@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -34,6 +35,13 @@ public class ShipmentTypeController {
                 .buildAndExpand(deliveryTypeResponse.id())
                 .toUri();
         return ResponseEntity.created(uri).body(deliveryTypeResponse);
+    }
+
+    @Operation(summary = "Display List", description = "Display Shipment Type List")
+    @GetMapping
+    public ResponseEntity<List<DeliveryTypeResponse>> getAll() {
+        List<DeliveryTypeResponse> deliveryTypes = shipmentTypeService.getAll();
+        return ResponseEntity.ok(deliveryTypes);
     }
 
     @Operation(summary = "Display", description = "Display Shipment Type")

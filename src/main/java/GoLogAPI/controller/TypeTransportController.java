@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -33,6 +34,13 @@ public class TypeTransportController {
                 .buildAndExpand(typeTransportResponse.id())
                 .toUri();
         return ResponseEntity.created(uri).body(typeTransportResponse);
+    }
+
+    @Operation(summary = "Display List", description = "Display Type Transport List")
+    @GetMapping
+    public ResponseEntity<List<TypeTransportResponse>> getAll() {
+        List<TypeTransportResponse> typeTransports = typeTransportService.getAll();
+        return ResponseEntity.ok(typeTransports);
     }
 
     @Operation(summary = "Display", description = "Display Type Transport")

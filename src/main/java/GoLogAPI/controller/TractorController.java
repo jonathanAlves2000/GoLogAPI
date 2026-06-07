@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -35,6 +36,13 @@ public class TractorController {
                 .buildAndExpand(tractorResponse.getId())
                 .toUri();
         return ResponseEntity.status(HttpStatus.CREATED).body(tractorResponse);
+    }
+
+    @Operation(summary = "Display List", description = "Display Tractor List")
+    @GetMapping
+    public ResponseEntity<List<TractorResponse>> getAll() {
+        List<TractorResponse> tractors = tractorService.getAll();
+        return ResponseEntity.ok(tractors);
     }
 
     @Operation(summary = "Display", description = "Display Tractor")

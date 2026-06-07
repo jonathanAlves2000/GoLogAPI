@@ -1,6 +1,7 @@
 package GoLogAPI.controller;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 import GoLogAPI.dto.supportedType.SupportedTypeCreateRequest;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,6 +47,13 @@ public class EquipamentGroupController {
                 .buildAndExpand(equipamentGroupResponse.id())
                 .toUri();
         return ResponseEntity.created(uri).body(equipamentGroupResponse);
+    }
+
+    @Operation(summary = "Display List", description = "Display Equipament Group List")
+    @GetMapping
+    public ResponseEntity<List<EquipamentGroupResponse>> getAll() {
+        List<EquipamentGroupResponse> equipamentGroups = equipamentGroupService.getAll();
+        return ResponseEntity.ok(equipamentGroups);
     }
 
     @Operation(summary = "Display", description = "Display Equipament Group")

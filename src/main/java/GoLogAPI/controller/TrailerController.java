@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -34,6 +35,13 @@ public class TrailerController {
                 .buildAndExpand(trailerResponse.getId())
                 .toUri();
         return ResponseEntity.created(uri).body(trailerResponse);
+    }
+
+    @Operation(summary = "Display List", description = "Display Trailer List")
+    @GetMapping
+    public ResponseEntity<List<TrailerResponse>> getAll() {
+        List<TrailerResponse> trailers = trailerService.getAll();
+        return ResponseEntity.ok(trailers);
     }
 
     @Operation(summary = "Display", description = "Display Trailer")

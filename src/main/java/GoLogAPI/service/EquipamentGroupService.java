@@ -18,6 +18,7 @@ import GoLogAPI.validation.EquipamentGroupValidator;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -70,6 +71,11 @@ public class EquipamentGroupService {
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         return equipamentGroupMapper.toResponse(equipamentGroup);
+    }
+
+    public List<EquipamentGroupResponse> getAll() {
+        List<EquipamentGroup> equipamentGroups = equipamentGroupRepository.findAll();
+        return equipamentGroupMapper.toResponses(equipamentGroups);
     }
 
     @Transactional

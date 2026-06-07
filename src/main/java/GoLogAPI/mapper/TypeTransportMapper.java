@@ -6,6 +6,8 @@ import GoLogAPI.model.TypeTransport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = {EquipamentGroupMapper.class})
 public interface TypeTransportMapper {
 
@@ -13,5 +15,7 @@ public interface TypeTransportMapper {
     TypeTransport toEntity(TypeTransportCreateRequest typeTransportCreateRequest);
 
     TypeTransportResponse toResponse(TypeTransport typeTransport);
+
+    List<TypeTransportResponse> toResponses(List<TypeTransport> typeTransports);
 
 }
