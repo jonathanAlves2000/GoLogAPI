@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
 -- Dumped by pg_dump version 18.1
 
--- Started on 2026-06-07 22:01:53 UTC
+-- Started on 2026-06-07 22:54:29 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -539,16 +539,18 @@ COPY public.occurrence_table (id, active, created_at, created_by, updated_at, up
 --
 
 COPY public.route_stop_table (id, calculated_cost, calculated_distance, calculated_duration, calculated_wait, realized_cots, realized_distance, realized_duration, realized_wait, route_completed, route_planned, sequence_order, shipment_id, transport_id) FROM stdin;
-aff2c7a0-9e55-4082-8f80-bffd09ce7d2d	0.54281	3193	325	0	\N	\N	\N	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA	1	486b3d5d-0466-4e76-9c04-e139921f15b7	b6b7b82b-3e41-4afa-9394-4c94c30452de
-8a6aba75-a889-49e7-b685-7ef114242be9	0.59823	3519	349	3251	\N	\N	\N	\N	\N	~oqgCfke`H`@f@t@CZ]A_A}@c@aDv@uMq@eDaAuEGwSmGi@u@o@Tq\\eJgE_@kDaBaFoEiDkGeF_e@i@A}@rA_OvHy@JgD{@	2	daa19285-39c2-40cb-85ac-d7de4229e655	b6b7b82b-3e41-4afa-9394-4c94c30452de
-9992a36e-10b0-4466-8839-2406eaec91e8	0.49011000000000005	2883	427	773	\N	\N	\N	\N	\N	jcmgClcc`HeBM}@|CeFdFr@j@vHcCbAAvKhLpAjBbFzLrB|AjD^~@p@t@hCSzEfHfHJfGv@ACcBfMQlB|BfAP`J_IiDw@aAx@	3	64dd3adc-8f9c-4b9e-a651-580bcead99cc	b6b7b82b-3e41-4afa-9394-4c94c30452de
-269d0945-b3cd-46cd-bff6-930648802e7f	0.4267	2510	457	19943	\N	\N	\N	\N	\N	|iogCzce`HeXhU{BtAwADqAtI}t@eDgBy@Da@}G@_Dr@mHEH_G	4	157fb504-8cf6-478f-9442-5410129c47ff	b6b7b82b-3e41-4afa-9394-4c94c30452de
 93c38ea6-89ef-4e27-8e41-3193000c4406	4.175140000000001	3902	549	0	\N	\N	\N	\N	\N	v~qgCvua`HqA|CyAr@eNyHeCbGwAnGoAnB}j@fZaBT{@hQaCdOaOzKHt@jDvAwHjDtBpFrG|HfAP`J_IiDw@aAx@	1	64dd3adc-8f9c-4b9e-a651-580bcead99cc	b9493772-b173-4800-aee8-8a81474793c8
 521ae9bd-b2b6-495b-8054-311b0aa70e86	3.0676900000000002	2867	378	5622	\N	\N	\N	\N	\N	|iogCzce`H}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	2	c826ec50-9680-42b7-a00a-64258f9ab8ad	b9493772-b173-4800-aee8-8a81474793c8
-1cb38f8a-2ca4-4a5a-99b6-91fd23025f82	3.0652799999999996	3193	325	0	\N	\N	\N	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA	1	486b3d5d-0466-4e76-9c04-e139921f15b7	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
-4bb1dbf4-3c82-4579-ba9d-43e04b820877	2.0390399999999995	2124	313	6287	\N	\N	\N	\N	\N	~oqgCfke`H`@f@t@CZ]A_As@c@kCv@uNq@wD_AWb@PhAoGbQsPq@oOuCtDuO_FaBaAx@	2	64dd3adc-8f9c-4b9e-a651-580bcead99cc	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
-7d7c1552-2d75-49a1-acf3-af9fc8da9235	2.4623999999999997	2565	348	16452	\N	\N	\N	\N	\N	|iogCzce`H}F~E_GgIqEb@mCe@uDaDHgFm@kCoAuAgDk@hDiK}@eDwDw]l@u@jFu@tAFXi@g@]aGlAc@eAEcBsADKuA	3	614903d2-34be-418e-ae26-bfb17d327bc0	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
-8b7a92c9-aac4-48b6-8098-b03cd4bc4c23	5.072639999999999	5284	646	9554	\N	\N	\N	\N	\N	v|mgCxpb`HJtArAEDbBb@dA_BHg@cAkCyVFyCaJut@c@iHsDsPXu@aDkF_PaOCw@g@C{EeWsIkWkFcMhIoEhEwDUYMwGVS]EOwG@{@\\LL_@o@a@SyIoGwPi@T	4	a380d58f-d17b-4ef1-9058-17ba76a6c848	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
+0e8a82b1-7226-4dfe-84c5-b88630344f8e	2.56902	1822	312	0	\N	\N	\N	\N	\N	z~mgCrcg`Hx@uU~ARrBpA~DyQzZyVpAhBpD_DiDw@aAx@	1	64dd3adc-8f9c-4b9e-a651-580bcead99cc	8561f7a1-8db7-43bc-910e-99908dd83a5a
+ecea54bc-e6da-437e-ae9b-445eec753479	4.04247	2867	378	5622	\N	\N	\N	\N	\N	|iogCzce`H}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	2	c826ec50-9680-42b7-a00a-64258f9ab8ad	8561f7a1-8db7-43bc-910e-99908dd83a5a
+c68d6219-1a92-422a-a1ad-d34de8b61695	0.6293400000000001	3702	315	0	\N	\N	\N	\N	\N	dargCbqa`HXq@jDbAbEeTK_@sHcCnBqGxAbD`@@lAqAbATj@v@HzAuXzxA}BdTo@b_@{@dBCbA	1	486b3d5d-0466-4e76-9c04-e139921f15b7	b6b7b82b-3e41-4afa-9394-4c94c30452de
+9bc640bd-5ec0-41b4-a280-f763c8ebc485	0.59823	3519	349	3251	\N	\N	\N	\N	\N	~oqgCfke`H`@f@t@CZ]A_A}@c@aDv@uMq@eDaAuEGwSmGi@u@o@Tq\\eJgE_@kDaBaFoEiDkGeF_e@i@A}@rA_OvHy@JgD{@	2	daa19285-39c2-40cb-85ac-d7de4229e655	b6b7b82b-3e41-4afa-9394-4c94c30452de
+7fd5faf1-dc65-4c57-9733-85c93cc423d8	0.49011000000000005	2883	427	773	\N	\N	\N	\N	\N	jcmgClcc`HeBM}@|CeFdFr@j@vHcCbAAvKhLpAjBbFzLrB|AjD^~@p@t@hCSzEfHfHJfGv@ACcBfMQlB|BfAP`J_IiDw@aAx@	3	64dd3adc-8f9c-4b9e-a651-580bcead99cc	b6b7b82b-3e41-4afa-9394-4c94c30452de
+22aadbbc-d020-4197-924c-4b7cdfd62fed	0.42653	2509	457	19943	\N	\N	\N	\N	\N	|iogCzce`HeXhU{BtAwADqAtI}t@eDgBy@Da@}G@_Dr@mHEH_G	4	157fb504-8cf6-478f-9442-5410129c47ff	b6b7b82b-3e41-4afa-9394-4c94c30452de
+330ea083-4654-4e88-ae90-98231c61bd23	3.0662399999999996	3194	325	0	\N	\N	\N	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA	1	486b3d5d-0466-4e76-9c04-e139921f15b7	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
+2649a980-3ee6-4339-a4bf-814094a7dfc3	2.03712	2122	313	6287	\N	\N	\N	\N	\N	~oqgCfke`H`@f@t@CZ]A_As@c@kCv@uNq@wD_AWb@PhAoGbQsPq@oOuCtDuO_FaBaAx@	2	64dd3adc-8f9c-4b9e-a651-580bcead99cc	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
+2ce3225a-507c-4c57-9be4-0309971abcc8	2.4623999999999997	2565	348	16452	\N	\N	\N	\N	\N	|iogCzce`H}F~E_GgIqEb@mCe@uDaDHgFm@kCoAuAgDk@hDiK}@eDwDw]l@u@jFu@tAFXi@g@]aGlAc@eAEcBsADKuA	3	614903d2-34be-418e-ae26-bfb17d327bc0	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
+47fd8439-51be-4280-9842-dc69395e5a17	5.07264	5284	646	9554	\N	\N	\N	\N	\N	v|mgCxpb`HJtArAEDbBb@dA_BHg@cAkCyVFyCaJut@c@iHsDsPXu@aDkF_PaOCw@g@C{EeWsIkWkFcMhIoEhEwDUYMwGVS]EOwG@{@\\LL_@o@a@SyIoGwPi@T	4	a380d58f-d17b-4ef1-9058-17ba76a6c848	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
 \.
 
 
@@ -632,9 +634,10 @@ COPY public.trailer_table (maximum_volume, id) FROM stdin;
 --
 
 COPY public.transport_table (id, active, created_at, created_by, updated_at, updated_by, calculed_distance, code_transport, distance_traveled, route_completed, route_planned, route_return_completed, route_return_planned, shipment_quantity, time_stopped, time_stopped_calculed, total_cost, total_cost_calculed, total_time, total_time_calculed, driver_id, equipament_group_id, transporter_id) FROM stdin;
-b6b7b82b-3e41-4afa-9394-4c94c30452de	t	2026-06-07 21:53:44.419839+00	admin@admin.com	2026-06-07 21:53:44.419839+00	admin@admin.com	12105	1	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA??`@f@t@CZ]A_A}@c@aDv@uMq@eDaAuEGwSmGi@u@o@Tq\\eJgE_@kDaBaFoEiDkGeF_e@i@A}@rA_OvHy@JgD{@??eBM}@|CeFdFr@j@vHcCbAAvKhLpAjBbFzLrB|AjD^~@p@t@hCSzEfHfHJfGv@ACcBfMQlB|BfAP`J_IiDw@aAx@??eXhU{BtAwADqAtI}t@eDgBy@Da@}G@_Dr@mHEH_G	\N	\N	4	\N	41067	\N	2.05785	\N	1558	\N	d5820f33-c8d2-44a7-90b9-8914d127e77a	7f564f96-d90f-42cc-beb2-e37cf63a324d
+b6b7b82b-3e41-4afa-9394-4c94c30452de	t	2026-06-07 21:53:44.419839+00	admin@admin.com	2026-06-07 22:36:59.816599+00	admin@admin.com	12613	1	\N	\N	dargCbqa`HXq@jDbAbEeTK_@sHcCnBqGxAbD`@@lAqAbATj@v@HzAuXzxA}BdTo@b_@{@dBCbA??`@f@t@CZ]A_A}@c@aDv@uMq@eDaAuEGwSmGi@u@o@Tq\\eJgE_@kDaBaFoEiDkGeF_e@i@A}@rA_OvHy@JgD{@??eBM}@|CeFdFr@j@vHcCbAAvKhLpAjBbFzLrB|AjD^~@p@t@hCSzEfHfHJfGv@ACcBfMQlB|BfAP`J_IiDw@aAx@??eXhU{BtAwADqAtI}t@eDgBy@Da@}G@_Dr@mHEH_G	\N	\N	4	\N	41067	\N	2.14421	\N	1548	\N	d5820f33-c8d2-44a7-90b9-8914d127e77a	7f564f96-d90f-42cc-beb2-e37cf63a324d
+50cde3ea-30fc-4c21-aaa5-3dfb3067f315	t	2026-06-07 21:53:44.476573+00	admin@admin.com	2026-06-07 22:36:59.81673+00	admin@admin.com	13165	3	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA??`@f@t@CZ]A_As@c@kCv@uNq@wD_AWb@PhAoGbQsPq@oOuCtDuO_FaBaAx@??}F~E_GgIqEb@mCe@uDaDHgFm@kCoAuAgDk@hDiK}@eDwDw]l@u@jFu@tAFXi@g@]aGlAc@eAEcBsADKuA??JtArAEDbBb@dA_BHg@cAkCyVFyCaJut@c@iHsDsPXu@aDkF_PaOCw@g@C{EeWsIkWkFcMhIoEhEwDUYMwGVS]EOwG@{@\\LL_@o@a@SyIoGwPi@T	\N	\N	4	\N	40993	\N	12.638399999999999	\N	1632	\N	17f54b48-7a3a-4a45-b7df-827bff7d9b05	7f564f96-d90f-42cc-beb2-e37cf63a324d
 b9493772-b173-4800-aee8-8a81474793c8	t	2026-06-07 21:53:44.452931+00	admin@admin.com	2026-06-07 21:53:44.452931+00	admin@admin.com	6769	2	\N	\N	v~qgCvua`HqA|CyAr@eNyHeCbGwAnGoAnB}j@fZaBT{@hQaCdOaOzKHt@jDvAwHjDtBpFrG|HfAP`J_IiDw@aAx@??}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	\N	\N	2	\N	37122	\N	7.2428300000000005	\N	927	\N	e56df2ca-a445-4e1e-ab3b-d1ba5bb9192b	7f564f96-d90f-42cc-beb2-e37cf63a324d
-50cde3ea-30fc-4c21-aaa5-3dfb3067f315	t	2026-06-07 21:53:44.476573+00	admin@admin.com	2026-06-07 21:53:44.476573+00	admin@admin.com	13166	3	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA??`@f@t@CZ]A_As@c@kCv@uNq@wD_AWb@PhAoGbQsPq@oOuCtDuO_FaBaAx@??}F~E_GgIqEb@mCe@uDaDHgFm@kCoAuAgDk@hDiK}@eDwDw]l@u@jFu@tAFXi@g@]aGlAc@eAEcBsADKuA??JtArAEDbBb@dA_BHg@cAkCyVFyCaJut@c@iHsDsPXu@aDkF_PaOCw@g@C{EeWsIkWkFcMhIoEhEwDUYMwGVS]EOwG@{@\\LL_@o@a@SyIoGwPi@T	\N	\N	4	\N	40993	\N	12.639359999999998	\N	1632	\N	17f54b48-7a3a-4a45-b7df-827bff7d9b05	7f564f96-d90f-42cc-beb2-e37cf63a324d
+8561f7a1-8db7-43bc-910e-99908dd83a5a	t	2026-06-07 22:36:58.7572+00	admin@admin.com	2026-06-07 22:36:58.7572+00	admin@admin.com	4689	4	\N	\N	z~mgCrcg`Hx@uU~ARrBpA~DyQzZyVpAhBpD_DiDw@aAx@??}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	\N	\N	2	\N	37122	\N	6.61149	\N	690	\N	d681c272-2657-4800-a298-9310aafdceda	7f564f96-d90f-42cc-beb2-e37cf63a324d
 \.
 
 
@@ -669,7 +672,7 @@ c916e36f-4846-41be-9b32-9e0ff8850a29	t	2026-03-15 22:23:57.149323+00	\N	2026-03-
 -- Name: transport_table_code_transport_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.transport_table_code_transport_seq', 3, true);
+SELECT pg_catalog.setval('public.transport_table_code_transport_seq', 4, true);
 
 
 --
@@ -1095,11 +1098,11 @@ ALTER TABLE ONLY public.tractor_table
     ADD CONSTRAINT fktpyy3ovef9vtfaubofrwkr6w1 FOREIGN KEY (id) REFERENCES public.equipament_table(id);
 
 
--- Completed on 2026-06-07 22:01:53 UTC
+-- Completed on 2026-06-07 22:54:29 UTC
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 0vcuoeTUnsFX28V4nCpIYj8JUyA9xzKQO1da97jc5OtvgQmR3M2Mdiq2uzS5PSk
+\unrestrict SoXNAbvTcpHtEZXLc1X7OCWnBKDi0ke2dfd3BcfxOYcY8fdkmXCL2YaV99G7qC2
 
