@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/company")
-@Tag(name = "Company")
+@Tag(name = "Empresa")
 public class CompanyController {
 
     private final CompanyService companyService;
@@ -23,7 +23,7 @@ public class CompanyController {
         this.companyService = companyService;
     }
 
-    @Operation(summary = "Create", description = "Create New Company")
+    @Operation(summary = "Cadastrar Empresa", description = "Cadastra uma nova empresa no sistema")
     @PostMapping
     public ResponseEntity<CompanyCreateResponse> save(@Valid @RequestBody CompanyCreateRequest companyCreateRequest){
         CompanyCreateResponse companyCreateResponse = companyService.save(companyCreateRequest);
@@ -34,35 +34,35 @@ public class CompanyController {
         return ResponseEntity.created(uri).body(companyCreateResponse);
     }
 
-    @Operation(summary = "Display", description = "Display Company")
+    @Operation(summary = "Exibir Empresa", description = "Exibe os detalhes de uma empresa específica pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<CompanyResponse> get(@PathVariable("id") UUID id){
         CompanyResponse companyResponse = companyService.get(id);
         return ResponseEntity.ok(companyResponse);
     }
 
-    @Operation(summary = "Display List", description = "Display Company List")
+    @Operation(summary = "Listar Empresas", description = "Retorna uma lista de todas as empresas cadastradas")
     @GetMapping
     public ResponseEntity<List<CompanyResponseList>> getAll(){
         List<CompanyResponseList> companyResponses = companyService.getAll();
         return ResponseEntity.ok().body(companyResponses);
     }
 
-    @Operation(summary = "Delete", description = "Delete Company")
+    @Operation(summary = "Excluir Empresa", description = "Exclui uma empresa específica pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id){
         companyService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Company")
+    @Operation(summary = "Atualizar Empresa", description = "Atualiza todos os dados de uma empresa existente")
     @PutMapping("{id}")
     public ResponseEntity<CompanyCreateResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody CompanyCreateRequest companyCreateRequest){
         CompanyCreateResponse companyCreateResponse = companyService.update(id, companyCreateRequest);
         return ResponseEntity.ok().body(companyCreateResponse);
     }
 
-    @Operation(summary = "Update Partial", description = "Update Company Partial")
+    @Operation(summary = "Atualizar Empresa Parcialmente", description = "Atualiza parcialmente os dados de uma empresa existente")
     @PatchMapping("{id}")
     public ResponseEntity<CompanyCreateResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody CompanyUpdateRequest companyUpdateRequest){
         CompanyCreateResponse companyCreateResponse = companyService.updatePartial(id, companyUpdateRequest);

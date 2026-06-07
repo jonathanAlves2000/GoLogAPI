@@ -29,7 +29,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/equipament-group")
-@Tag(name = "Equipament Group")
+@Tag(name = "Grupo de Equipamento")
 public class EquipamentGroupController {
 
     private final EquipamentGroupService equipamentGroupService;
@@ -38,7 +38,7 @@ public class EquipamentGroupController {
         this.equipamentGroupService = equipamentGroupService;
     }
 
-    @Operation(summary = "Create", description = "Create New Equipament Group")
+    @Operation(summary = "Cadastrar Grupo de Equipamento", description = "Cadastra um novo grupo de equipamentos no sistema")
     @PostMapping
     public ResponseEntity<EquipamentGroupResponse> save(@Valid @RequestBody EquipamentGroupCreateRequest equipamentGroupCreateRequest){
         EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.save(equipamentGroupCreateRequest);
@@ -49,28 +49,28 @@ public class EquipamentGroupController {
         return ResponseEntity.created(uri).body(equipamentGroupResponse);
     }
 
-    @Operation(summary = "Display List", description = "Display Equipament Group List")
+    @Operation(summary = "Listar Grupos de Equipamento", description = "Retorna uma lista de todos os grupos de equipamentos cadastrados")
     @GetMapping
     public ResponseEntity<List<EquipamentGroupResponse>> getAll() {
         List<EquipamentGroupResponse> equipamentGroups = equipamentGroupService.getAll();
         return ResponseEntity.ok(equipamentGroups);
     }
 
-    @Operation(summary = "Display", description = "Display Equipament Group")
+    @Operation(summary = "Exibir Grupo de Equipamento", description = "Exibe os detalhes de um grupo de equipamentos específico pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<EquipamentGroupResponse> get(@PathVariable("id") UUID id){
        EquipamentGroupResponse equipamentGroupResponse = equipamentGroupService.get(id);
        return ResponseEntity.ok(equipamentGroupResponse);
-    }
+     }
 
-    @Operation(summary = "Delete", description = "Delete Equipament Group")
+    @Operation(summary = "Excluir Grupo de Equipamento", description = "Exclui um grupo de equipamentos específico pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         equipamentGroupService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Equipament Group")
+    @Operation(summary = "Atualizar Grupo de Equipamento", description = "Atualiza todos os dados de um grupo de equipamentos existente")
     @PutMapping("{id}")
     public ResponseEntity<EquipamentGroupResponse> update(
             @PathVariable("id") UUID id, @RequestBody EquipamentGroupCreateRequest equipamentGroupCreateRequest){
@@ -78,7 +78,7 @@ public class EquipamentGroupController {
         return ResponseEntity.ok(equipamentGroupResponse);
     }
 
-    @Operation(summary = "Update Partial", description = "Update Partial Equipament Group")
+    @Operation(summary = "Atualizar Grupo de Equipamento Parcialmente", description = "Atualiza parcialmente os dados de um grupo de equipamentos existente")
     @PatchMapping("{id}")
     public ResponseEntity<EquipamentGroupResponse> updatePartial(
             @PathVariable("id") UUID id, @RequestBody EquipamentGroupUpdateRequest equipamentGroupUpdateRequest){
@@ -86,7 +86,7 @@ public class EquipamentGroupController {
         return ResponseEntity.ok(equipamentGroupResponse);
     }
 
-    @Operation(summary = "Update Partial Type Suported", description = "Update Partial Type Suported")
+    @Operation(summary = "Associar Tipo de Transporte", description = "Associa um tipo de transporte ao grupo de equipamentos")
     @PatchMapping("/association")
     public ResponseEntity<SupportedTypeResponse> addTransportType(
             @RequestBody @Valid SupportedTypeCreateRequest supportedTypeCreateRequest){

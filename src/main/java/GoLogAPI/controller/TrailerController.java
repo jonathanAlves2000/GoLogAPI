@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/trailer")
-@Tag(name = "Trailer")
+@Tag(name = "Carreta")
 public class TrailerController {
 
     private final TrailerService trailerService;
@@ -26,7 +26,7 @@ public class TrailerController {
         this.trailerService = trailerService;
     }
 
-    @Operation(summary = "Create", description = "Create New Trailer")
+    @Operation(summary = "Cadastrar Carreta", description = "Cadastra uma nova carreta/reboque no sistema")
     @PostMapping
     public ResponseEntity<TrailerResponse> save(@Valid @RequestBody TrailerCreateRequest trailerCreateRequest){
         TrailerResponse trailerResponse = trailerService.save(trailerCreateRequest);
@@ -37,35 +37,35 @@ public class TrailerController {
         return ResponseEntity.created(uri).body(trailerResponse);
     }
 
-    @Operation(summary = "Display List", description = "Display Trailer List")
+    @Operation(summary = "Listar Carretas", description = "Retorna uma lista de todas as carretas cadastradas")
     @GetMapping
     public ResponseEntity<List<TrailerResponse>> getAll() {
         List<TrailerResponse> trailers = trailerService.getAll();
         return ResponseEntity.ok(trailers);
     }
 
-    @Operation(summary = "Display", description = "Display Trailer")
+    @Operation(summary = "Exibir Carreta", description = "Exibe os detalhes de uma carreta específica pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<TrailerResponse> get(@PathVariable("id") UUID id){
         TrailerResponse trailerResponse = trailerService.get(id);
         return ResponseEntity.ok().body(trailerResponse);
     }
 
-    @Operation(summary = "Delete", description = "Delete Trailer")
+    @Operation(summary = "Excluir Carreta", description = "Exclui uma carreta específica pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         trailerService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Trailer")
+    @Operation(summary = "Atualizar Carreta", description = "Atualiza todos os dados de uma carreta existente")
     @PutMapping("{id}")
     public ResponseEntity<TrailerResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody TrailerCreateRequest trailerCreateRequest){
         TrailerResponse trailerResponse = trailerService.update(id, trailerCreateRequest);
         return ResponseEntity.ok().body(trailerResponse);
     }
 
-    @Operation(summary = "Update Partial", description = "Update Partial Trailer")
+    @Operation(summary = "Atualizar Carreta Parcialmente", description = "Atualiza parcialmente os dados de uma carreta existente")
     @PatchMapping("{id}")
     public ResponseEntity<TrailerResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody TrailerUpdateRequest trailerUpdateRequest){
         TrailerResponse trailerResponse = trailerService.updatePartial(id, trailerUpdateRequest);

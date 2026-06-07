@@ -19,7 +19,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/telemetry")
-@Tag(name = "Telemetry")
+@Tag(name = "Telemetria")
 public class TelemetryController {
 
     private final TelemetryService telemetryService;
@@ -28,7 +28,7 @@ public class TelemetryController {
         this.telemetryService = telemetryService;
     }
 
-    @Operation(summary = "Create", description = "Create New Telemetry")
+    @Operation(summary = "Cadastrar Telemetria", description = "Cadastra uma nova leitura de telemetria no sistema")
     @PostMapping
     public ResponseEntity<TelemetryReponse> save(@RequestBody @Valid TelemetryCreateRequest telemetryCreateRequest){
         TelemetryReponse telemetryReponse = telemetryService.save(telemetryCreateRequest);
@@ -39,35 +39,35 @@ public class TelemetryController {
         return ResponseEntity.created(uri).body(telemetryReponse);
     }
 
-    @Operation(summary = "Display", description = "Display Telemetry")
+    @Operation(summary = "Exibir Telemetria", description = "Exibe os detalhes de uma telemetria específica pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<TelemetryReponse> get(@PathVariable("id") UUID id){
         TelemetryReponse telemetryReponse = telemetryService.get(id);
         return ResponseEntity.ok(telemetryReponse);
     }
 
-    @Operation(summary = "Display List", description = "Display List Telemetry")
+    @Operation(summary = "Listar Telemetrias", description = "Retorna uma lista de todas as leituras de telemetria cadastradas")
     @GetMapping
     public ResponseEntity<List<TelemetryResponseList>> getAll(){
         List<TelemetryResponseList> telemetries = telemetryService.getAll();
         return ResponseEntity.ok().body(telemetries);
     }
 
-    @Operation(summary = "Delete", description = "Delete Telemetry")
+    @Operation(summary = "Excluir Telemetria", description = "Exclui uma leitura de telemetria específica pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         telemetryService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Telemetry")
+    @Operation(summary = "Atualizar Telemetria", description = "Atualiza todos os dados de uma telemetria existente")
     @PutMapping("{id}")
     public ResponseEntity<TelemetryReponse> update(@PathVariable("id") UUID id, @Valid @RequestBody TelemetryCreateRequest telemetryCreateRequest){
         TelemetryReponse telemetryReponse = telemetryService.update(id, telemetryCreateRequest);
         return ResponseEntity.ok(telemetryReponse);
     }
 
-    @Operation(summary = "Update Partial", description = "Update Partial Telemetry")
+    @Operation(summary = "Atualizar Telemetria Parcialmente", description = "Atualiza parcialmente os dados de uma telemetria existente")
     @PatchMapping("{id}")
     public ResponseEntity<TelemetryReponse> updatePartial(@PathVariable("id") UUID id, TelemetryUpdateRequest telemetryUpdateRequest){
         TelemetryReponse telemetryReponse = telemetryService.updatePartial(id, telemetryUpdateRequest);

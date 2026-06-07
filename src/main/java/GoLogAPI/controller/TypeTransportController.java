@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/type-transport")
-@Tag(name = "Type Transport")
+@Tag(name = "Tipo de Transporte")
 public class TypeTransportController {
 
     private final TypeTransportService typeTransportService;
@@ -25,7 +25,7 @@ public class TypeTransportController {
         this.typeTransportService = typeTransportService;
     }
 
-    @Operation(summary = "Create", description = "Create Type Transport")
+    @Operation(summary = "Cadastrar Tipo de Transporte", description = "Cadastra um novo tipo de transporte no sistema")
     @PostMapping
     public ResponseEntity<TypeTransportResponse> save(@Valid @RequestBody TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransportResponse typeTransportResponse = typeTransportService.save(typeTransportCreateRequest);
@@ -36,35 +36,35 @@ public class TypeTransportController {
         return ResponseEntity.created(uri).body(typeTransportResponse);
     }
 
-    @Operation(summary = "Display List", description = "Display Type Transport List")
+    @Operation(summary = "Listar Tipos de Transporte", description = "Retorna uma lista de todos os tipos de transporte cadastrados")
     @GetMapping
     public ResponseEntity<List<TypeTransportResponse>> getAll() {
         List<TypeTransportResponse> typeTransports = typeTransportService.getAll();
         return ResponseEntity.ok(typeTransports);
     }
 
-    @Operation(summary = "Display", description = "Display Type Transport")
+    @Operation(summary = "Exibir Tipo de Transporte", description = "Exibe os detalhes de um tipo de transporte específico pelo ID")
     @RequestMapping(value = "{id}", method ={RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<TypeTransportResponse> get(@PathVariable("id") UUID id){
         TypeTransportResponse typeTransportResponse = typeTransportService.get(id);
         return ResponseEntity.ok(typeTransportResponse);
     }
 
-    @Operation(summary = "Delete", description = "Delete Type Transport")
+    @Operation(summary = "Excluir Tipo de Transporte", description = "Exclui um tipo de transporte específico pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         typeTransportService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Type Transport")
+    @Operation(summary = "Atualizar Tipo de Transporte", description = "Atualiza todos os dados de um tipo de transporte existente")
     @PutMapping("{id}")
     public ResponseEntity<TypeTransportResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransportResponse typeTransportResponse = typeTransportService.update(id, typeTransportCreateRequest);
         return ResponseEntity.ok(typeTransportResponse);
     }
 
-    @Operation(summary = "Update Partial", description = "Update Partial Type Transport")
+    @Operation(summary = "Atualizar Tipo de Transporte Parcialmente", description = "Atualiza parcialmente os dados de um tipo de transporte existente")
     @PatchMapping("{id}")
     public ResponseEntity<TypeTransportResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody TypeTransportUpdateRequest TypeTransportUpdateRequest){
         TypeTransportResponse typeTransportResponse = typeTransportService.updatePartial(id, TypeTransportUpdateRequest);

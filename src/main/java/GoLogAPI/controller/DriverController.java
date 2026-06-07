@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/driver")
-@Tag(name = "Driver")
+@Tag(name = "Motorista")
 public class DriverController {
 
     private final DriverService driverService;
@@ -27,7 +27,7 @@ public class DriverController {
         this.driverService = driverService;
     }
 
-    @Operation(summary = "Create", description = "Create Driver")
+    @Operation(summary = "Cadastrar Motorista", description = "Cadastra um novo motorista no sistema")
     @PostMapping
     public ResponseEntity<DriverResponse> save(@Valid @RequestBody DriverCreateRequest driverCreateRequest) {
         DriverResponse driverResponse = driverService.save(driverCreateRequest);
@@ -38,35 +38,35 @@ public class DriverController {
         return ResponseEntity.created(uri).body(driverResponse);
     }
 
-    @Operation(summary = "Display", description = "Display Driver")
+    @Operation(summary = "Exibir Motorista", description = "Exibe os detalhes de um motorista específico pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<DriverResponse> get(@PathVariable("id") UUID id){
         DriverResponse driverResponse = driverService.get(id);
         return ResponseEntity.ok(driverResponse);
     }
 
-    @Operation(summary = "Display List", description = "Display Driver List")
+    @Operation(summary = "Listar Motoristas", description = "Retorna uma lista de todos os motoristas cadastrados")
     @GetMapping
     public ResponseEntity<List<DriverResponseList>> getAll(){
         List<DriverResponseList> driverResponses = driverService.getAll();
         return ResponseEntity.ok(driverResponses);
     }
 
-    @Operation(summary = "Delete", description = "Delete Driver")
+    @Operation(summary = "Excluir Motorista", description = "Exclui um motorista específico pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         driverService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Driver")
+    @Operation(summary = "Atualizar Motorista", description = "Atualiza todos os dados de um motorista existente")
     @PutMapping("{id}")
     public ResponseEntity<DriverResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody DriverCreateRequest driverCreateRequest){
         DriverResponse driverResponse = driverService.update(id, driverCreateRequest);
         return ResponseEntity.ok().body(driverResponse);
     }
 
-    @Operation(summary = "Update Partial", description = "Update Partial Driver")
+    @Operation(summary = "Atualizar Motorista Parcialmente", description = "Atualiza parcialmente os dados de um motorista existente")
     @PatchMapping("{id}")
     public ResponseEntity<DriverResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody DriverUpdateRequest driverUpdateRequest){
         DriverResponse driverResponse = driverService.updatePartial(id, driverUpdateRequest);

@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/occurrence")
-@Tag(name = "Occurrence")
+@Tag(name = "Ocorrência")
 public class OccurrenceController {
 
     private final OccurrenceService occurrenceService;
@@ -24,7 +24,7 @@ public class OccurrenceController {
         this.occurrenceService = occurrenceService;
     }
 
-    @Operation(summary = "Create", description = "Create New Occurrence")
+    @Operation(summary = "Cadastrar Ocorrência", description = "Cadastra uma nova ocorrência de transporte no sistema")
     @PostMapping
     public ResponseEntity<OccurrenceCreateResponse> save(@Valid @RequestBody OccurrenceCreateRequest occurrenceCreateRequest){
         OccurrenceCreateResponse ocurrenceCreateResponse = occurrenceService.save(occurrenceCreateRequest);
@@ -35,28 +35,28 @@ public class OccurrenceController {
         return ResponseEntity.created(uri).body(ocurrenceCreateResponse);
     }
 
-    @Operation(summary = "Display", description = "Display Occurrence")
+    @Operation(summary = "Exibir Ocorrência", description = "Exibe os detalhes de uma ocorrência específica pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<OccurrenceResponse> get(@PathVariable("id") UUID id){
         OccurrenceResponse occurrenceResponse = occurrenceService.get(id);
         return ResponseEntity.ok().body(occurrenceResponse);
     }
 
-    @Operation(summary = "Display List", description = "Display List Occurrence")
+    @Operation(summary = "Listar Ocorrências", description = "Retorna uma lista de todas as ocorrências cadastradas")
     @GetMapping
     public ResponseEntity<List<OccurrenceResponseList>> getAll(){
         List<OccurrenceResponseList> occurrences = occurrenceService.getAll();
         return ResponseEntity.ok().body(occurrences);
     }
 
-    @Operation(summary = "Delete", description = "Delete Occurrence")
+    @Operation(summary = "Excluir Ocorrência", description = "Exclui uma ocorrência específica pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         occurrenceService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Occurrence")
+    @Operation(summary = "Atualizar Ocorrência", description = "Atualiza todos os dados de uma ocorrência existente")
     @PutMapping("{id}")
     public ResponseEntity<OccurrenceCreateResponse> update(
             @PathVariable("id") UUID id,
@@ -66,7 +66,7 @@ public class OccurrenceController {
         return ResponseEntity.ok().body(occurrenceCreateResponse);
     }
 
-    @Operation(summary = "Update Partial", description = "Update Partial Occurrence")
+    @Operation(summary = "Atualizar Ocorrência Parcialmente", description = "Atualiza parcialmente os dados de uma ocorrência existente")
     @PatchMapping("{id}")
     public ResponseEntity<OccurrenceCreateResponse> updatePartial(
             @PathVariable("id") UUID id,

@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
-@Tag(name = "User")
+@Tag(name = "Usuário")
 public class UserController {
 
         private final UserService userService;
@@ -29,7 +29,7 @@ public class UserController {
             this.userService = userService;
         }
 
-        @Operation(summary = "Create", description = "Create new user")
+        @Operation(summary = "Cadastrar Usuário", description = "Cadastra um novo usuário no sistema")
         @PostMapping
         public ResponseEntity<UserResponse> save(@Valid @RequestBody UserCreateRequest userCreateRequest){
             UserResponse userResponse = userService.save(userCreateRequest);
@@ -40,35 +40,35 @@ public class UserController {
             return ResponseEntity.created(uri).body(userResponse);
         }
 
-        @Operation(summary = "Display", description = "Display User")
+        @Operation(summary = "Exibir Usuário", description = "Exibe os detalhes de um usuário específico pelo ID")
         @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
         public ResponseEntity<UserResponse> get(@PathVariable("id") UUID id){
             UserResponse userResponse = userService.get(id);
             return ResponseEntity.ok(userResponse);
         }
 
-        @Operation(summary = "Display List", description = "Display User List")
+        @Operation(summary = "Listar Usuários", description = "Retorna uma lista de todos os usuários cadastrados")
         @GetMapping
         public ResponseEntity<List<UserResponseList>> getAll(){
             List<UserResponseList> users = userService.getAll();
             return ResponseEntity.ok().body(users);
         }
 
-        @Operation(summary = "Delete", description = "Delete User")
+        @Operation(summary = "Excluir Usuário", description = "Exclui um usuário específico pelo ID")
         @DeleteMapping("{id}")
         public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
             userService.delete(id);
             return ResponseEntity.noContent().build();
         }
 
-        @Operation(summary = "Update", description = "Update User")
+        @Operation(summary = "Atualizar Usuário", description = "Atualiza todos os dados de um usuário existente")
         @PutMapping("{id}")
         public ResponseEntity<UserResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody UserCreateRequest userCreateRequest){
             UserResponse userResponse = userService.update(id, userCreateRequest);
             return ResponseEntity.ok().body(userResponse);
         }
 
-        @Operation(summary = "Update Partial", description = "Update User Partial")
+        @Operation(summary = "Atualizar Usuário Parcialmente", description = "Atualiza parcialmente os dados de um usuário existente")
         @PatchMapping("{id}")
         public ResponseEntity<UserResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody UserUpdateRequest userUpdateRequest){
             UserResponse userResponse = userService.updatePartial(id, userUpdateRequest);

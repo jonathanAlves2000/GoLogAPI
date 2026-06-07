@@ -27,7 +27,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/address")
-@Tag(name = "Address")
+@Tag(name = "Endereço")
 public class AddressController {
 
     private final AddressService addressService;
@@ -36,7 +36,7 @@ public class AddressController {
         this.addressService = addressService;
     }
 
-    @Operation(summary = "Create", description = "Create New Address")
+    @Operation(summary = "Cadastrar Endereço", description = "Cadastra um novo endereço no sistema")
     @PostMapping
     public ResponseEntity<AddressResponse> save(@Valid @RequestBody AddressCreateRequest addressCreateRequest){
         AddressResponse addressResponse = addressService.save(addressCreateRequest);
@@ -47,7 +47,7 @@ public class AddressController {
         return ResponseEntity.created(uri).body(addressResponse);
     }
 
-    @Operation(summary = "Display", description = "Display Address")
+    @Operation(summary = "Exibir Endereço", description = "Exibe os detalhes de um endereço específico pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<AddressResponse> get(@PathVariable("id") UUID id){
         AddressResponse addressResponse = addressService.get(id);
@@ -55,27 +55,27 @@ public class AddressController {
     }
 
     @GetMapping
-    @Operation(summary = "Display List", description = "Display Address List")
+    @Operation(summary = "Listar Endereços", description = "Retorna uma lista de todos os endereços cadastrados")
     public ResponseEntity<List<AddressResponse>> getAll(){
         List<AddressResponse> addressResponses = addressService.getAll();
         return ResponseEntity.ok(addressResponses);
     }
 
-    @Operation(summary = "Display List", description = "Display Address List")
+    @Operation(summary = "Excluir Endereço", description = "Exclui um endereço específico pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         addressService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Address")
+    @Operation(summary = "Atualizar Endereço", description = "Atualiza todos os dados de um endereço existente")
     @PutMapping("{id}")
     public ResponseEntity<AddressResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody AddressCreateRequest addressCreateRequest){
         AddressResponse addressResponse = addressService.update(id, addressCreateRequest);
         return ResponseEntity.ok().body(addressResponse);
     }
 
-    @Operation(summary = "Update Partial", description = "Update Address Partial")
+    @Operation(summary = "Atualizar Endereço Parcialmente", description = "Atualiza parcialmente os dados de um endereço existente")
     @PatchMapping("{id}")
     public ResponseEntity<AddressResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody AddressUpdateRequest addressUpdateRequest){
         AddressResponse addressResponse = addressService.updatePartial(id, addressUpdateRequest);

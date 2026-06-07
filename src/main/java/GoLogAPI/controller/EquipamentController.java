@@ -13,7 +13,7 @@ import GoLogAPI.service.EquipamentService;
 
 @RestController
 @RequestMapping("/equipament")
-@Tag(name = "Equipament")
+@Tag(name = "Equipamento")
 public class EquipamentController {
 
     private final EquipamentService equipamentService;
@@ -22,14 +22,14 @@ public class EquipamentController {
         this.equipamentService = equipamentService;
     }
 
-    @Operation(summary = "Display", description = "Display Equipament")
+    @Operation(summary = "Exibir Equipamento", description = "Exibe os detalhes de um equipamento específico pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<EquipamentResponse> get(@PathVariable("id") UUID id){
         EquipamentResponse equipamentResponse = equipamentService.get(id);
         return ResponseEntity.ok(equipamentResponse);
     }
 
-    @Operation(summary = "Display List", description = "Display Equipament List")
+    @Operation(summary = "Listar Equipamentos", description = "Retorna uma lista de todos os equipamentos cadastrados")
     @GetMapping
     public ResponseEntity<List<EquipamentResponse>> getAll(){
         List<EquipamentResponse> equipaments = equipamentService.getAll();

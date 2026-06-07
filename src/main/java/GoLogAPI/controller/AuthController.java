@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/login")
-@Tag(name = "Authentication")
+@Tag(name = "Autenticação")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -28,7 +28,7 @@ public class AuthController {
         this.tokenService = tokenService;
     }
 
-    @Operation(summary = "Authenticate")
+    @Operation(summary = "Autenticar", description = "Realiza a autenticação do usuário e retorna o token JWT")
     @PostMapping
     public ResponseEntity<TokenResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
         var authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.email() ,loginRequest.password());

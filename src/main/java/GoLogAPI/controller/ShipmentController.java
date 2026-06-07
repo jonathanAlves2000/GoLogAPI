@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/shipment")
-@Tag(name = "Shipment")
+@Tag(name = "Carga/Remessa")
 public class ShipmentController {
 
     private final ShipmentService shipmentService;
@@ -23,7 +23,7 @@ public class ShipmentController {
         this.shipmentService = shipmentService;
     }
 
-    @Operation(summary = "Create", description = "Create New Shipment")
+    @Operation(summary = "Cadastrar Carga", description = "Cadastra uma nova carga/remessa no sistema")
     @PostMapping
     public ResponseEntity<ShipmentCreateResponse> save(@Valid @RequestBody ShipmentCreateRequest shipmentCreateRequest){
         ShipmentCreateResponse shipmentCreateResponse = shipmentService.save(shipmentCreateRequest);
@@ -34,42 +34,42 @@ public class ShipmentController {
         return ResponseEntity.created(uri).body(shipmentCreateResponse);
     }
 
-    @Operation(summary = "Display", description = "Display Shipment")
+    @Operation(summary = "Exibir Carga", description = "Exibe os detalhes de uma carga/remessa específica pelo ID")
     @RequestMapping(value = "{id}", method = {RequestMethod.GET, RequestMethod.HEAD})
     public ResponseEntity<ShipmentResponse> get(@PathVariable("id") UUID id){
         ShipmentResponse shipmentResponse = shipmentService.get(id);
         return ResponseEntity.ok(shipmentResponse);
     }
 
-    @Operation(summary = "Dispaly List", description = "Display Shipment List")
+    @Operation(summary = "Listar Cargas", description = "Retorna uma lista de todas as cargas/remessas cadastradas")
     @GetMapping
     public ResponseEntity<List<ShipmentResponseList>> getAll(){
         List<ShipmentResponseList> deliveryResponses = shipmentService.getAll();
         return ResponseEntity.ok().body(deliveryResponses);
     }
 
-    @Operation(summary = "Dispaly List Personalized", description = "Display Shipment List Personalized")
+    @Operation(summary = "Listar Cargas Personalizado", description = "Retorna uma lista personalizada de cargas/remessas com filtros de consulta")
     @GetMapping("/list-personalized")
     public ResponseEntity<List<ShipmentResponseListPersonalized>> getAllWithQuery(){
         List<ShipmentResponseListPersonalized> shipmentResponseListQueryList = shipmentService.getAllWithQuery();
         return ResponseEntity.ok(shipmentResponseListQueryList);
     }
 
-    @Operation(summary = "Delete", description = "Delete Shipment")
+    @Operation(summary = "Excluir Carga", description = "Exclui uma carga/remessa específica pelo ID")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id){
         shipmentService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Update", description = "Update Shipment")
+    @Operation(summary = "Atualizar Carga", description = "Atualiza todos os dados de uma carga/remessa existente")
     @PutMapping("{id}")
     public ResponseEntity<ShipmentUpdateResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody ShipmentCreateRequest shipmentCreateRequest){
         ShipmentUpdateResponse shipmentUpdateResponse = shipmentService.update(id, shipmentCreateRequest);
         return ResponseEntity.ok().body(shipmentUpdateResponse);
     }
 
-    @Operation(summary = "Update", description = "Update Partial Shipment")
+    @Operation(summary = "Atualizar Carga Parcialmente", description = "Atualiza parcialmente os dados de uma carga/remessa existente")
     @PatchMapping("{id}")
     public ResponseEntity<ShipmentCreateResponse> updatePartial(@PathVariable("id") UUID id, @Valid @RequestBody ShipmentUpdateRequest shipmentUpdateRequest){
         ShipmentCreateResponse shipmentCreateResponse = shipmentService.updatePartial(id, shipmentUpdateRequest);
