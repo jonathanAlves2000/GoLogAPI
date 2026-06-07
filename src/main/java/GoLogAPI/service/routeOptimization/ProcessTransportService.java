@@ -20,16 +20,13 @@ import java.util.UUID;
 public class ProcessTransportService {
 
     private final TransportRepository transportRepository;
-    private final ShipmentRepository shipmentRepository;
     private final EquipamentGroupRepository equipamentGroupRepository;
     private final EquipamentRepository equipamentRepository;
     private final CompanyRepository companyRepository;
 
-    public ProcessTransportService(TransportRepository transportRepository, ShipmentRepository shipmentRepository,
-                                   EquipamentGroupRepository equipamentGroupRepository, EquipamentRepository equipamentRepository,
+    public ProcessTransportService(TransportRepository transportRepository, EquipamentGroupRepository equipamentGroupRepository, EquipamentRepository equipamentRepository,
                                    CompanyRepository companyRepository) {
         this.transportRepository = transportRepository;
-        this.shipmentRepository = shipmentRepository;
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.equipamentRepository = equipamentRepository;
         this.companyRepository = companyRepository;
@@ -73,7 +70,6 @@ public class ProcessTransportService {
         if(vehicleRoute.transitions() != null) {
             for(ApiRouteTransition transition : vehicleRoute.transitions()) {
                 if(transition.routePolyline() != null && transition.routePolyline().points() != null) {
-                    // Decodifica os pontos de cada perna individual
                     List<LatLng> points = OptimizeListLocation.procesingRouteGoogle(transition.routePolyline().points());
                     if(points != null) {
                         totalRoutePoints.addAll(points);
@@ -82,10 +78,9 @@ public class ProcessTransportService {
             }
         }
 
-        // Se a lista final tiver pontos, codifica tudo em uma única string macro
         if(!totalRoutePoints.isEmpty()) {
             String totalPolylineCode = com.google.maps.internal.PolylineEncoding.encode(totalRoutePoints);
-            transport.setRoutePlanned(totalPolylineCode); // Grava a linha completa do dia no Transport!
+            transport.setRoutePlanned(totalPolylineCode);
         }
 
         return transportRepository.save(transport);

@@ -14,6 +14,7 @@ public record ShipmentResponseListPersonalized(
         String status,
         ShipmentType shipmentType,
         TypeTransport typeTransport,
+        Address address,
         Company customer,
         Shipment operationOrigem,
         Transport transport,

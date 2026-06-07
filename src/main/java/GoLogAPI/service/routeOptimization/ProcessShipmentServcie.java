@@ -78,27 +78,22 @@ public class ProcessShipmentServcie {
                     int sequenceOrder = i + 1;
                     Shipment shipment = null;
 
-                    // CORREÇÃO AQUI: Relação direta 1 para 1 entre a transição 'i' e a visita 'i'
                     if(i < visits.size()) {
                         ApiRouteStop currentStop = visits.get(i);
                         String[] ids = currentStop.shipmentLabel().split("/");
                         UUID collectId = UUID.fromString(ids[0]);
                         UUID deliveryId = UUID.fromString(ids[1]);
 
-                        // Identifica se o destino da perna é o ponto de coleta ou de entrega
                         UUID targetId = currentStop.isPickup() ? collectId : deliveryId;
 
                         shipment = shipmentRepository.findById(targetId)
                                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, targetId));
                     }
 
-                    // Se i for igual ao tamanho de visits, esta é a transição final de volta à garagem.
-                    // Como não há documento (Shipment) atrelado à garagem, ignoramos o salvamento dela.
                     if (shipment == null) {
                         continue;
                     }
 
-                    // Instancia e salva a Parada Física da Viagem de forma isolada
                     RouteStop stop = new RouteStop();
                     stop.setSequenceOrder(sequenceOrder);
                     stop.setRoutePlanned(polylineCode);
