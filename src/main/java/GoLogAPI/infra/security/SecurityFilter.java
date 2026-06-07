@@ -36,9 +36,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 try {
                     var email = tokenService.getSubject(token);
                     var role = tokenService.getClaim(token, "role");
-                    var name = tokenService.getClaim(token, "name");
-                    //var userDetails = getUserDetailsService.loadUserByUsername(email);
-                    var authority = new SimpleGrantedAuthority(role);
+                    var authority = new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role);
                     var authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } catch (TokenExpiredException exception) {
