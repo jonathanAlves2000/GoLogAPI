@@ -2,7 +2,7 @@
 
 O **GoLogAPI** é o ecossistema de backend robusto desenvolvido para o gerenciamento, otimização logística e monitoramento de frotas em tempo real. Projetado com foco em alta performance e escalabilidade, o sistema integra serviços de telemetria, roteirização inteligente e persistência isolada de dados.
 
-Este repositório faz parte do projeto central de otimização logística multiplataforma, atuando como o core engine que serve o aplicativo móvel (**GoLogApp**), sitema WEb (**GoLogWEB) e processa dados de dispositivos IoT.
+Este repositório faz parte do projeto central de otimização logística multiplataforma, atuando como o core engine que serve o aplicativo móvel (**GoLogApp**), sitema WEb (**GoLogWEB**) e processa dados de dispositivos IoT.
 
 ---
 
