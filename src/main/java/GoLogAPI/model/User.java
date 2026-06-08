@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
@@ -60,6 +62,7 @@ public class User extends Audit implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Company company;
 
     @Override

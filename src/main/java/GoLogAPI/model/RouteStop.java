@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import java.util.UUID;
 
 @Entity
@@ -55,9 +58,11 @@ public class RouteStop {
 
     @ManyToOne
     @JoinColumn(name = "transport_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Transport transport;
 
     @ManyToOne
     @JoinColumn(name = "shipment_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Shipment shipment;
 }

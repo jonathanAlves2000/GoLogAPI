@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import java.util.UUID;
@@ -64,14 +66,17 @@ public class Transport extends Audit {
 
     @ManyToOne
     @JoinColumn(name = "driver_id", nullable = true)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Driver driver;
 
     @ManyToOne
     @JoinColumn(name = "transporter_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Company transporter;
 
     @ManyToOne
     @JoinColumn(name = "equipament_group_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private EquipamentGroup equipamentGroup;
 
     @Column(name = "code_transport", insertable = false, updatable = false)

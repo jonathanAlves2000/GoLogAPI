@@ -3,6 +3,8 @@ package GoLogAPI.model;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -42,6 +44,7 @@ public class Driver extends Audit {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private User user;
 
 }

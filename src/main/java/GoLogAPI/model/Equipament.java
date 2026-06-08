@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.ManyToAny;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -45,6 +47,7 @@ public class Equipament extends Audit {
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Company company;
 
 }

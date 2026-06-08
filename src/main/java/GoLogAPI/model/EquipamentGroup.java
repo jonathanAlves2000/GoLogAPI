@@ -3,6 +3,8 @@ package GoLogAPI.model;
 import java.util.Set;
 import java.util.UUID;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -41,14 +43,17 @@ public class EquipamentGroup extends Audit{
 
     @ManyToOne
     @JoinColumn(name = "equipament1_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Equipament equipament1;
 
     @ManyToOne
     @JoinColumn(name = "equipament2_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private Equipament equipament2;
 
     @ManyToOne
     @JoinColumn(name = "equipament3_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private Equipament equipament3;
 
     @ManyToMany

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -37,13 +39,16 @@ public class Occurrence extends Audit {
 
     @ManyToOne
     @JoinColumn(name = "delivery_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Shipment shipment;
 
     @ManyToOne
     @JoinColumn(name = "transport_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Transport transport;
 
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private User sender;
 }

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -53,5 +55,6 @@ public class Telemetry extends Audit{
 
     @ManyToOne
     @JoinColumn(name = "equipament_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Equipament equipamentId;
 }

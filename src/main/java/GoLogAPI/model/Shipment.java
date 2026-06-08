@@ -2,6 +2,8 @@ package GoLogAPI.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
@@ -41,25 +43,31 @@ public class Shipment extends Audit {
 
     @ManyToOne
     @JoinColumn(name = "responsible_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "shipment_type_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private ShipmentType shipmentType;
 
     @ManyToOne
     @JoinColumn(name = "type_transport_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private TypeTransport typeTransport;
 
     @ManyToOne
     @JoinColumn(name = "shipment_address_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Address address;
 
     @ManyToOne
     @JoinColumn(name = "shipment_customer_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Company customer;
 
     @ManyToOne
     @JoinColumn(name = "carga_origem_id", nullable = true)
+    @NotFound(action = NotFoundAction.IGNORE)
     private Shipment operationOrigem;
 }
