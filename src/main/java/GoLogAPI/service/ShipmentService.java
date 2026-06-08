@@ -170,6 +170,7 @@ public class ShipmentService {
                             shipment.getStatus(),
                             shipment.getShipmentType(),
                             shipment.getTypeTransport(),
+                            shipment.getAddress(),
                             shipment.getCustomer(),
                             shipment.getOperationOrigem(),
                             transport,

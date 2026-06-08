@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
                         email = "admin@admin.com"
                 )
         ),
-        security = @SecurityRequirement(name = "bearerAuth") // <--- Aplica globalmente
+        security = @SecurityRequirement(name = "bearerAuth")
 )
 
 @SecurityScheme(

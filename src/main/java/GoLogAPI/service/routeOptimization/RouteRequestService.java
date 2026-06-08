@@ -20,7 +20,6 @@ public class RouteRequestService {
 
     private final EquipamentGroupRepository equipamentGroupRepository;
     private final ShipmentRepository shipmentRepository;
-    private final AddressRepository addressRepository;
     private final RouteOptimizationClient routeOptimizationClient;
     private final TelemetryRepository telemetryRepository;
     private final TractorRepository tractorRepository;
@@ -31,7 +30,6 @@ public class RouteRequestService {
     {
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.shipmentRepository = shipmentRepository;
-        this.addressRepository = addressRepository;
         this.routeOptimizationClient = routeOptimizationClient;
         this.telemetryRepository = telemetryRepository;
         this.tractorRepository = tractorRepository;
@@ -41,14 +39,13 @@ public class RouteRequestService {
     public String optimizeRoutes(){
         List<EquipamentGroup> equipaments = equipamentGroupRepository.findAll();
         List<Shipment> collects = shipmentRepository.findByTypeOperation(TypeOperation.COLETA);
-        List<Address> addresses = addressRepository.findAll();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
 
         List<Vehicle> vehicles = equipaments.stream()
                 .map(equipament -> {
-                    /*Telemetry telemetry = telemetryRepository.findTopByEquipamentIdOrderByDateTimeDesc(equipament.getEquipament1())
-                            .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));*/
+                    Telemetry telemetry = telemetryRepository.findTopByEquipamentIdOrderByDateTimeDesc(equipament.getEquipament1())
+                            .orElse(null);
 
                     Tractor tractor = tractorRepository.findById(equipament.getEquipament1().getId()).
                             orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));
@@ -56,8 +53,8 @@ public class RouteRequestService {
                     return new Vehicle(
                             equipament.getEquipament1().getPlate(),
                             new Location(
-                                    equipament.getEquipament1().getCompany().getAddress().getLatitude(),
-                                    equipament.getEquipament1().getCompany().getAddress().getLongitude()
+                                    telemetry != null && !telemetry.getLatitude().isEmpty() ? telemetry.getLatitude() : equipament.getEquipament1().getCompany().getAddress().getLatitude(),
+                                    telemetry != null && !telemetry.getLongitude().isEmpty() ? telemetry.getLongitude() : equipament.getEquipament1().getCompany().getAddress().getLongitude()
                             ),
                             new LoadLimits(new Weight(String.valueOf(equipament.getEquipament1().getMaximumCapacity().longValue()))),
                             List.of(new TimeWindow("2026-06-11T05:00:00-03:00", "2026-06-11T20:00:00-03:00")),

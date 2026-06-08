@@ -80,7 +80,6 @@ public class Transport extends Audit {
     private EquipamentGroup equipamentGroup;
 
     @Column(name = "code_transport", insertable = false, updatable = false)
-    @org.hibernate.annotations.Generated
+    @org.hibernate.annotations.Generated()
     private Integer codeTransport;
-
 }
