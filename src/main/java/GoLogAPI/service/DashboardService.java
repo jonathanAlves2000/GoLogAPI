@@ -40,6 +40,7 @@ public class DashboardService {
         List<RouteStop> routeStops = routeStopRepository.findAll();
 
         Map<UUID, RouteStop> shipmentToRouteStop = routeStops.stream()
+                .filter(rs -> rs.getShipment() != null)
                 .collect(Collectors.toMap(rs -> rs.getShipment().getId(), rs -> rs, (rs1, rs2) -> rs1));
 
         long quantidadeMotoristas = drivers.size();
