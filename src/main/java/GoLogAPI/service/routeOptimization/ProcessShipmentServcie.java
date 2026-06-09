@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -124,41 +122,50 @@ public class ProcessShipmentServcie {
             return;
         }
 
-        // 1. Calcula os totais das ENTREGAS (Forçando conversão limpa para String)
-        double weightTotalShipment = 0.0;
-        double volumeTotalShipment = 0.0;
+        Map<UUID, Double> weightPerCollect = new HashMap<>();
+        Map<UUID, Double> volumePerCollect = new HashMap<>();
 
-        for (RouteStop stop : stops) {
-            if(stop.getShipment() != null && stop.getShipment().getTypeOperation() != null) {
-                // Pega o nome do tipo (funciona tanto para String quanto para Enum)
-                String typeStr = stop.getShipment().getTypeOperation().toString().trim();
+        for(RouteStop stop : stops) {
+            Shipment shipment = stop.getShipment();
+            if(shipment != null && shipment.getTypeOperation() != null) {
+                String typeStr = shipment.getTypeOperation().toString().trim();
 
                 if("ENTREGA".equalsIgnoreCase(typeStr)) {
-                    weightTotalShipment += (stop.getShipment().getWeight() != null) ? stop.getShipment().getWeight() : 0.0;
-                    volumeTotalShipment += (stop.getShipment().getVolume() != null) ? stop.getShipment().getVolume() : 0.0;
+
+                    UUID collectOrigimId = shipment.getOperationOrigem().getId();
+
+                    if (collectOrigimId != null) {
+                        double peso = (shipment.getWeight() != null) ? shipment.getWeight() : 0.0;
+                        double volume = (shipment.getVolume() != null) ? shipment.getVolume() : 0.0;
+
+                        weightPerCollect.put(collectOrigimId, weightPerCollect.getOrDefault(collectOrigimId, 0.0) + peso);
+                        volumePerCollect.put(collectOrigimId, volumePerCollect.getOrDefault(collectOrigimId, 0.0) + volume);
+                    }
                 }
             }
         }
 
-        // 2. Aplica os valores calculados diretamente nas entidades RouteStop da lista
         for(RouteStop stop : stops) {
-            if(stop.getShipment() == null || stop.getShipment().getTypeOperation() == null) {
+            Shipment shipment = stop.getShipment();
+            if(shipment == null || shipment.getTypeOperation() == null) {
                 continue;
             }
 
-            String typeOperation = stop.getShipment().getTypeOperation().toString().trim();
+            String typeOperation = shipment.getTypeOperation().toString().trim();
 
             if("COLETA".equalsIgnoreCase(typeOperation)) {
-                // Coleta recebe o acumulado das entregas
-                stop.setWeight(weightTotalShipment);
-                stop.setVolume(volumeTotalShipment);
-            } else if ("ENTREGA".equalsIgnoreCase(typeOperation)) {
-                // Entrega espelha o valor do próprio shipment
-                stop.setWeight(stop.getShipment().getWeight() != null ? stop.getShipment().getWeight() : 0.0);
-                stop.setVolume(stop.getShipment().getVolume() != null ? stop.getShipment().getVolume() : 0.0);
+                UUID idCollect = shipment.getId();
+                double filterWeight = weightPerCollect.getOrDefault(idCollect, 0.0);
+                double filterVolume = volumePerCollect.getOrDefault(idCollect, 0.0);
+
+                stop.setWeight(filterWeight);
+                stop.setVolume(filterVolume);
+            }
+            else if ("ENTREGA".equalsIgnoreCase(typeOperation)) {
+                stop.setWeight(shipment.getWeight() != null ? shipment.getWeight() : 0.0);
+                stop.setVolume(shipment.getVolume() != null ? shipment.getVolume() : 0.0);
             }
 
-            // Salva a entidade de rota atualizada com os novos valores
             routeStopRepository.save(stop);
         }
     }

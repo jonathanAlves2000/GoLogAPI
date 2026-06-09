@@ -70,5 +70,6 @@ public class RouteStop extends Audit{
     @ManyToOne
     @JoinColumn(name = "shipment_id", nullable = false)
     @NotFound(action = NotFoundAction.IGNORE)
+    @JsonIgnoreProperties({"routeStop", "transport"})
     private Shipment shipment;
 }
