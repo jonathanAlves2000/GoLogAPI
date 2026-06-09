@@ -28,6 +28,9 @@ public class Occurrence extends Audit {
     @Column(name = "id", nullable = false)
     private UUID id;
 
+    @Column(name = "date_time", nullable = false)
+    private LocalDateTime dateTime;
+
     @Column(name = "type", nullable = false)
     private String type;
 

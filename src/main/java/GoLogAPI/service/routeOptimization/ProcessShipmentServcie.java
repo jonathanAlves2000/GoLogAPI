@@ -9,17 +9,18 @@ import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Transport;
 import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.ShipmentRepository;
-import GoLogAPI.repository.TransportRepository;
 import GoLogAPI.service.MessageException;
 import com.google.maps.model.LatLng;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ProcessShipmentServcie {
 
     private final ShipmentRepository shipmentRepository;
@@ -34,7 +35,7 @@ public class ProcessShipmentServcie {
         this.routeStopRepository = routeStopRepository;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public void processShipment(List<ApiVehicleRoute> routes) {
         for (ApiVehicleRoute vehicleRoute : routes) {
 
@@ -50,9 +51,12 @@ public class ProcessShipmentServcie {
 
             routeStopRepository.deleteByTransportId(transport.getId());
 
+            routeStopRepository.flush();
+
             Double distanceTotal = (vehicleRoute.metrics() != null) ? vehicleRoute.metrics().travelDistanceMeters() : 0.0;
             List<ApiRouteStop> visits = vehicleRoute.visits();
             List<ApiRouteTransition> transitions = vehicleRoute.transitions();
+            List<RouteStop> newStops = new ArrayList<>();
 
             if (transitions != null && visits != null) {
                 for (int i = 0; i < transitions.size(); i++) {
@@ -105,10 +109,57 @@ public class ProcessShipmentServcie {
                     stop.setShipment(shipment);
                     shipment.setStatus("Aguardando Inicio");
 
-                    routeStopRepository.save(stop);
+                    RouteStop routeStop = routeStopRepository.save(stop);
                     shipmentRepository.save(shipment);
+                    newStops.add(routeStop);
+                }
+                this.updateWeightAndVolume(newStops);
+            }
+        }
+    }
+
+    private void updateWeightAndVolume(List<RouteStop> stops) {
+
+        if(stops == null || stops.isEmpty()) {
+            return;
+        }
+
+        // 1. Calcula os totais das ENTREGAS (Forçando conversão limpa para String)
+        double weightTotalShipment = 0.0;
+        double volumeTotalShipment = 0.0;
+
+        for (RouteStop stop : stops) {
+            if(stop.getShipment() != null && stop.getShipment().getTypeOperation() != null) {
+                // Pega o nome do tipo (funciona tanto para String quanto para Enum)
+                String typeStr = stop.getShipment().getTypeOperation().toString().trim();
+
+                if("ENTREGA".equalsIgnoreCase(typeStr)) {
+                    weightTotalShipment += (stop.getShipment().getWeight() != null) ? stop.getShipment().getWeight() : 0.0;
+                    volumeTotalShipment += (stop.getShipment().getVolume() != null) ? stop.getShipment().getVolume() : 0.0;
                 }
             }
+        }
+
+        // 2. Aplica os valores calculados diretamente nas entidades RouteStop da lista
+        for(RouteStop stop : stops) {
+            if(stop.getShipment() == null || stop.getShipment().getTypeOperation() == null) {
+                continue;
+            }
+
+            String typeOperation = stop.getShipment().getTypeOperation().toString().trim();
+
+            if("COLETA".equalsIgnoreCase(typeOperation)) {
+                // Coleta recebe o acumulado das entregas
+                stop.setWeight(weightTotalShipment);
+                stop.setVolume(volumeTotalShipment);
+            } else if ("ENTREGA".equalsIgnoreCase(typeOperation)) {
+                // Entrega espelha o valor do próprio shipment
+                stop.setWeight(stop.getShipment().getWeight() != null ? stop.getShipment().getWeight() : 0.0);
+                stop.setVolume(stop.getShipment().getVolume() != null ? stop.getShipment().getVolume() : 0.0);
+            }
+
+            // Salva a entidade de rota atualizada com os novos valores
+            routeStopRepository.save(stop);
         }
     }
 

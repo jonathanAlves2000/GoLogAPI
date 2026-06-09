@@ -18,10 +18,16 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RouteStop {
+public class RouteStop extends Audit{
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "weight", nullable = true)
+    private Double weight;
+
+    @Column(name = "volume", nullable = true)
+    private Double volume;
 
     @Column(name = "sequence_order", nullable = false)
     private Integer sequenceOrder;

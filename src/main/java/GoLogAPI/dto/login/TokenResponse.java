@@ -1,5 +1,8 @@
 package GoLogAPI.dto.login;
 
+import java.util.UUID;
+
 public record TokenResponse(
-        String token
+        String token,
+        UUID userId
 ) { }

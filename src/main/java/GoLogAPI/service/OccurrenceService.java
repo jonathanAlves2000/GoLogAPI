@@ -50,6 +50,11 @@ public class OccurrenceService {
 
         Occurrence occurrence = occurrenceMapper.toEntity(occurrenceCreateRequest);
 
+        if(occurrenceCreateRequest.type().equals("Inicio"))
+             shipment.setStatus("Iniciado");
+        if(occurrenceCreateRequest.type().equals("Fim"))
+            shipment.setStatus("Finalizado");
+
         occurrence.setShipment(shipment);
         occurrence.setTransport(transport);
         occurrence.setSender(sender);

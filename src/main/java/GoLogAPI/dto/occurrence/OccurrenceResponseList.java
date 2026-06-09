@@ -6,6 +6,7 @@ import java.util.UUID;
 
 public record OccurrenceResponseList(
         UUID id,
+        LocalDateTime dateTime,
         String type,
         String description,
         Instant createdAt,
