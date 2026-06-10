@@ -114,6 +114,34 @@ public class DashboardService {
                 })
                 .count();
 
+        double custoTotalPlanejado = transports.stream()
+                .mapToDouble(t -> t.getTotalCostCalculed() != null ? t.getTotalCostCalculed() : 0.0)
+                .sum();
+        custoTotalPlanejado = Math.round(custoTotalPlanejado * 100.0) / 100.0;
+
+        double custoTotalEfetivo = transports.stream()
+                .mapToDouble(t -> t.getTotalCost() != null ? t.getTotalCost() : 0.0)
+                .sum();
+        custoTotalEfetivo = Math.round(custoTotalEfetivo * 100.0) / 100.0;
+
+        double emissaoCo2Planejada = transports.stream()
+                .mapToDouble(t -> {
+                    double co2PerKm = getTransportCo2PerKm(t);
+                    double distance = t.getCalculedDistance() != null ? t.getCalculedDistance() : 0.0;
+                    return (distance / 1000.0) * co2PerKm;
+                })
+                .sum();
+        emissaoCo2Planejada = Math.round(emissaoCo2Planejada * 100.0) / 100.0;
+
+        double emissaoCo2Efetiva = transports.stream()
+                .mapToDouble(t -> {
+                    double co2PerKm = getTransportCo2PerKm(t);
+                    double distance = t.getDistanceTraveled() != null ? t.getDistanceTraveled() : 0.0;
+                    return (distance / 1000.0) * co2PerKm;
+                })
+                .sum();
+        emissaoCo2Efetiva = Math.round(emissaoCo2Efetiva * 100.0) / 100.0;
+
         return new DashboardMetricsResponse(
                 quantidadeMotoristas,
                 rotasEmAndamento,
@@ -122,8 +150,32 @@ public class DashboardService {
                 taxaAlocacao,
                 rotasConcluidas,
                 slaDia,
-                atrasos
+                atrasos,
+                custoTotalPlanejado,
+                custoTotalEfetivo,
+                emissaoCo2Planejada,
+                emissaoCo2Efetiva
         );
+    }
+
+    private double getTransportCo2PerKm(Transport transport) {
+        EquipamentGroup group = transport.getEquipamentGroup();
+        if (group == null) {
+            return 0.0;
+        }
+        if (group.getEquipament1() instanceof Tractor) {
+            Double co2 = ((Tractor) group.getEquipament1()).getCo2PerKm();
+            return co2 != null ? co2 : 0.0;
+        }
+        if (group.getEquipament2() instanceof Tractor) {
+            Double co2 = ((Tractor) group.getEquipament2()).getCo2PerKm();
+            return co2 != null ? co2 : 0.0;
+        }
+        if (group.getEquipament3() instanceof Tractor) {
+            Double co2 = ((Tractor) group.getEquipament3()).getCo2PerKm();
+            return co2 != null ? co2 : 0.0;
+        }
+        return 0.0;
     }
 
     private boolean isShipmentCompleted(Shipment shipment, Map<UUID, RouteStop> shipmentToRouteStop) {

@@ -8,5 +8,9 @@ public record DashboardMetricsResponse(
         double taxaAlocacao,
         long rotasConcluidas,
         double slaDia,
-        long atrasos
+        long atrasos,
+        double custoTotalPlanejado,
+        double custoTotalEfetivo,
+        double emissaoCo2Planejada,
+        double emissaoCo2Efetiva
 ) { }
