@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
 -- Dumped by pg_dump version 18.1
 
--- Started on 2026-06-09 23:19:24 UTC
+-- Started on 2026-06-10 21:33:27 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -483,6 +483,11 @@ ca7dee83-4beb-4e06-ae2b-b45b509e2720	t	2026-06-06 15:51:55.292648+00	admin@admin
 
 COPY public.driver_table (id, active, created_at, created_by, updated_at, updated_by, cnh_expiration, cnh_number, user_id) FROM stdin;
 0fa0d515-0c4b-47be-bfd6-ef042669c0a0	t	2026-03-15 23:05:41.222869+00	Admin Master	2026-03-15 23:05:41.222869+00	Admin Master	2030-10-10	85983282551	438eca76-a0cf-480b-8c85-f129ec3e9216
+ac949c17-ffc7-4869-adac-76a96cff9f0c	t	2026-06-10 21:26:08.350364+00	admin@admin.com	2026-06-10 21:26:08.350364+00	admin@admin.com	2030-10-10	85983282456	03d49770-0d3a-496f-81c1-367a94250c6d
+3a0316ab-20d7-40f2-9be5-c28a2e5381f9	t	2026-06-10 21:26:18.898096+00	admin@admin.com	2026-06-10 21:26:18.898096+00	admin@admin.com	2030-10-10	85983287878	8f0f3bb3-3f65-4d6a-9abd-d4edf71e3298
+d4acae16-4769-4261-be0f-919958968647	t	2026-06-10 21:26:29.676849+00	admin@admin.com	2026-06-10 21:26:29.676849+00	admin@admin.com	2030-10-10	85983284545	2bd51947-406b-4bdf-9c75-b0a401c6bd72
+a960b64d-995e-4d59-b7cb-f11c99664b8e	t	2026-06-10 21:26:44.132866+00	admin@admin.com	2026-06-10 21:26:44.132866+00	admin@admin.com	2030-10-10	85983282545	92fb79a3-7d79-4570-b903-9c2b3df6dd13
+030a95e6-4dfc-46a2-8621-c8ca1612b86e	t	2026-06-10 21:26:56.222972+00	admin@admin.com	2026-06-10 21:26:56.222972+00	admin@admin.com	2030-10-10	85923682545	2bd3809f-71ed-4092-9e0c-1fba247ff45e
 \.
 
 
@@ -645,10 +650,10 @@ COPY public.trailer_table (maximum_volume, id) FROM stdin;
 --
 
 COPY public.transport_table (id, active, created_at, created_by, updated_at, updated_by, calculed_distance, code_transport, distance_traveled, route_completed, route_planned, route_return_completed, route_return_planned, shipment_quantity, time_stopped, time_stopped_calculed, total_cost, total_cost_calculed, total_time, total_time_calculed, driver_id, equipament_group_id, transporter_id) FROM stdin;
-b6b7b82b-3e41-4afa-9394-4c94c30452de	t	2026-06-07 21:53:44.419839+00	admin@admin.com	2026-06-08 23:58:17.725844+00	admin@admin.com	12614	1	\N	\N	dargCbqa`HXq@jDbAbEeTK_@sHcCnBqGxAbD`@@lAqAbATj@v@HzAuXzxA}BdTo@b_@{@dBCbA??`@f@t@CZ]A_A}@c@aDv@uMq@eDaAuEGwSmGi@u@o@Tq\\eJgE_@kDaBaFoEiDkGeF_e@i@A}@rA_OvHy@JgD{@??eBM}@|CeFdFr@j@vHcCbAAvKhLpAjBbFzLrB|AjD^~@p@t@hCSzEfHfHJfGv@ACcBfMQlB|BfAP`J_IiDw@aAx@??eXhU{BtAwADqAtI}t@eDgBy@Da@}G@_Dr@mHEH_G	\N	\N	4	\N	41067	\N	2.14438	\N	1548	\N	d5820f33-c8d2-44a7-90b9-8914d127e77a	7f564f96-d90f-42cc-beb2-e37cf63a324d
-8561f7a1-8db7-43bc-910e-99908dd83a5a	t	2026-06-07 22:36:58.7572+00	admin@admin.com	2026-06-09 23:13:33.061796+00	admin@admin.com	4686	4	\N	\N	z~mgCrcg`Hx@uU~ARrBpA~DyQzZyVpAhBpD_DiDw@aAx@??}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	\N	\N	2	\N	37122	\N	6.607259999999999	\N	690	\N	d681c272-2657-4800-a298-9310aafdceda	7f564f96-d90f-42cc-beb2-e37cf63a324d
-50cde3ea-30fc-4c21-aaa5-3dfb3067f315	t	2026-06-07 21:53:44.476573+00	admin@admin.com	2026-06-09 23:13:33.283992+00	admin@admin.com	13162	3	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA??`@f@t@CZ]A_As@c@kCv@uNq@wD_AWb@PhAoGbQsPq@oOuCtDuO_FaBaAx@??}F~E_GgIqEb@mCe@uDaDHgFm@kCoAuAgDk@hDiK}@eDwDw]l@u@jFu@tAFXi@g@]aGlAc@eAEcBsADKuA??JtArAEDbBb@dA_BHg@cAkCyVFyCaJut@c@iHsDsPXu@aDkF_PaOCw@g@C{EeWsIkWkFcMhIoEhEwDUYMwGVS]EOwG@{@\\LL_@o@a@SyIoGwPi@T	\N	\N	4	\N	40993	\N	12.63552	\N	1632	\N	17f54b48-7a3a-4a45-b7df-827bff7d9b05	7f564f96-d90f-42cc-beb2-e37cf63a324d
-b9493772-b173-4800-aee8-8a81474793c8	t	2026-06-07 21:53:44.452931+00	admin@admin.com	2026-06-07 21:53:44.452931+00	admin@admin.com	6769	2	\N	\N	v~qgCvua`HqA|CyAr@eNyHeCbGwAnGoAnB}j@fZaBT{@hQaCdOaOzKHt@jDvAwHjDtBpFrG|HfAP`J_IiDw@aAx@??}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	\N	\N	2	\N	37122	\N	7.2428300000000005	\N	927	\N	e56df2ca-a445-4e1e-ab3b-d1ba5bb9192b	7f564f96-d90f-42cc-beb2-e37cf63a324d
+b6b7b82b-3e41-4afa-9394-4c94c30452de	t	2026-06-07 21:53:44.419839+00	admin@admin.com	2026-06-10 21:30:15.650579+00	admin@admin.com	12614	1	\N	\N	dargCbqa`HXq@jDbAbEeTK_@sHcCnBqGxAbD`@@lAqAbATj@v@HzAuXzxA}BdTo@b_@{@dBCbA??`@f@t@CZ]A_A}@c@aDv@uMq@eDaAuEGwSmGi@u@o@Tq\\eJgE_@kDaBaFoEiDkGeF_e@i@A}@rA_OvHy@JgD{@??eBM}@|CeFdFr@j@vHcCbAAvKhLpAjBbFzLrB|AjD^~@p@t@hCSzEfHfHJfGv@ACcBfMQlB|BfAP`J_IiDw@aAx@??eXhU{BtAwADqAtI}t@eDgBy@Da@}G@_Dr@mHEH_G	\N	\N	4	\N	41067	\N	2.14438	\N	1548	ac949c17-ffc7-4869-adac-76a96cff9f0c	d5820f33-c8d2-44a7-90b9-8914d127e77a	7f564f96-d90f-42cc-beb2-e37cf63a324d
+8561f7a1-8db7-43bc-910e-99908dd83a5a	t	2026-06-07 22:36:58.7572+00	admin@admin.com	2026-06-10 21:30:43.879276+00	admin@admin.com	4686	4	\N	\N	z~mgCrcg`Hx@uU~ARrBpA~DyQzZyVpAhBpD_DiDw@aAx@??}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	\N	\N	2	\N	37122	\N	6.607259999999999	\N	690	030a95e6-4dfc-46a2-8621-c8ca1612b86e	d681c272-2657-4800-a298-9310aafdceda	7f564f96-d90f-42cc-beb2-e37cf63a324d
+b9493772-b173-4800-aee8-8a81474793c8	t	2026-06-07 21:53:44.452931+00	admin@admin.com	2026-06-10 21:31:41.090995+00	admin@admin.com	6769	2	\N	\N	v~qgCvua`HqA|CyAr@eNyHeCbGwAnGoAnB}j@fZaBT{@hQaCdOaOzKHt@jDvAwHjDtBpFrG|HfAP`J_IiDw@aAx@??}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	\N	\N	2	\N	37122	\N	7.2428300000000005	\N	927	0fa0d515-0c4b-47be-bfd6-ef042669c0a0	e56df2ca-a445-4e1e-ab3b-d1ba5bb9192b	7f564f96-d90f-42cc-beb2-e37cf63a324d
+50cde3ea-30fc-4c21-aaa5-3dfb3067f315	t	2026-06-07 21:53:44.476573+00	admin@admin.com	2026-06-10 21:32:05.626727+00	admin@admin.com	13162	3	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA??`@f@t@CZ]A_As@c@kCv@uNq@wD_AWb@PhAoGbQsPq@oOuCtDuO_FaBaAx@??}F~E_GgIqEb@mCe@uDaDHgFm@kCoAuAgDk@hDiK}@eDwDw]l@u@jFu@tAFXi@g@]aGlAc@eAEcBsADKuA??JtArAEDbBb@dA_BHg@cAkCyVFyCaJut@c@iHsDsPXu@aDkF_PaOCw@g@C{EeWsIkWkFcMhIoEhEwDUYMwGVS]EOwG@{@\\LL_@o@a@SyIoGwPi@T	\N	\N	4	\N	40993	\N	12.63552	\N	1632	d4acae16-4769-4261-be0f-919958968647	17f54b48-7a3a-4a45-b7df-827bff7d9b05	7f564f96-d90f-42cc-beb2-e37cf63a324d
 \.
 
 
@@ -674,6 +679,11 @@ d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	t	2026-06-01 13:53:03.085394+00	admin@admin
 COPY public.user_table (id, active, created_at, created_by, updated_at, updated_by, cpf, email, name, password, user_profile, company_id) FROM stdin;
 c916e36f-4846-41be-9b32-9e0ff8850a29	t	2026-03-15 22:23:57.149323+00	\N	2026-03-15 22:23:57.149323+00	\N	000.000.000-00	admin@admin.com	Admin Master	$2a$10$ArcCT.dC00YRsOFROZOffedZWEJgQpmralIVFz47cAzOz3LBauigi	ADMIN	d9d7b435-c256-405b-877c-848f4a22e22a
 438eca76-a0cf-480b-8c85-f129ec3e9216	t	2026-03-15 23:04:31.316347+00	Admin Master	2026-03-15 23:04:31.316347+00	Admin Master	49018326895	jonathan@admin.com	Jonathan Alves	$2a$10$dSXyVxyZSainREynEB9SD.Lu1VNUkpvAtYukS0sns6JbAS8W7Sa6e	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
+03d49770-0d3a-496f-81c1-367a94250c6d	t	2026-06-10 21:22:58.056493+00	admin@admin.com	2026-06-10 21:22:58.056493+00	admin@admin.com	49018326835	fernando.silva@admin.com	Fernando Silva	$2a$10$ez7j8blJn8QdS2uj51fxWe/aEllRWzyTPdUNcLOZNJ51Qvdq8azMa	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
+8f0f3bb3-3f65-4d6a-9abd-d4edf71e3298	t	2026-06-10 21:23:11.800519+00	admin@admin.com	2026-06-10 21:23:11.800519+00	admin@admin.com	27491835601	mariana.souza@admin.com	Mariana Souza	$2a$10$e.t0ByQCJWjjgGdN4EobGu0y.8SuEHpet4Kn14JJFRvueosufx/lu	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
+2bd51947-406b-4bdf-9c75-b0a401c6bd72	t	2026-06-10 21:23:24.138668+00	admin@admin.com	2026-06-10 21:23:24.138668+00	admin@admin.com	38502941732	ricardo.santos@admin.com	Ricardo Santos	$2a$10$oU2ht8/BC25ppIZ7vV3RMO9Kj3m/JJgGyJSp0EpYF01MZRCn7gKmG	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
+92fb79a3-7d79-4570-b903-9c2b3df6dd13	t	2026-06-10 21:23:31.986691+00	admin@admin.com	2026-06-10 21:23:31.986691+00	admin@admin.com	52140398766	carlos.oliveira@admin.com	Carlos Oliveira	$2a$10$tdLC/Hu8Pbo6tz0HpmlTLOJIdsEgT4EqvHBC15LdOe8ggs4Rkuxv2	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
+2bd3809f-71ed-4092-9e0c-1fba247ff45e	t	2026-06-10 21:23:43.615724+00	admin@admin.com	2026-06-10 21:23:43.615724+00	admin@admin.com	63251409844	aline.costa@admin.com	Aline Costa	$2a$10$Eg2VoA6cj/u.Y6qgGu0XEuz4g8mgJuiNT3W9D/UDQb/RK4nx3SCEi	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
 \.
 
 
@@ -1091,11 +1101,11 @@ ALTER TABLE ONLY public.tractor_table
     ADD CONSTRAINT fktpyy3ovef9vtfaubofrwkr6w1 FOREIGN KEY (id) REFERENCES public.equipament_table(id);
 
 
--- Completed on 2026-06-09 23:19:24 UTC
+-- Completed on 2026-06-10 21:33:27 UTC
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict bJcg7uRO7OwRQacYTgxomTssPPi4wh7tObVcVNeP4re9JLCQdE00XdHfMfiBxad
+\unrestrict JylluaZS4k0TppggHAfzP01EyPJhZeKk0krXBaw5m81NUTi9gYhmKP6XEfFdTlP
 
