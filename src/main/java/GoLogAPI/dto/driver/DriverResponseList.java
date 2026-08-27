@@ -1,6 +1,7 @@
 package GoLogAPI.dto.driver;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record DriverResponseList(
@@ -9,5 +10,7 @@ public record DriverResponseList(
         String email,
         String cnhNumber,
         String cpf,
+        LocalTime startWorkday,
+        LocalTime endWorkday,
         LocalDate cnhExpiration
 ) { }

@@ -14,16 +14,13 @@ public class ProcessRouteService {
     private final RouteRequestService routeRequestService;
     private final ObjectMapper objectMapper;
     private final ProcessShipmentServcie processShipment;
-    private final ProcessTransportService processTransport;
 
     public ProcessRouteService(RouteRequestService routeRequestService, ObjectMapper objectMapper,
-                               ShipmentRepository shipmentRepository, ProcessShipmentServcie processShipment,
-                               ProcessTransportService processTransport)
+                               ShipmentRepository shipmentRepository, ProcessShipmentServcie processShipment)
     {
         this.routeRequestService = routeRequestService;
         this.objectMapper = objectMapper;
         this.processShipment = processShipment;
-        this.processTransport = processTransport;
     }
 
     public void processRoute() {
@@ -38,7 +35,7 @@ public class ProcessRouteService {
                 processShipment.processShipment(routeResponseObject.routes());
             }
 
-        } catch (JsonProcessingException e) {
+        } catch(JsonProcessingException e) {
             throw new RuntimeException(e + " Falha ao deserializar o JSON de rotas do Google");
         }
     }

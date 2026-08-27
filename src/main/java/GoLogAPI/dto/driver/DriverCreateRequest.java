@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record DriverCreateRequest(
@@ -19,6 +20,13 @@ public record DriverCreateRequest(
         @JsonFormat(pattern = "dd/MM/yyyy")
         @Future(message = "A data de expiração deve ser maior que a data atual")
         LocalDate cnhExpiration,
+
+        @NotNull(message = "A hora inicial da jornada de trabalho deve ser informada")
+        @NotNull
+        LocalTime startWorkday,
+
+        @NotNull(message = "A hora final da jornada de trabalho deve ser informada")
+        LocalTime endWorkday,
 
         @NotNull(message = "Id do usuario deve ser informado.")
         UUID userId

@@ -80,7 +80,6 @@ public class RouteRequestService {
 
                     return deliveries.stream().map(delivery -> {
 
-
                         Stop deliveryStop = new Stop(
                                 new Location(delivery.getAddress().getLatitude(), delivery.getAddress().getLongitude()),
                                 "1800s",
@@ -111,8 +110,7 @@ public class RouteRequestService {
                                 100000.0
                         );
                     });
-                })
-                .toList();
+                }).toList();
 
         String globalStartTime = "2026-06-01T00:00:00-03:00";
         String globalEndTime = "2026-06-30T23:59:59-03:00";

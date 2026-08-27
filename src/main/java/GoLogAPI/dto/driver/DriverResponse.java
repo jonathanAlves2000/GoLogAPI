@@ -3,6 +3,7 @@ package GoLogAPI.dto.driver;
 import GoLogAPI.dto.user.UserResponse;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record DriverResponse(
@@ -11,6 +12,8 @@ public record DriverResponse(
         String email,
         String cnhNumber,
         String cpf,
+        LocalTime startWorkday,
+        LocalTime endWorkday,
         LocalDate cnhExpiration,
         UserResponse user
 ) { }

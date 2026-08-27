@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 public record DriverUpdateRequest(
@@ -15,6 +16,10 @@ public record DriverUpdateRequest(
         @JsonFormat(pattern = "dd/MM/yyyy")
         @Future(message = "A data de expiração deve ser maior que hoje")
         LocalDate cnhExpiration,
+
+        LocalTime startWorkday,
+
+        LocalTime endWorkday,
 
         UUID userId
 ) implements DriverRequest { }

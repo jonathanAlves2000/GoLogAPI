@@ -1,6 +1,8 @@
 package GoLogAPI.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.NotFound;
@@ -41,6 +43,12 @@ public class Driver extends Audit {
 
     @Column(name = "cnh_expiration", nullable = false)
     private LocalDate cnhExpiration;
+
+    @Column(name = "start_workday", nullable = false)
+    private LocalTime startWorkday;
+
+    @Column(name = "end_workday", nullable = false)
+    private LocalTime endWorkday;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)

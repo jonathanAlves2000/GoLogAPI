@@ -35,16 +35,16 @@ public class ProcessShipmentServcie {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public void processShipment(List<ApiVehicleRoute> routes) {
-        for (ApiVehicleRoute vehicleRoute : routes) {
+        for(ApiVehicleRoute vehicleRoute : routes) {
 
-            if (vehicleRoute.transitions() == null || vehicleRoute.transitions().isEmpty())
+            if(vehicleRoute.transitions() == null || vehicleRoute.transitions().isEmpty())
                 continue;
 
             Double costTotalRoute = vehicleRoute.routeTotalCost() != null ? vehicleRoute.routeTotalCost() : 0.0;
 
             Transport transport = processTransportService.processTransport(vehicleRoute, costTotalRoute);
 
-            if (transport == null)
+            if(transport == null)
                 continue;
 
             routeStopRepository.deleteByTransportId(transport.getId());
@@ -56,11 +56,11 @@ public class ProcessShipmentServcie {
             List<ApiRouteTransition> transitions = vehicleRoute.transitions();
             List<RouteStop> newStops = new ArrayList<>();
 
-            if (transitions != null && visits != null) {
-                for (int i = 0; i < transitions.size(); i++) {
+            if(transitions != null && visits != null) {
+                for(int i = 0; i < transitions.size(); i++) {
                     ApiRouteTransition routeTransition = transitions.get(i);
 
-                    if (routeTransition.routePolyline() == null || routeTransition.routePolyline().points() == null)
+                    if(routeTransition.routePolyline() == null || routeTransition.routePolyline().points() == null)
                         continue;
 
                     Integer duration = parseApiRouteDuration(routeTransition.travelDuration().toString());
