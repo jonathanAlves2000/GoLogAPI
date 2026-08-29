@@ -1,5 +1,7 @@
 package GoLogAPI.model;
 
+import GoLogAPI.model.enums.ShipmentStatus;
+import GoLogAPI.model.enums.TypeOperation;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.NotFound;
@@ -38,8 +40,9 @@ public class Shipment extends Audit {
     @Column(name = "schedulind", nullable = false)
     private LocalDateTime schedulind;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private String status;
+    private ShipmentStatus status;
 
     @ManyToOne
     @JoinColumn(name = "responsible_id", nullable = false)

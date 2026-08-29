@@ -1,8 +1,10 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.shipment.*;
+import GoLogAPI.dto.shipment.ShipmentResponseList;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.*;
+import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,14 +22,13 @@ public class ShipmentService {
     private final UserRepository userRepository;
     private final ShipmentTypeRepository shipmentTypeRepository;
     private final TypeTransportRepository typeTransportRepository;
-    private final TransportRepository transportRepository;
     private final RouteStopRepository routeStopRepository;
 
     public ShipmentService(
             ShipmentRepository shipmentRepository, AddressRepository addressRepository,
             CompanyRepository companyRepository, UserRepository userRepository,
             ShipmentTypeRepository shipmentTypeRepository, TypeTransportRepository typeTransportRepository,
-            TransportRepository transportRepository, RouteStopRepository routeStopRepository)
+            RouteStopRepository routeStopRepository)
     {
         this.shipmentRepository = shipmentRepository;
         this.addressRepository = addressRepository;
@@ -35,7 +36,6 @@ public class ShipmentService {
         this.userRepository = userRepository;
         this.shipmentTypeRepository = shipmentTypeRepository;
         this.typeTransportRepository = typeTransportRepository;
-        this.transportRepository = transportRepository;
         this.routeStopRepository = routeStopRepository;
     }
 
@@ -63,7 +63,7 @@ public class ShipmentService {
                 .volume(shipmentCreateRequest.volume())
                 .schedulind(shipmentCreateRequest.schedulind())
                 .user(user)
-                .status("")
+                .status(ShipmentStatus.PENDENTE)
                 .shipmentType(shipmentType)
                 .address(shipmentAddress)
                 .typeTransport(typeTransport)
@@ -150,6 +150,26 @@ public class ShipmentService {
                         shipment.getOperationOrigem()
                 ))
                 .toList();
+    }
+
+    public List<ShipmentResponseList> getByStatus(ShipmentStatus status){
+        List<Shipment> shipments = shipmentRepository.findByStatus(status);
+
+        return shipments.stream()
+                .map(shipment -> new ShipmentResponseList(
+                        shipment.getId(),
+                        shipment.getTypeOperation(),
+                        shipment.getWeight(),
+                        shipment.getVolume(),
+                        shipment.getSchedulind(),
+                        shipment.getStatus(),
+                        shipment.getUser(),
+                        shipment.getShipmentType(),
+                        shipment.getTypeTransport(),
+                        shipment.getAddress(),
+                        shipment.getCustomer(),
+                        shipment.getOperationOrigem()
+                )).toList();
     }
 
     public List<ShipmentResponseListPersonalized> getAllWithQuery() {
@@ -272,7 +292,7 @@ public class ShipmentService {
         if(shipmentUpdateRequest.schedulind() != null)
             shipment.setSchedulind(shipmentUpdateRequest.schedulind());
 
-        if(shipmentUpdateRequest.status() != null && !shipmentUpdateRequest.status().isBlank())
+        if(shipmentUpdateRequest.status() != null)
             shipment.setStatus(shipmentUpdateRequest.status());
 
         if(shipmentUpdateRequest.userId() != null) {

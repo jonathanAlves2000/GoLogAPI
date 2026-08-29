@@ -1,4 +1,4 @@
-package GoLogAPI.infra.config;
+package GoLogAPI.infra.client;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import org.springframework.stereotype.Component;

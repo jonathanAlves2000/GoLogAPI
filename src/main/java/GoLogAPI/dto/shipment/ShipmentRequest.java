@@ -1,6 +1,8 @@
 package GoLogAPI.dto.shipment;
 
 import GoLogAPI.model.*;
+import GoLogAPI.model.enums.ShipmentStatus;
+import GoLogAPI.model.enums.TypeOperation;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,7 +13,7 @@ public interface ShipmentRequest {
     Double weight();
     Double volume();
     LocalDateTime schedulind();
-    String status();
+    ShipmentStatus status();
     User user();
     ShipmentType deliveryType();
     TypeTransport typeTransport();

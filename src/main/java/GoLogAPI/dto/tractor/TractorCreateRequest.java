@@ -1,6 +1,6 @@
 package GoLogAPI.dto.tractor;
 
-import GoLogAPI.model.TypeFuel;
+import GoLogAPI.model.enums.TypeFuel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

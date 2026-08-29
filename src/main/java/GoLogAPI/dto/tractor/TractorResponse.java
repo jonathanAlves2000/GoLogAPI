@@ -1,8 +1,7 @@
 package GoLogAPI.dto.tractor;
 
 import GoLogAPI.dto.equipament.EquipamentResponse;
-import GoLogAPI.model.Company;
-import GoLogAPI.model.TypeFuel;
+import GoLogAPI.model.enums.TypeFuel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

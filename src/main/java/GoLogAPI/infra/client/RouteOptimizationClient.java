@@ -1,13 +1,10 @@
 package GoLogAPI.infra.client;
 
-import GoLogAPI.infra.config.GoogleAuthConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
 
 @Component
 public class RouteOptimizationClient {

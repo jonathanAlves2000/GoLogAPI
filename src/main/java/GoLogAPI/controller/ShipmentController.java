@@ -1,5 +1,7 @@
 package GoLogAPI.controller;
 import GoLogAPI.dto.shipment.*;
+import GoLogAPI.dto.shipment.ShipmentResponseList;
+import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.service.ShipmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,6 +48,13 @@ public class ShipmentController {
     public ResponseEntity<List<ShipmentResponseList>> getAll(){
         List<ShipmentResponseList> deliveryResponses = shipmentService.getAll();
         return ResponseEntity.ok().body(deliveryResponses);
+    }
+
+    @Operation(summary = "Listar Cargas Por Status", description = "Retorna uma lista de cargas/remessas por status")
+    @GetMapping("/list-by-status")
+    public ResponseEntity<List<ShipmentResponseList>> getByStatus(@RequestParam ShipmentStatus status){
+        List<ShipmentResponseList> shipmentResponses = shipmentService.getByStatus(status);
+        return ResponseEntity.ok().body(shipmentResponses);
     }
 
     @Operation(summary = "Listar Cargas Personalizado", description = "Retorna uma lista personalizada de cargas/remessas com filtros de consulta")

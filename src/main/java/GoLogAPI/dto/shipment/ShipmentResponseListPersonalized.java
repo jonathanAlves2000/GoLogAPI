@@ -1,7 +1,8 @@
 package GoLogAPI.dto.shipment;
 
-import GoLogAPI.dto.company.CompanyResponseShipment;
 import GoLogAPI.model.*;
+import GoLogAPI.model.enums.ShipmentStatus;
+import GoLogAPI.model.enums.TypeOperation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ public record ShipmentResponseListPersonalized(
         Double weight,
         Double volume,
         LocalDateTime shedulind,
-        String status,
+        ShipmentStatus status,
 
         @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "createdAt", "createdBy", "updatedAt", "updatedBy", "active"})
         ShipmentType shipmentType,

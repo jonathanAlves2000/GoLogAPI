@@ -1,7 +1,6 @@
 package GoLogAPI.dto.tractor;
 
-import GoLogAPI.model.Company;
-import GoLogAPI.model.TypeFuel;
+import GoLogAPI.model.enums.TypeFuel;
 import jakarta.validation.constraints.Pattern;
 
 import java.util.UUID;

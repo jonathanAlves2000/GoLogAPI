@@ -2,6 +2,7 @@ package GoLogAPI.service;
 
 import GoLogAPI.dto.dashboard.DashboardMetricsResponse;
 import GoLogAPI.model.*;
+import GoLogAPI.model.enums.TypeOperation;
 import GoLogAPI.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

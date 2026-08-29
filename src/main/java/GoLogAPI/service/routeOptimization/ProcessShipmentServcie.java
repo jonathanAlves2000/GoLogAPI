@@ -7,6 +7,7 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.RouteStop;
 import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Transport;
+import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.ShipmentRepository;
 import GoLogAPI.service.MessageException;
@@ -105,7 +106,7 @@ public class ProcessShipmentServcie {
                     stop.setCalculatedWait(waitDuration);
                     stop.setTransport(transport);
                     stop.setShipment(shipment);
-                    shipment.setStatus("Aguardando Inicio");
+                    shipment.setStatus(ShipmentStatus.AGUARDANDO_INICIO);
 
                     RouteStop routeStop = routeStopRepository.save(stop);
                     shipmentRepository.save(shipment);

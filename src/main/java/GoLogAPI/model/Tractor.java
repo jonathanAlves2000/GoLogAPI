@@ -1,5 +1,6 @@
 package GoLogAPI.model;
 
+import GoLogAPI.model.enums.TypeFuel;
 import jakarta.persistence.*;
 import lombok.*;
 

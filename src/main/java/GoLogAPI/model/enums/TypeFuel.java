@@ -1,4 +1,4 @@
-package GoLogAPI.model;
+package GoLogAPI.model.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

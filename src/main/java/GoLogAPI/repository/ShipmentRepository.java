@@ -1,13 +1,13 @@
 package GoLogAPI.repository;
 
 import GoLogAPI.model.Shipment;
-import GoLogAPI.model.TypeOperation;
+import GoLogAPI.model.enums.ShipmentStatus;
+import GoLogAPI.model.enums.TypeOperation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
@@ -31,4 +31,10 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
             "INNER JOIN rs.transport t " +
             "WHERE s.active = true")
     List<Object[]> findAllShipmentsWithRoutesAndTransportMandatory();
+
+
+    @Query("SELECT s " +
+           "FROM Shipment s " +
+           "WHERE s.status = :status")
+    List<Shipment> findByStatus(@Param("status") ShipmentStatus status);
 }

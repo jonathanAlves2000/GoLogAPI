@@ -4,6 +4,7 @@ import GoLogAPI.dto.occurrence.*;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.OccurrenceMapper;
 import GoLogAPI.model.*;
+import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.ShipmentRepository;
 import GoLogAPI.repository.OccurrenceRepository;
 import GoLogAPI.repository.TransportRepository;
@@ -51,9 +52,9 @@ public class OccurrenceService {
         Occurrence occurrence = occurrenceMapper.toEntity(occurrenceCreateRequest);
 
         if(occurrenceCreateRequest.type().equals("Inicio"))
-             shipment.setStatus("Iniciado");
+             shipment.setStatus(ShipmentStatus.INICIADO);
         if(occurrenceCreateRequest.type().equals("Fim"))
-            shipment.setStatus("Finalizado");
+            shipment.setStatus(ShipmentStatus.FINALIZADO);
 
         occurrence.setShipment(shipment);
         occurrence.setTransport(transport);

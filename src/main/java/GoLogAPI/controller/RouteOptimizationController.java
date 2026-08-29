@@ -24,8 +24,8 @@ public class RouteOptimizationController {
     @Operation(summary = "Otimizar Rotas", description = "Realiza o processo de otimização de rotas de transporte com base nas cargas e capacidades")
     @PostMapping
     public String optimizeRoutes(){
-        routeRequestService.optimizeRoutes();
+        String routeOtimized = routeRequestService.optimizeRoutes();
         processRouteService.processRoute();
-        return routeRequestService.optimizeRoutes();
+        return routeOtimized;
     }
 }

@@ -5,6 +5,7 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.infra.client.RouteOptimizationClient;
 import GoLogAPI.model.*;
 import GoLogAPI.model.Shipment;
+import GoLogAPI.model.enums.TypeOperation;
 import GoLogAPI.repository.*;
 import GoLogAPI.service.MessageException;
 import org.springframework.stereotype.Service;

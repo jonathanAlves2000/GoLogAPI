@@ -43,16 +43,21 @@ public class TransportService {
 
     @Transactional
     public TransportCreateResponse save(TransportCreateRequest transportCreateRequest){
+
         Transport transport = transportMapper.toEntity(transportCreateRequest);
+
         Driver driver = driverRepository.findById(transportCreateRequest.driverId())
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.driverId()));
+
         Company company = companyRepository.findById(transportCreateRequest.transporterId())
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.transporterId()));
+
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(transportCreateRequest.equipamentGroupId())
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.equipamentGroupId()));
+
         transport.setDriver(driver);
         transport.setTransporter(company);
         transport.setEquipamentGroup(equipamentGroup);

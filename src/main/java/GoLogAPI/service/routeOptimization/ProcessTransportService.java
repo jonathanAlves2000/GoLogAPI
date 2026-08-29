@@ -1,6 +1,5 @@
 package GoLogAPI.service.routeOptimization;
 
-import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteStop;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
 import GoLogAPI.exception.ResourceNotFoundException;
@@ -13,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
