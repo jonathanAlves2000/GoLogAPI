@@ -23,7 +23,7 @@ public record ShipmentCreateRequest(
     @Future(message = "A data de agendamento da remessa deve ser no futuro")
     LocalDateTime schedulind,
 
-    @Size(min = 1, max = 30, message = "O status da remessa deve ter entre 1 e 30 caracteres.")
+    @NotNull(message = "O Status da remessa não pode ser nulo.")
     ShipmentStatus status,
 
     @NotNull(message = "O Id so usuario não pode ser nulo.")

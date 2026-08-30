@@ -37,9 +37,9 @@ public class TypeTransport extends Audit{
     @Column(name = "name", nullable = false)
     String name;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "text")
     String description;
 
-    @Column(name = "care", nullable = false)
+    @Column(name = "care", nullable = false, columnDefinition = "text")
     String care;
 }
