@@ -2,6 +2,7 @@ package GoLogAPI.model;
 
 import java.util.UUID;
 
+import GoLogAPI.model.enums.EquipamentStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.NotFound;
@@ -44,6 +45,10 @@ public class Equipament extends Audit {
 
     @Column(name = "maximum_capacity", nullable = false)
     private Double maximumCapacity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private EquipamentStatus status;
 
     @ManyToOne
     @JoinColumn(name = "company_id", nullable = false)

@@ -11,6 +11,7 @@ import GoLogAPI.mapper.SupportedTypeMapper;
 import GoLogAPI.model.Equipament;
 import GoLogAPI.model.EquipamentGroup;
 import GoLogAPI.model.TypeTransport;
+import GoLogAPI.model.enums.EquipamentGroupStatus;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.EquipamentRepository;
 import GoLogAPI.repository.TypeTransportRepository;
@@ -47,8 +48,11 @@ public class EquipamentGroupService {
 
     @Transactional
     public EquipamentGroupResponse save(EquipamentGroupCreateRequest equipamentGroupCreateRequest){
+
         EquipamentGroup equipamentGroup = equipamentGroupMapper.toEntity(equipamentGroupCreateRequest);
+
         equipamentGroupValidator.validate(equipamentGroupCreateRequest);
+
         Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament1Id()));
         equipamentGroup.setEquipament1(equipament1);
@@ -63,6 +67,7 @@ public class EquipamentGroupService {
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament3Id()));
             equipamentGroup.setEquipament3(equipament3);
         }
+
         equipamentGroupRepository.save(equipamentGroup);
         return equipamentGroupMapper.toResponse(equipamentGroup);
     }
@@ -87,6 +92,7 @@ public class EquipamentGroupService {
 
     @Transactional
     public EquipamentGroupResponse update(UUID id, EquipamentGroupCreateRequest equipamentGroupCreateRequest){
+
         equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
@@ -115,21 +121,25 @@ public class EquipamentGroupService {
 
     @Transactional
     public EquipamentGroupResponse updatePartial(UUID id, EquipamentGroupUpdateRequest equipamentGroupUpdateRequest){
+
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
         if(equipamentGroupUpdateRequest.observation() != null)
             equipamentGroup.setObservation(equipamentGroupUpdateRequest.observation());
+
         if(equipamentGroupUpdateRequest.equipament1Id() != null){
             Equipament equipament1 = equipamentRepository.findById(equipamentGroupUpdateRequest.equipament1Id())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupUpdateRequest.equipament1Id()));
             equipamentGroup.setEquipament1(equipament1);
         }
+
         if(equipamentGroupUpdateRequest.equipament2Id() != null){
             Equipament equipament2 = equipamentRepository.findById(equipamentGroupUpdateRequest.equipament2Id())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupUpdateRequest.equipament2Id()));
             equipamentGroup.setEquipament2(equipament2);
         }
+
         if(equipamentGroupUpdateRequest.equipament3Id() != null){
             Equipament equipament3 = equipamentRepository.findById(equipamentGroupUpdateRequest.equipament3Id())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupUpdateRequest.equipament3Id()));

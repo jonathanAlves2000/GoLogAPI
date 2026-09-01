@@ -1,5 +1,6 @@
 package GoLogAPI.dto.trailer;
 
+import GoLogAPI.model.enums.EquipamentStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -27,6 +28,9 @@ public record TrailerCreateRequest(
 
         @NotNull(message = "Volume maximo deve ser informado.")
         Double maximumVolume,
+
+        @NotNull(message = "Status do trailer deve ser infoemado.")
+        EquipamentStatus equipamentStatus,
 
         @NotNull(message = "A Empresa do equipamento deve ser informada.")
         UUID companyId

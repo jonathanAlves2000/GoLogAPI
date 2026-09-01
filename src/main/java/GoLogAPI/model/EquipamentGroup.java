@@ -3,21 +3,14 @@ package GoLogAPI.model;
 import java.util.Set;
 import java.util.UUID;
 
+import GoLogAPI.model.enums.EquipamentGroupStatus;
+import jakarta.persistence.*;
+import jdk.jfr.Description;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,6 +48,10 @@ public class EquipamentGroup extends Audit{
     @JoinColumn(name = "equipament3_id")
     @NotFound(action = NotFoundAction.IGNORE)
     private Equipament equipament3;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private EquipamentGroupStatus status;
 
     @ManyToMany
     @JoinTable(

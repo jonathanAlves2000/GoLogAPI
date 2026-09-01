@@ -1,5 +1,6 @@
 package GoLogAPI.dto.tractor;
 
+import GoLogAPI.model.enums.EquipamentStatus;
 import GoLogAPI.model.enums.TypeFuel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -33,6 +34,9 @@ public record TractorCreateRequest(
 
         @NotNull
         Double kmPerLiter,
+
+        @NotNull(message = "Status do tractor deve ser infoemado.")
+        EquipamentStatus equipamentStatus,
 
         @NotNull(message = "Empresa do equipamento deve ser informada.")
         UUID companyId
