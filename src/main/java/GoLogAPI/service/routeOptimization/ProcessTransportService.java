@@ -32,7 +32,7 @@ public class ProcessTransportService {
 
     @Transactional
     public Transport processTransport(ApiVehicleRoute vehicleRoute, Double totalCost) {
-        if (vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty()) {
+        if(vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty()) {
             return null;
         }
 
