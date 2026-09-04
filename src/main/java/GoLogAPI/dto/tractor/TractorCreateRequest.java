@@ -36,7 +36,7 @@ public record TractorCreateRequest(
         Double kmPerLiter,
 
         @NotNull(message = "Status do tractor deve ser infoemado.")
-        EquipamentStatus equipamentStatus,
+        EquipamentStatus status,
 
         @NotNull(message = "Empresa do equipamento deve ser informada.")
         UUID companyId

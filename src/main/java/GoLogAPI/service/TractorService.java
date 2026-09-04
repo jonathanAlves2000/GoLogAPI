@@ -40,6 +40,7 @@ public class TractorService {
 
         Company company = companyRepository.findById(tractorCreateRequest.companyId())
                         .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, tractorCreateRequest.companyId()));
+
         tractor.setCompany(company);
 
         Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
@@ -86,7 +87,7 @@ public class TractorService {
         Company company = companyRepository.findById(tractorCreateRequest.companyId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, tractorCreateRequest.companyId()));
 
-        tractorValidator.validate(tractorCreateRequest);
+        //tractorValidator.validate(tractorCreateRequest);
         Tractor tractor = tractorMapper.toEntity(tractorCreateRequest);
 
         Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
@@ -114,7 +115,7 @@ public class TractorService {
         Tractor tractor = tractorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        tractorValidator.validate(tractorUpdateRequest);
+        //tractorValidator.validate(tractorUpdateRequest);
 
         if(tractorUpdateRequest.plate() != null && !tractorUpdateRequest.plate().isBlank())
             tractor.setPlate(tractorUpdateRequest.plate());

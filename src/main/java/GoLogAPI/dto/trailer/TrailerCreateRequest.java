@@ -30,7 +30,7 @@ public record TrailerCreateRequest(
         Double maximumVolume,
 
         @NotNull(message = "Status do trailer deve ser infoemado.")
-        EquipamentStatus equipamentStatus,
+        EquipamentStatus status,
 
         @NotNull(message = "A Empresa do equipamento deve ser informada.")
         UUID companyId

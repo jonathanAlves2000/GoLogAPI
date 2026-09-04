@@ -1,6 +1,8 @@
 package GoLogAPI.dto.equipament;
 
 import java.util.UUID;
+
+import GoLogAPI.model.enums.EquipamentStatus;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -17,4 +19,5 @@ public abstract class EquipamentResponse {
     private String model;
     private Integer numberAxles;
     private Double maximumCapacity;
+    private EquipamentStatus status;
 }

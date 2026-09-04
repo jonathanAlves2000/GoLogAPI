@@ -1,6 +1,7 @@
 package GoLogAPI.dto.trailer;
 
 import GoLogAPI.dto.equipament.EquipamentResponse;
+import GoLogAPI.model.enums.EquipamentStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,12 +13,12 @@ import java.util.UUID;
 public class TrailerResponse extends EquipamentResponse {
 
     private Double maximumVolume;
-    private UUID compabyId;
+    private UUID companyId;
 
     public TrailerResponse(UUID id, String plate, String renavam, String model,
-                           Integer numberAxles, Double maximumCapacity, Double maximumVolume, UUID compabyId) {
-        super(id, plate, renavam, model, numberAxles, maximumCapacity);
+                           Integer numberAxles, Double maximumCapacity, Double maximumVolume, EquipamentStatus status , UUID companyId) {
+        super(id, plate, renavam, model, numberAxles, maximumCapacity, status);
         this.maximumVolume = maximumVolume;
-        this.compabyId = compabyId;
+        this.companyId = companyId;
     }
 }
