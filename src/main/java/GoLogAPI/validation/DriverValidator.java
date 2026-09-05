@@ -21,8 +21,7 @@ public class DriverValidator {
     public void validate(DriverRequest driverRequest){
         List<String> errors = new ArrayList<>();
 
-       if(driverRequest.cnhNumber() != null && !driverRequest.cnhNumber().isBlank())
-         cnh(driverRequest.cnhNumber(), errors);
+        cnh(driverRequest.cnhNumber(), errors);
 
         if(!errors.isEmpty()) throw new ConflictException(errors);
     }

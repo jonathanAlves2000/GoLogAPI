@@ -1,10 +1,12 @@
 package GoLogAPI.controller;
 
+import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
 import GoLogAPI.service.routeOptimization.ProcessRouteService;
 import GoLogAPI.service.routeOptimization.RouteRequestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,9 +25,9 @@ public class RouteOptimizationController {
 
     @Operation(summary = "Otimizar Rotas", description = "Realiza o processo de otimização de rotas de transporte com base nas cargas e capacidades")
     @PostMapping
-    public String optimizeRoutes(){
-        String routeOtimized = routeRequestService.optimizeRoutes();
-        processRouteService.processRoute();
+    public String optimizeRoutes(@RequestBody OptimizeRouteRequest optimizeRouteRequest){
+        String routeOtimized = routeRequestService.optimizeRoutes(optimizeRouteRequest);
+        processRouteService.processRoute(routeOtimized);
         return routeOtimized;
     }
 }

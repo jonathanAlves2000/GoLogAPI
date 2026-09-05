@@ -9,6 +9,7 @@ import GoLogAPI.model.WorkSchedule;
 import GoLogAPI.repository.DriverRepository;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.WorkScheduleRepository;
+import GoLogAPI.validation.WorkSheduleValidation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,18 +23,21 @@ public class WorkScheduleService {
     private final WorkScheduleRepository workScheduleRepository;
     private final EquipamentGroupRepository equipamentGroupRepository;
     private final DriverRepository driverRepository;
+    private final WorkSheduleValidation workSheduleValidation;
 
     public WorkScheduleService(WorkScheduleRepository workScheduleRepository,
                                EquipamentGroupRepository equipamentGroupRepository,
-                               DriverRepository driverRepository)
+                               DriverRepository driverRepository, WorkSheduleValidation workSheduleValidation)
     {
         this.workScheduleRepository = workScheduleRepository;
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.driverRepository = driverRepository;
+        this.workSheduleValidation = workSheduleValidation;
     }
 
     @Transactional
     public void save(WorkSheduleCreateRequest workSheduleCreateRequest){
+        workSheduleValidation.validate(workSheduleCreateRequest);
 
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(workSheduleCreateRequest.equipamentGroupId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, workSheduleCreateRequest.equipamentGroupId()));

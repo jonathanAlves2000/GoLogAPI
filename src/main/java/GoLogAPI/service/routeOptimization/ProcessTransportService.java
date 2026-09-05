@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,13 +22,15 @@ public class ProcessTransportService {
     private final EquipamentGroupRepository equipamentGroupRepository;
     private final EquipamentRepository equipamentRepository;
     private final CompanyRepository companyRepository;
+    private final WorkScheduleRepository workScheduleRepository;
 
     public ProcessTransportService(TransportRepository transportRepository, EquipamentGroupRepository equipamentGroupRepository, EquipamentRepository equipamentRepository,
-                                   CompanyRepository companyRepository) {
+                                   CompanyRepository companyRepository, WorkScheduleRepository workScheduleRepository) {
         this.transportRepository = transportRepository;
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.equipamentRepository = equipamentRepository;
         this.companyRepository = companyRepository;
+        this.workScheduleRepository = workScheduleRepository;
     }
 
     @Transactional
@@ -55,6 +58,11 @@ public class ProcessTransportService {
         Transport transport = transportRepository.findByEquipamentGroup(equipamentGroup)
                 .orElse(new Transport());
 
+        Driver driver = null;
+        for(WorkSchedule workSchedule : workScheduleRepository.findByEquipamentGroupId(equipamentGroup.getId())) {
+            driver = workSchedule.getDriver();
+        }
+
         transport.setShipmentQuantity(vehicleRoute.visits().size());
         transport.setCalculedDistance(totalDistance);
         transport.setTotalTimeCalculed(totalDuration);
@@ -62,6 +70,7 @@ public class ProcessTransportService {
         transport.setTotalCostCalculed(totalCost);
         transport.setEquipamentGroup(equipamentGroup);
         transport.setTransporter(company);
+        transport.setDriver(driver);
 
         List<LatLng> totalRoutePoints = new ArrayList<>();
 

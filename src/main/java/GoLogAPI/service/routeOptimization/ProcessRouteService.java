@@ -23,8 +23,8 @@ public class ProcessRouteService {
         this.processShipment = processShipment;
     }
 
-    public void processRoute() {
-        String routeResponseString = routeRequestService.optimizeRoutes();
+    public void processRoute(String routeResponseString) {
+
         try {
             ApiRouteOptimizationResponse routeResponseObject = objectMapper.readValue(
                     routeResponseString,

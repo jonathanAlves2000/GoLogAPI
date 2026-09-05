@@ -50,7 +50,7 @@ public class ProcessShipmentServcie {
 
             routeStopRepository.deleteByTransportId(transport.getId());
 
-            routeStopRepository.flush();
+            routeStopRepository.flush(); // Força o commit da trandação
 
             Double distanceTotal = (vehicleRoute.metrics() != null) ? vehicleRoute.metrics().travelDistanceMeters() : 0.0;
             List<ApiRouteStop> visits = vehicleRoute.visits();

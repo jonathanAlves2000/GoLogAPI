@@ -21,7 +21,7 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
         Double getTotalVolume();
     }
 
-    List<Shipment> findByTypeOperation(TypeOperation typeOperation);
+    List<Shipment> findByIdInAndTypeOperation(List<UUID> shipmentId, TypeOperation typeOperation);
     List<Shipment> findByOperationOrigem(Shipment shipment);
 
 
