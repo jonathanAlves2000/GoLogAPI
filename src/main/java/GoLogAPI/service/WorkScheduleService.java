@@ -45,6 +45,8 @@ public class WorkScheduleService {
                 .driver(driver)
                 .equipamentGroup(equipamentGroup)
                 .scheduleDate(workSheduleCreateRequest.scheduleDate())
+                .startWorkday(workSheduleCreateRequest.startWorkday())
+                .endWorkday(workSheduleCreateRequest.endWorkday())
                 .status(workSheduleCreateRequest.status())
                 .build();
 
@@ -60,6 +62,8 @@ public class WorkScheduleService {
                         workSchedule.getDriver(),
                         workSchedule.getEquipamentGroup(),
                         workSchedule.getScheduleDate(),
+                        workSchedule.getStartWorkday(),
+                        workSchedule.getEndWorkday(),
                         workSchedule.getStatus()
                 )).toList();
     }
@@ -79,6 +83,8 @@ public class WorkScheduleService {
         workSchedule.setDriver(driver);
         workSchedule.setEquipamentGroup(equipamentGroup);
         workSchedule.setScheduleDate(workSheduleCreateRequest.scheduleDate());
+        workSchedule.setStartWorkday(workSheduleCreateRequest.startWorkday());
+        workSchedule.setEndWorkday(workSheduleCreateRequest.endWorkday());
         workSchedule.setStatus(workSheduleCreateRequest.status());
 
         workScheduleRepository.save(workSchedule);

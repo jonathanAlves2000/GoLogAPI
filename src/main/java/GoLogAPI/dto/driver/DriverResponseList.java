@@ -10,7 +10,5 @@ public record DriverResponseList(
         String email,
         String cnhNumber,
         String cpf,
-        LocalTime startWorkday,
-        LocalTime endWorkday,
         LocalDate cnhExpiration
 ) { }

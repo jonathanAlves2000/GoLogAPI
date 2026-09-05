@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -35,6 +36,12 @@ public class WorkSchedule extends Audit {
 
     @Column(name = "schedule_date", nullable = false)
     private LocalDate scheduleDate;
+
+    @Column(name = "start_workday", nullable = false)
+    private LocalTime startWorkday;
+
+    @Column(name = "end_workday", nullable = false)
+    private LocalTime endWorkday;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

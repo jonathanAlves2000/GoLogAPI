@@ -17,9 +17,5 @@ public record DriverUpdateRequest(
         @Future(message = "A data de expiração deve ser maior que hoje")
         LocalDate cnhExpiration,
 
-        LocalTime startWorkday,
-
-        LocalTime endWorkday,
-
         UUID userId
 ) implements DriverRequest { }
