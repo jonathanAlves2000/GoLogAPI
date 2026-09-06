@@ -33,7 +33,7 @@ public record TractorCreateRequest(
         TypeFuel typeFuel,
 
         @NotNull
-        Double kmPerLiter,
+        Double costPerKilometer,
 
         @NotNull(message = "Status do tractor deve ser infoemado.")
         EquipamentStatus status,

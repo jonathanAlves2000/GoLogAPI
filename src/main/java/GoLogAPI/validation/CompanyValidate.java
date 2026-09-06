@@ -10,11 +10,11 @@ import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.CompanyRepository;
 
 @Component
-public class CompanyValidator {
+public class CompanyValidate {
 
     private final CompanyRepository companyRepository;
 
-    public CompanyValidator(CompanyRepository companyRepository){
+    public CompanyValidate(CompanyRepository companyRepository){
         this.companyRepository = companyRepository;
     }
 

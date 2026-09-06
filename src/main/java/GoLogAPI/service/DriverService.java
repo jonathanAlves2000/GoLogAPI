@@ -10,7 +10,7 @@ import GoLogAPI.model.Driver;
 import GoLogAPI.model.User;
 import GoLogAPI.repository.DriverRepository;
 import GoLogAPI.repository.UserRepository;
-import GoLogAPI.validation.DriverValidator;
+import GoLogAPI.validation.DriverValidate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,20 +25,20 @@ public class DriverService {
     private final UserRepository userRepository;
     private final DriverRepository driverRepository;
     private final DriverMapper driverMapper;
-    private final DriverValidator driverValidator;
+    private final DriverValidate driverValidate;
 
     public DriverService(UserRepository userRepository ,DriverRepository driverRepository,
-                         DriverMapper driverMapper, DriverValidator driverValidator)
+                         DriverMapper driverMapper, DriverValidate driverValidate)
     {
         this.driverRepository = driverRepository;
         this.driverMapper = driverMapper;
         this.userRepository = userRepository;
-        this.driverValidator = driverValidator;
+        this.driverValidate = driverValidate;
     }
 
     @Transactional
     public DriverResponse save(DriverCreateRequest driverCreateRequest) {
-        driverValidator.validate(driverCreateRequest);
+        driverValidate.validate(driverCreateRequest);
         Driver driver = driverMapper.toEntity(driverCreateRequest);
         User user = userRepository.findById(driverCreateRequest.userId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, driverCreateRequest.userId()));
@@ -82,7 +82,7 @@ public class DriverService {
     public DriverResponse updatePartial(UUID id, DriverUpdateRequest driverUpdateRequest){
         Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        driverValidator.validate(driverUpdateRequest);
+        driverValidate.validate(driverUpdateRequest);
 
         if(driverUpdateRequest.cnhNumber() != null && !driverUpdateRequest.cnhNumber().isBlank())
             driver.setCnhNumber(driverUpdateRequest.cnhNumber());

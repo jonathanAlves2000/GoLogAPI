@@ -4,6 +4,7 @@ import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.*;
+import GoLogAPI.model.enums.WorkScheduleStatus;
 import GoLogAPI.repository.*;
 import GoLogAPI.service.MessageException;
 import com.google.maps.model.LatLng;
@@ -61,6 +62,8 @@ public class ProcessTransportService {
         Driver driver = null;
         for(WorkSchedule workSchedule : workScheduleRepository.findByEquipamentGroupId(equipamentGroup.getId())) {
             driver = workSchedule.getDriver();
+            workSchedule.setStatus(WorkScheduleStatus.EM_OPERACAO);
+            workScheduleRepository.save(workSchedule);
         }
 
         transport.setShipmentQuantity(vehicleRoute.visits().size());

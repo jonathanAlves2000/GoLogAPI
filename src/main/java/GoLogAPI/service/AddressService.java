@@ -7,7 +7,7 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.AddressMapper;
 import GoLogAPI.model.Address;
 import GoLogAPI.repository.AddressRepository;
-import GoLogAPI.validation.AddressValidator;
+import GoLogAPI.validation.AddressValidate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -20,17 +20,17 @@ public class AddressService {
 
     private final AddressRepository addressRepository;
     private final AddressMapper addressMapper;
-    private final AddressValidator addressValidator;
+    private final AddressValidate addressValidate;
 
-    public AddressService(AddressRepository addressRepository, AddressMapper addressMapper, AddressValidator addressValidator){
+    public AddressService(AddressRepository addressRepository, AddressMapper addressMapper, AddressValidate addressValidate){
         this.addressRepository = addressRepository;
         this.addressMapper = addressMapper;
-        this.addressValidator = addressValidator;
+        this.addressValidate = addressValidate;
     }
 
     @Transactional
     public AddressResponse save(AddressCreateRequest addressCreateRequest){
-        addressValidator.validate(addressCreateRequest);
+        addressValidate.validate(addressCreateRequest);
         Address address = addressMapper.toEntity(addressCreateRequest);
         addressRepository.save(address);
         return addressMapper.toResponse(address);
@@ -56,7 +56,7 @@ public class AddressService {
 
     @Transactional
     public AddressResponse update(UUID id, AddressCreateRequest addressCreateRequest){
-        addressValidator.validate(addressCreateRequest);
+        addressValidate.validate(addressCreateRequest);
         addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         Address address = addressMapper.toEntity(addressCreateRequest);
@@ -69,7 +69,7 @@ public class AddressService {
     public AddressResponse updatePartial(UUID id, AddressUpdateRequest addressUpdateRequest){
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        addressValidator.validate(addressUpdateRequest);
+        addressValidate.validate(addressUpdateRequest);
 
         if(addressUpdateRequest.cep() != null && !addressUpdateRequest.cep().isBlank())
             address.setCep(addressUpdateRequest.cep());

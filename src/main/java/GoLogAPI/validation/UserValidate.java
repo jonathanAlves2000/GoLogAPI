@@ -10,11 +10,11 @@ import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.UserRepository;
 
 @Component
-public class UserValidator {
+public class UserValidate {
 
     private final UserRepository userRepository;
 
-    public UserValidator(UserRepository userRepository){
+    public UserValidate(UserRepository userRepository){
         this.userRepository = userRepository;
     }
 

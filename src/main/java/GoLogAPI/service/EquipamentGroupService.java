@@ -11,11 +11,10 @@ import GoLogAPI.mapper.SupportedTypeMapper;
 import GoLogAPI.model.Equipament;
 import GoLogAPI.model.EquipamentGroup;
 import GoLogAPI.model.TypeTransport;
-import GoLogAPI.model.enums.EquipamentGroupStatus;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.EquipamentRepository;
 import GoLogAPI.repository.TypeTransportRepository;
-import GoLogAPI.validation.EquipamentGroupValidator;
+import GoLogAPI.validation.EquipamentGroupValidate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -29,19 +28,19 @@ public class EquipamentGroupService {
     private final EquipamentGroupRepository equipamentGroupRepository;
     private final EquipamentGroupMapper equipamentGroupMapper;
     private final EquipamentRepository equipamentRepository;
-    private final EquipamentGroupValidator equipamentGroupValidator;
+    private final EquipamentGroupValidate equipamentGroupValidate;
     private final TypeTransportRepository typeTransportRepository;
     private final SupportedTypeMapper supportedTypeMapper;
 
 
     public EquipamentGroupService(EquipamentGroupRepository equipamentGroupRepository,
-    EquipamentGroupMapper equipamentGroupMapper,EquipamentRepository equipamentRepository,
-    EquipamentGroupValidator equipamentGroupValidator, TypeTransportRepository typeTransportRepository,
+                                  EquipamentGroupMapper equipamentGroupMapper, EquipamentRepository equipamentRepository,
+                                  EquipamentGroupValidate equipamentGroupValidate, TypeTransportRepository typeTransportRepository,
                                   SupportedTypeMapper supportedTypeMapper){
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.equipamentGroupMapper = equipamentGroupMapper;
         this.equipamentRepository = equipamentRepository;
-        this.equipamentGroupValidator= equipamentGroupValidator;
+        this.equipamentGroupValidate = equipamentGroupValidate;
         this.typeTransportRepository = typeTransportRepository;
         this.supportedTypeMapper = supportedTypeMapper;
     }
@@ -51,7 +50,7 @@ public class EquipamentGroupService {
 
         EquipamentGroup equipamentGroup = equipamentGroupMapper.toEntity(equipamentGroupCreateRequest);
 
-        equipamentGroupValidator.validate(equipamentGroupCreateRequest);
+        equipamentGroupValidate.validate(equipamentGroupCreateRequest);
 
         Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament1Id()));

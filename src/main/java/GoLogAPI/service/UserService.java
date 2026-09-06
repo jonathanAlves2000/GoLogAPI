@@ -10,7 +10,7 @@ import GoLogAPI.model.Company;
 import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.UserRepository;
 import GoLogAPI.model.User;
-import GoLogAPI.validation.UserValidator;
+import GoLogAPI.validation.UserValidate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +25,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final UserMapper userMapper;
-    private final UserValidator userValidator;
+    private final UserValidate userValidate;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository ,UserMapper userMapper, UserValidator userValidator, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository , UserMapper userMapper, UserValidate userValidate, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
         this.userMapper = userMapper;
-        this.userValidator = userValidator;
+        this.userValidate = userValidate;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -40,7 +40,7 @@ public class UserService {
     public UserResponse save(UserCreateRequest userCreateRequest){
         Company company = companyRepository.findById(userCreateRequest.companyId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userCreateRequest.companyId()));
-        userValidator.validate(userCreateRequest);
+        userValidate.validate(userCreateRequest);
         String passwordEnconder = passwordEncoder.encode(userCreateRequest.password());
         User user = userMapper.toEntity(userCreateRequest);
         user.setPassword(passwordEnconder);
@@ -71,7 +71,7 @@ public class UserService {
     public UserResponse update(UUID id, UserCreateRequest userCreateRequest){
       userRepository.findById(id)
               .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-      userValidator.validate(userCreateRequest);
+      userValidate.validate(userCreateRequest);
       User user = userMapper.toEntity(userCreateRequest);
       Company company = companyRepository.findById(userCreateRequest.companyId())
               .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userCreateRequest.companyId()));
@@ -86,7 +86,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        userValidator.validate(userUpdateRequest);
+        userValidate.validate(userUpdateRequest);
 
         if(userUpdateRequest.name() != null && !userUpdateRequest.name().isBlank())
             user.setName(userUpdateRequest.name());

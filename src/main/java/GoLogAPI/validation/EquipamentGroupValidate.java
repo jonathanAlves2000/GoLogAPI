@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class EquipamentGroupValidator {
+public class EquipamentGroupValidate {
 
     private final EquipamentGroupRepository equipamentGroupRepository;
 
-    public EquipamentGroupValidator(EquipamentGroupRepository equipamentGroupRepository){
+    public EquipamentGroupValidate(EquipamentGroupRepository equipamentGroupRepository){
         this.equipamentGroupRepository = equipamentGroupRepository;
     }
 

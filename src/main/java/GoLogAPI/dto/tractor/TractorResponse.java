@@ -14,18 +14,16 @@ import java.util.UUID;
 public class TractorResponse extends EquipamentResponse {
 
     private TypeFuel typeFuel;
-    private Double kmPerLiter;
-    private Double co2PerKm;
+    private Double costPerKilometer;
     private UUID companyId;
 
     public TractorResponse(UUID id, String plate, String renavam, String model,
                            Integer numberAxles, Double maximumCapacity, TypeFuel typeFuel,
-                           Double kmPerLiter, Double co2PerKm, EquipamentStatus status, UUID companyId) {
+                           Double costPerKilometer, EquipamentStatus status, UUID companyId) {
 
         super(id, plate, renavam, model, numberAxles, maximumCapacity, status);
         this.typeFuel = typeFuel;
-        this.kmPerLiter = kmPerLiter;
-        this.co2PerKm = co2PerKm;
+        this.costPerKilometer = costPerKilometer;
         this.companyId = companyId;
     }
 }

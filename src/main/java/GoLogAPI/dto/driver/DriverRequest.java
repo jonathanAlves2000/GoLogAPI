@@ -7,5 +7,6 @@ import java.util.UUID;
 public interface DriverRequest {
     String cnhNumber();
     LocalDate cnhExpiration();
+    Double costPerHour();
     UUID userId();
 }

@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class WorkSheduleValidation {
+public class WorkSheduleValidate {
 
     private final WorkScheduleRepository workScheduleRepository;
 
-    public WorkSheduleValidation(WorkScheduleRepository workScheduleRepository){
+    public WorkSheduleValidate(WorkScheduleRepository workScheduleRepository){
         this.workScheduleRepository = workScheduleRepository;
     }
 

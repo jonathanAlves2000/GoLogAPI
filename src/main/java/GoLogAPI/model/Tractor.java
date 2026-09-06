@@ -16,9 +16,10 @@ public class Tractor extends Equipament{
     @Column(name = "type_fuel", nullable = false)
     private TypeFuel typeFuel;
 
-    @Column(name = "km_per_liter", nullable = false)
-    private Double kmPerLiter;
+    @Column(name = "cost_per_kilometer", nullable = false)
+    private Double costPerKilometer;
 
-    @Column(name = "co2_per_km", nullable = false)
-    private  Double co2PerKm;
+    @Column(name = "co2_per_kilometer", nullable = false)
+    private Double co2PerKilometer;
+
 }

@@ -10,11 +10,11 @@ import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.TrailerRepository;
 
 @Component
-public class TrailerValidator {
+public class TrailerValidate {
 
     private final TrailerRepository trailerRepository;
 
-    public TrailerValidator(TrailerRepository trailerRepository){
+    public TrailerValidate(TrailerRepository trailerRepository){
         this.trailerRepository = trailerRepository;
     }
 

@@ -7,7 +7,6 @@ import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.Objects;
 
 @Mapper(componentModel = "spring", uses = {TractorMapper.class, TrailerMapper.class})
 public abstract class EquipamentMapper {

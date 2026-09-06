@@ -10,11 +10,11 @@ import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.DriverRepository;
 
 @Component
-public class DriverValidator {
+public class DriverValidate {
 
     private final DriverRepository driverRepository;
 
-    public DriverValidator(DriverRepository driverRepository){
+    public DriverValidate(DriverRepository driverRepository){
         this.driverRepository = driverRepository;
     }
 

@@ -6,6 +6,7 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.*;
 import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.*;
+import GoLogAPI.validation.ShipementValidate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +24,13 @@ public class ShipmentService {
     private final ShipmentTypeRepository shipmentTypeRepository;
     private final TypeTransportRepository typeTransportRepository;
     private final RouteStopRepository routeStopRepository;
+    private final ShipementValidate shipementValidate;
 
     public ShipmentService(
             ShipmentRepository shipmentRepository, AddressRepository addressRepository,
             CompanyRepository companyRepository, UserRepository userRepository,
             ShipmentTypeRepository shipmentTypeRepository, TypeTransportRepository typeTransportRepository,
-            RouteStopRepository routeStopRepository)
+            RouteStopRepository routeStopRepository, ShipementValidate shipementValidate)
     {
         this.shipmentRepository = shipmentRepository;
         this.addressRepository = addressRepository;
@@ -37,10 +39,13 @@ public class ShipmentService {
         this.shipmentTypeRepository = shipmentTypeRepository;
         this.typeTransportRepository = typeTransportRepository;
         this.routeStopRepository = routeStopRepository;
+        this.shipementValidate = shipementValidate;
     }
 
     @Transactional
     public ShipmentCreateResponse save(ShipmentCreateRequest shipmentCreateRequest) {
+
+        shipementValidate.validate(shipmentCreateRequest);
 
         User user = userRepository.findById(shipmentCreateRequest.userId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentCreateRequest.userId()));
@@ -210,6 +215,8 @@ public class ShipmentService {
     @Transactional
     public ShipmentUpdateResponse update(UUID id, ShipmentCreateRequest shipmentCreateRequest){
 
+        shipementValidate.validate(shipmentCreateRequest);
+
         Shipment shipment = shipmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
@@ -279,6 +286,8 @@ public class ShipmentService {
 
     @Transactional
     public ShipmentCreateResponse updatePartial(UUID id, ShipmentUpdateRequest shipmentUpdateRequest){
+
+        shipementValidate.validate(shipmentUpdateRequest);
 
         Shipment shipment = shipmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));

@@ -2,6 +2,7 @@ package GoLogAPI.controller;
 
 import GoLogAPI.dto.workSchedule.WorkSheduleCreateRequest;
 import GoLogAPI.dto.workSchedule.WorkSheduleResponses;
+import GoLogAPI.model.enums.WorkScheduleStatus;
 import GoLogAPI.service.WorkScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,6 +35,12 @@ public class WorkScheduleController {
     @GetMapping
     public ResponseEntity<List<WorkSheduleResponses>> getAll(){
         List<WorkSheduleResponses> workSheduleResponses = workScheduleService.getAll();
+        return ResponseEntity.ok().body(workSheduleResponses);
+    }
+
+    @GetMapping("/getByStatus")
+    public ResponseEntity<List<WorkSheduleResponses>> getByStatus(@RequestParam WorkScheduleStatus status){
+        List<WorkSheduleResponses> workSheduleResponses = workScheduleService.getByStatus(status);
         return ResponseEntity.ok().body(workSheduleResponses);
     }
 

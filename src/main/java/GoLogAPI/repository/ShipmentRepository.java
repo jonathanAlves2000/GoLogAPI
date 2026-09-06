@@ -21,6 +21,7 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
         Double getTotalVolume();
     }
 
+
     List<Shipment> findByIdInAndTypeOperation(List<UUID> shipmentId, TypeOperation typeOperation);
     List<Shipment> findByOperationOrigem(Shipment shipment);
 
@@ -37,4 +38,10 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
            "FROM Shipment s " +
            "WHERE s.status = :status")
     List<Shipment> findByStatus(@Param("status") ShipmentStatus status);
+
+
+    @Query("SELECT s " +
+           "FROM Shipment s " +
+            "WHERE id = :collectId")
+    Shipment findByOperationOrigemId(UUID collectId);
 }

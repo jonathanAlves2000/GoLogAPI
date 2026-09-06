@@ -57,13 +57,16 @@ public class RouteRequestService {
         List<Vehicle> vehicles = new ArrayList<>();
 
         for(WorkSchedule workSchedule : workSchedules) {
+
             EquipamentGroup equipament = workSchedule.getEquipamentGroup();
+            Driver driver = workSchedule.getDriver();
 
             Telemetry telemetry = telemetryRepository.findTopByEquipamentIdOrderByDateTimeDesc(equipament.getEquipament1())
                     .orElse(null);
 
             Tractor tractor = tractorRepository.findById(equipament.getEquipament1().getId()).
                     orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));
+
             LocalDate routeDate = LocalDate.now();
 
             OffsetDateTime startDateTime = routeDate.atTime(workSchedule.getStartWorkday()).atOffset(ZoneOffset.of("-03:00"));
@@ -81,7 +84,7 @@ public class RouteRequestService {
 
             ZoneOffset offset = ZoneOffset.of("-03:00");
 
-            for (LocalDate date = today; !date.isAfter(validUntil); date = date.plusDays(1)) {
+            for(LocalDate date = today; !date.isAfter(validUntil); date = date.plusDays(1)) {
                 OffsetDateTime start = date.atTime(workSchedule.getStartWorkday()).atOffset(offset);
                 OffsetDateTime end = date.atTime(workSchedule.getEndWorkday()).atOffset(offset);
                 if (end.isBefore(start)) end = end.plusDays(1); // turno noturno
@@ -89,6 +92,18 @@ public class RouteRequestService {
                 startWindows.add(new TimeWindow(start.format(formatter), end.minusHours(2).format(formatter)));
                 endWindows.add(new TimeWindow(end.format(formatter), end.plusHours(2).format(formatter)));
             }
+
+            double kmMultiplier = switch (optimizeRouteRequest.routePriority()){
+                case ECONOMIA -> 2.0;
+                case EQUILIBRIO -> 1.0;
+                case TEMPO -> 0.1;
+            };
+
+            double hourMultiplier = switch (optimizeRouteRequest.routePriority()){
+                case ECONOMIA -> 0.1;
+                case EQUILIBRIO -> 1.0;
+                case TEMPO -> 2.0;
+            };
 
             vehicles.add(
                     new Vehicle(equipament.getEquipament1().getPlate(),
@@ -98,8 +113,9 @@ public class RouteRequestService {
                     ),
                     new LoadLimits(new Weight(String.valueOf(equipament.getEquipament1().getMaximumCapacity().longValue()))),
                     startWindows, // Pode inciar entre x e y
-                    endWindows, // precisa terminar entre x e y
-                    tractor.getCo2PerKm()
+                    endWindows,  // precisa terminar entre x e y
+                    tractor.getCostPerKilometer() * kmMultiplier,
+                    driver.getCostPerHour() * hourMultiplier
             ));
         }
 

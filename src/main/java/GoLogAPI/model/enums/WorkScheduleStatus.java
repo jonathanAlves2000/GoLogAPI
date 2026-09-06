@@ -2,7 +2,8 @@ package GoLogAPI.model.enums;
 
 public enum WorkScheduleStatus {
     ATIVO("Escala Ativa"),
-    DESATIVADO("Escala Desativada");
+    DESATIVADO("Escala Desativada"),
+    EM_OPERACAO("Em Operação");
 
     private final String status;
 

@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class AddressValidator {
+public class AddressValidate {
 
     private final AddressRepository addressRepository;
 
-    public AddressValidator(AddressRepository addressRepository){
+    public AddressValidate(AddressRepository addressRepository){
         this.addressRepository = addressRepository;
     }
 

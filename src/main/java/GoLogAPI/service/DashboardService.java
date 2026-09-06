@@ -165,15 +165,15 @@ public class DashboardService {
             return 0.0;
         }
         if (group.getEquipament1() instanceof Tractor) {
-            Double co2 = ((Tractor) group.getEquipament1()).getCo2PerKm();
+            Double co2 = ((Tractor) group.getEquipament1()).getCostPerKilometer();
             return co2 != null ? co2 : 0.0;
         }
         if (group.getEquipament2() instanceof Tractor) {
-            Double co2 = ((Tractor) group.getEquipament2()).getCo2PerKm();
+            Double co2 = ((Tractor) group.getEquipament2()).getCostPerKilometer();
             return co2 != null ? co2 : 0.0;
         }
         if (group.getEquipament3() instanceof Tractor) {
-            Double co2 = ((Tractor) group.getEquipament3()).getCo2PerKm();
+            Double co2 = ((Tractor) group.getEquipament3()).getCostPerKilometer();
             return co2 != null ? co2 : 0.0;
         }
         return 0.0;

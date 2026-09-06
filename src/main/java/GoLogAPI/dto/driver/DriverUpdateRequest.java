@@ -3,6 +3,7 @@ package GoLogAPI.dto.driver;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +17,9 @@ public record DriverUpdateRequest(
         @JsonFormat(pattern = "dd/MM/yyyy")
         @Future(message = "A data de expiração deve ser maior que hoje")
         LocalDate cnhExpiration,
+
+        @Positive(message = "O valor de custo por hora deve ser positivo")
+        Double costPerHour,
 
         UUID userId
 ) implements DriverRequest { }

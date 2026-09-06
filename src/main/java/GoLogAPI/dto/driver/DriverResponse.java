@@ -13,5 +13,6 @@ public record DriverResponse(
         String cnhNumber,
         String cpf,
         LocalDate cnhExpiration,
+        Double costPerHour,
         UserResponse user
 ) { }

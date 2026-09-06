@@ -13,14 +13,12 @@ import java.util.UUID;
 public record ShipmentUpdateRequest(
 
         TypeOperation typeOperation,
-        @Positive
+        @Positive(message = "O peso deve ser positivo.")
         Double weight,
-        @Positive
+        @Positive(message = "O volume deve ser positivo.")
         Double volume,
-        @FutureOrPresent
-        @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+        @FutureOrPresent(message = "A data de agendamento da remessa deve ser no futuro ou presente")
         LocalDateTime schedulind,
-        @Size(min = 1, max = 10, message = "O Status da entrega deve ter entre 1 e 10 caracteres.")
         ShipmentStatus status,
         Integer shippingSequence,
         UUID userId,
@@ -30,5 +28,4 @@ public record ShipmentUpdateRequest(
         UUID addressId,
         UUID customerId,
         UUID operationOrigemId
-) {
-}
+) implements ShipmentRequest{ }

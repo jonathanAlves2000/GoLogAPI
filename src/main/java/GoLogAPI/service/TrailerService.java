@@ -9,7 +9,7 @@ import GoLogAPI.model.Company;
 import GoLogAPI.model.Trailer;
 import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.TrailerRepository;
-import GoLogAPI.validation.TrailerValidator;
+import GoLogAPI.validation.TrailerValidate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,20 +22,20 @@ public class TrailerService {
 
     private final TrailerRepository trailerRepository;
     private final TrailerMapper trailerMapper;
-    private final TrailerValidator trailerValidator;
+    private final TrailerValidate trailerValidate;
     private final CompanyRepository companyRepository;
 
     public TrailerService(TrailerRepository trailerRepository,
-                          TrailerMapper trailerMapper, TrailerValidator trailerValidator, CompanyRepository companyRepository){
+                          TrailerMapper trailerMapper, TrailerValidate trailerValidate, CompanyRepository companyRepository){
         this.trailerRepository = trailerRepository;
         this.trailerMapper = trailerMapper;
-        this.trailerValidator = trailerValidator;
+        this.trailerValidate = trailerValidate;
         this.companyRepository = companyRepository;
     }
 
     @Transactional
     public TrailerResponse save(TrailerCreateRequest trailerCreateRequest){
-        trailerValidator.validate(trailerCreateRequest);
+        trailerValidate.validate(trailerCreateRequest);
 
         Company company = companyRepository.findById(trailerCreateRequest.companyId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, trailerCreateRequest.companyId()));
@@ -89,7 +89,7 @@ public class TrailerService {
         Company company = companyRepository.findById(trailerUpdateRequest.companyId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, trailerUpdateRequest.companyId()));
 
-        trailerValidator.validate(trailerUpdateRequest);
+        trailerValidate.validate(trailerUpdateRequest);
 
         if(trailerUpdateRequest.plate() != null && !trailerUpdateRequest.plate().isBlank())
             trailer.setPlate(trailerUpdateRequest.plate());

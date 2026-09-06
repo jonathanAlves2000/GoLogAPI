@@ -6,10 +6,11 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.Driver;
 import GoLogAPI.model.EquipamentGroup;
 import GoLogAPI.model.WorkSchedule;
+import GoLogAPI.model.enums.WorkScheduleStatus;
 import GoLogAPI.repository.DriverRepository;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.WorkScheduleRepository;
-import GoLogAPI.validation.WorkSheduleValidation;
+import GoLogAPI.validation.WorkSheduleValidate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,21 +24,21 @@ public class WorkScheduleService {
     private final WorkScheduleRepository workScheduleRepository;
     private final EquipamentGroupRepository equipamentGroupRepository;
     private final DriverRepository driverRepository;
-    private final WorkSheduleValidation workSheduleValidation;
+    private final WorkSheduleValidate workSheduleValidate;
 
     public WorkScheduleService(WorkScheduleRepository workScheduleRepository,
                                EquipamentGroupRepository equipamentGroupRepository,
-                               DriverRepository driverRepository, WorkSheduleValidation workSheduleValidation)
+                               DriverRepository driverRepository, WorkSheduleValidate workSheduleValidate)
     {
         this.workScheduleRepository = workScheduleRepository;
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.driverRepository = driverRepository;
-        this.workSheduleValidation = workSheduleValidation;
+        this.workSheduleValidate = workSheduleValidate;
     }
 
     @Transactional
     public void save(WorkSheduleCreateRequest workSheduleCreateRequest){
-        workSheduleValidation.validate(workSheduleCreateRequest);
+        workSheduleValidate.validate(workSheduleCreateRequest);
 
         EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(workSheduleCreateRequest.equipamentGroupId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, workSheduleCreateRequest.equipamentGroupId()));
@@ -68,6 +69,23 @@ public class WorkScheduleService {
                         workSchedule.getScheduleDate(),
                         workSchedule.getStartWorkday(),
                         workSchedule.getEndWorkday(),
+                        workSchedule.getDriver().getCostPerHour(),
+                        workSchedule.getStatus()
+                )).toList();
+    }
+
+    public List<WorkSheduleResponses> getByStatus(WorkScheduleStatus status){
+        List<WorkSchedule> workSchedules = workScheduleRepository.findByStatus(status);
+
+        return workSchedules.stream()
+                .map(workSchedule -> new WorkSheduleResponses(
+                        workSchedule.getId(),
+                        workSchedule.getDriver(),
+                        workSchedule.getEquipamentGroup(),
+                        workSchedule.getScheduleDate(),
+                        workSchedule.getStartWorkday(),
+                        workSchedule.getEndWorkday(),
+                        workSchedule.getDriver().getCostPerHour(),
                         workSchedule.getStatus()
                 )).toList();
     }

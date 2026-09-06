@@ -44,6 +44,9 @@ public class Driver extends Audit {
     @Column(name = "cnh_expiration", nullable = false)
     private LocalDate cnhExpiration;
 
+    @Column(name = "cost_per_hour", nullable = false)
+    private Double costPerHour;
+
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     @NotFound(action = NotFoundAction.IGNORE)

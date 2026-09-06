@@ -17,5 +17,6 @@ public record WorkSheduleResponses(
         LocalDate scheduleDate,
         LocalTime startWorkday,
         LocalTime endWorkday,
+        Double costPerHour,
         WorkScheduleStatus status
 ) { }

@@ -10,11 +10,11 @@ import GoLogAPI.exception.ConflictException;
 import GoLogAPI.repository.TractorRepository;
 
 @Component
-public class TractorValidator {
+public class TractorValidate {
 
     private final TractorRepository tractorRepository;
 
-    public TractorValidator(TractorRepository tractorRepository){
+    public TractorValidate(TractorRepository tractorRepository){
         this.tractorRepository = tractorRepository;
     }
 

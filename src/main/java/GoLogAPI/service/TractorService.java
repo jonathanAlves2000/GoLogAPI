@@ -9,7 +9,7 @@ import GoLogAPI.model.Company;
 import GoLogAPI.model.Tractor;
 import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.TractorRepository;
-import GoLogAPI.validation.TractorValidator;
+import GoLogAPI.validation.TractorValidate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,20 +22,20 @@ public class TractorService {
 
     private final TractorRepository tractorRepository;
     private final TractorMapper tractorMapper;
-    private final TractorValidator tractorValidator;
+    private final TractorValidate tractorValidate;
     private final CompanyRepository companyRepository;
 
     public TractorService(TractorRepository tractorRepository, TractorMapper tractorMapper,
-                          TractorValidator tractorValidator, CompanyRepository companyRepository){
+                          TractorValidate tractorValidate, CompanyRepository companyRepository){
         this.tractorRepository = tractorRepository;
         this.tractorMapper = tractorMapper;
-        this.tractorValidator = tractorValidator;
+        this.tractorValidate = tractorValidate;
         this.companyRepository = companyRepository;
     }
 
     @Transactional
     public TractorResponse save(TractorCreateRequest tractorCreateRequest){
-        tractorValidator.validate(tractorCreateRequest);
+        tractorValidate.validate(tractorCreateRequest);
         Tractor tractor = tractorMapper.toEntity(tractorCreateRequest);
 
         Company company = companyRepository.findById(tractorCreateRequest.companyId())
@@ -43,19 +43,19 @@ public class TractorService {
 
         tractor.setCompany(company);
 
-        Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
-        Double factorEmission;
-        Double co2EmissionPerKm;
-
-        factorEmission = switch (tractor.getTypeFuel()) {
-            case DIESEL -> 2.68;
-            case ETANOL -> 1.52;
-            case GASOLINA -> 2.28;
-            default -> 0.0;
-        };
-
-        co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
-        tractor.setCo2PerKm(co2EmissionPerKm);
+//        Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
+//        Double factorEmission;
+//        Double co2EmissionPerKm;
+//
+//        factorEmission = switch (tractor.getTypeFuel()) {
+//            case DIESEL -> 2.68;
+//            case ETANOL -> 1.52;
+//            case GASOLINA -> 2.28;
+//            default -> 0.0;
+//        };
+//
+//        co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
+//        tractor.setCo2PerKm(co2EmissionPerKm);
 
         tractorRepository.save(tractor);
         return tractorMapper.toResponse(tractor);
@@ -90,19 +90,20 @@ public class TractorService {
         //tractorValidator.validate(tractorCreateRequest);
         Tractor tractor = tractorMapper.toEntity(tractorCreateRequest);
 
-        Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
-        Double factorEmission;
-        Double co2EmissionPerKm;
+//        Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
+//        Double factorEmission;
+//        Double co2EmissionPerKm;
+//
+//        factorEmission = switch (tractor.getTypeFuel()) {
+//            case DIESEL -> 2.68;
+//            case ETANOL -> 1.52;
+//            case GASOLINA -> 2.28;
+//            default -> 0.0;
+//        };
+//
+//        co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
+//        tractor.setCo2PerKm(co2EmissionPerKm);
 
-        factorEmission = switch (tractor.getTypeFuel()) {
-            case DIESEL -> 2.68;
-            case ETANOL -> 1.52;
-            case GASOLINA -> 2.28;
-            default -> 0.0;
-        };
-
-        co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
-        tractor.setCo2PerKm(co2EmissionPerKm);
         tractor.setId(id);
         tractor.setCompany(company);
         tractorRepository.save(tractor);
@@ -127,25 +128,22 @@ public class TractorService {
             tractor.setMaximumCapacity(tractorUpdateRequest.maximumCapacity());
         if(tractorUpdateRequest.numberAxles() != null)
             tractor.setNumberAxles(tractorUpdateRequest.numberAxles());
-        if(tractorUpdateRequest.typeFuel() != null)
-            tractor.setTypeFuel(tractorUpdateRequest.typeFuel());
-        if(tractorUpdateRequest.kmPerLiter() != null) {
+        if(tractorUpdateRequest.costPerKilometer() != null) {
+            tractor.setCostPerKilometer(tractorUpdateRequest.costPerKilometer());
 
-            tractor.setKmPerLiter(tractorUpdateRequest.kmPerLiter());
+//            Double litersPerKm = 1.0 / tractorUpdateRequest.kmPerLiter();
+//            Double factorEmission;
+//            Double co2EmissionPerKm;
+//
+//            factorEmission = switch (tractor.getTypeFuel()) {
+//                case DIESEL -> 2.68;
+//                case ETANOL -> 1.52;
+//                case GASOLINA -> 2.28;
+//                default -> 0.0;
+//            };
 
-            Double litersPerKm = 1.0 / tractorUpdateRequest.kmPerLiter();
-            Double factorEmission;
-            Double co2EmissionPerKm;
-
-            factorEmission = switch (tractor.getTypeFuel()) {
-                case DIESEL -> 2.68;
-                case ETANOL -> 1.52;
-                case GASOLINA -> 2.28;
-                default -> 0.0;
-            };
-
-            co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
-            tractor.setCo2PerKm(co2EmissionPerKm);
+//            co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
+//            tractor.setCo2PerKm(co2EmissionPerKm);
         }
 
         if(tractorUpdateRequest.companyId() != null) {

@@ -20,7 +20,7 @@ public record ShipmentCreateRequest(
     Double volume,
 
     @NotNull(message = "A data de agendamento da remessa não poder nula.")
-    @Future(message = "A data de agendamento da remessa deve ser no futuro")
+    @FutureOrPresent(message = "A data de agendamento da remessa deve ser no futuro ou presente")
     LocalDateTime schedulind,
 
     @NotNull(message = "O Status da remessa não pode ser nulo.")
@@ -42,4 +42,5 @@ public record ShipmentCreateRequest(
     UUID customerId,
 
     UUID operationOrigemId
-) { }
+
+) implements ShipmentRequest{ }

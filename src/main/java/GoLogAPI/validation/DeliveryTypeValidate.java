@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class DeliveryTypeValidator {
+public class DeliveryTypeValidate {
 
     private final ShipmentTypeRepository shipmentTypeRepository;
 
-    public DeliveryTypeValidator(ShipmentTypeRepository deliveryTypeValidator){
+    public DeliveryTypeValidate(ShipmentTypeRepository deliveryTypeValidator){
         this.shipmentTypeRepository = deliveryTypeValidator;
     }
 

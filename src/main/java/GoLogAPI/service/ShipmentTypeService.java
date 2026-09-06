@@ -6,7 +6,7 @@ import GoLogAPI.dto.shipmentType.DeliveryTypeUpdateRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.ShipmentType;
 import GoLogAPI.repository.ShipmentTypeRepository;
-import GoLogAPI.validation.DeliveryTypeValidator;
+import GoLogAPI.validation.DeliveryTypeValidate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +18,17 @@ import java.util.UUID;
 public class ShipmentTypeService {
 
     private final ShipmentTypeRepository shipmentTypeRepository;
-    private final DeliveryTypeValidator deliveryTypeValidator;
+    private final DeliveryTypeValidate deliveryTypeValidate;
 
-    public ShipmentTypeService(ShipmentTypeRepository shipmentTypeRepository, DeliveryTypeValidator deliveryTypeValidator){
-        this.deliveryTypeValidator = deliveryTypeValidator;
+    public ShipmentTypeService(ShipmentTypeRepository shipmentTypeRepository, DeliveryTypeValidate deliveryTypeValidate){
+        this.deliveryTypeValidate = deliveryTypeValidate;
         this.shipmentTypeRepository = shipmentTypeRepository;
     }
 
     @Transactional
     public DeliveryTypeResponse save(DeliveryTypeCreateRequest deliveryTypeCreateRequest){
 
-        deliveryTypeValidator.validate(deliveryTypeCreateRequest);
+        deliveryTypeValidate.validate(deliveryTypeCreateRequest);
 
         ShipmentType shipmentType = ShipmentType.builder()
                 .name(deliveryTypeCreateRequest.name())
@@ -78,7 +78,7 @@ public class ShipmentTypeService {
         ShipmentType shipmentType = shipmentTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        deliveryTypeValidator.validate(deliveryTypeCreateRequest);
+        deliveryTypeValidate.validate(deliveryTypeCreateRequest);
 
        shipmentType.setName(deliveryTypeCreateRequest.name());
        shipmentType.setDescription(deliveryTypeCreateRequest.description());
@@ -99,7 +99,7 @@ public class ShipmentTypeService {
         ShipmentType shipmentType = shipmentTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        deliveryTypeValidator.validate(deliveryTypeUpdateRequest);
+        deliveryTypeValidate.validate(deliveryTypeUpdateRequest);
 
         if(deliveryTypeUpdateRequest.name() != null && !deliveryTypeUpdateRequest.name().isBlank())
             shipmentType.setName(deliveryTypeUpdateRequest.name());

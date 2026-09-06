@@ -8,7 +8,7 @@ import GoLogAPI.model.Company;
 import org.springframework.transaction.annotation.Transactional;
 import GoLogAPI.repository.AddressRepository;
 import GoLogAPI.repository.CompanyRepository;
-import GoLogAPI.validation.CompanyValidator;
+import GoLogAPI.validation.CompanyValidate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,18 +21,18 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final AddressRepository addressRepository;
     private final CompanyMapper companyMapper;
-    private final CompanyValidator companyValidator;
+    private final CompanyValidate companyValidate;
 
-    public CompanyService(CompanyRepository companyRepository, AddressRepository addressRepository, CompanyMapper companyMapper, CompanyValidator companyValidator){
+    public CompanyService(CompanyRepository companyRepository, AddressRepository addressRepository, CompanyMapper companyMapper, CompanyValidate companyValidate){
         this.companyRepository = companyRepository;
         this.addressRepository = addressRepository;
         this.companyMapper = companyMapper;
-        this.companyValidator = companyValidator;
+        this.companyValidate = companyValidate;
     }
 
     @Transactional
     public CompanyCreateResponse save(CompanyCreateRequest companyCreateRequest){
-        companyValidator.validate(companyCreateRequest);
+        companyValidate.validate(companyCreateRequest);
         Company company = companyMapper.toEntity(companyCreateRequest);
         Address address = addressRepository.findById(companyCreateRequest.addressId())
                         .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyCreateRequest.addressId()));
@@ -76,7 +76,7 @@ public class CompanyService {
     public CompanyCreateResponse updatePartial(UUID id, CompanyUpdateRequest companyUpdateRequest){
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        companyValidator.validate(companyUpdateRequest);
+        companyValidate.validate(companyUpdateRequest);
 
         if(companyUpdateRequest.cnpjCpf() != null && !companyUpdateRequest.cnpjCpf().isBlank())
             company.setCnpjCpf(companyUpdateRequest.cnpjCpf());

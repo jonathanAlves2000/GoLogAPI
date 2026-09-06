@@ -11,7 +11,6 @@ public interface TractorRequest {
     String model();
     Integer numberAxles();
     Double maximumCapacity();
-    TypeFuel typeFuel();
-    Double kmPerLiter();
+    Double costPerKilometer();
     UUID companyId();
 }
