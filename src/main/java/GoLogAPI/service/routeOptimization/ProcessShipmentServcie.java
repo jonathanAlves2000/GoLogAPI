@@ -7,6 +7,7 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.RouteStop;
 import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Transport;
+import GoLogAPI.model.enums.RoutePriority;
 import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.ShipmentRepository;
@@ -35,15 +36,34 @@ public class ProcessShipmentServcie {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
-    public void processShipment(List<ApiVehicleRoute> routes) {
+    public void processShipment(List<ApiVehicleRoute> routes, RoutePriority routePriority) {
         for(ApiVehicleRoute vehicleRoute : routes) {
 
             if(vehicleRoute.transitions() == null || vehicleRoute.transitions().isEmpty())
                 continue;
 
-            Double costTotalRoute = vehicleRoute.routeTotalCost() != null ? vehicleRoute.routeTotalCost() : 0.0;
+            double kmMultiplier = switch (routePriority) {
+                case ECONOMIA -> 2.0;
+                case EQUILIBRIO -> 1.0;
+                case TEMPO -> 0.1;
+            };
 
-            Transport transport = processTransportService.processTransport(vehicleRoute, costTotalRoute);
+            double hourMultiplier = switch (routePriority) {
+                case ECONOMIA -> 0.1;
+                case EQUILIBRIO -> 1.0;
+                case TEMPO -> 2.0;
+            };
+
+            Map<String, Double> routeCosts = vehicleRoute.routeCosts();
+            Double costKmMultiplied = routeCosts.get("model.vehicles.cost_per_kilometer");
+            Double costHourMultiplied = routeCosts.get("model.vehicles.cost_per_hour");
+
+            Double costKmCalculated = costKmMultiplied != null ? costKmMultiplied / kmMultiplier : 0.0;
+            Double costHourCalculated = costHourMultiplied != null ? costHourMultiplied / hourMultiplier : 0.0;
+
+            Double custoTotalCalculated = costKmCalculated + costHourCalculated;
+
+            Transport transport = processTransportService.processTransport(vehicleRoute, costKmCalculated, costHourCalculated, custoTotalCalculated);
 
             if(transport == null)
                 continue;
@@ -75,7 +95,7 @@ public class ProcessShipmentServcie {
 
                     Double costRoute = 0.0;
                     if (distanceTotal > 0) {
-                        costRoute = (travelDistanceMeters / distanceTotal) * costTotalRoute;
+                        costRoute = (travelDistanceMeters / distanceTotal) * custoTotalCalculated;
                     }
 
                     int sequenceOrder = i + 1;

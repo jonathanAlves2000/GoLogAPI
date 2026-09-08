@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
 -- Dumped by pg_dump version 18.1
 
--- Started on 2026-06-10 21:33:27 UTC
+-- Started on 2026-09-08 21:12:46 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -113,7 +113,8 @@ CREATE TABLE public.driver_table (
     updated_by character varying(255),
     cnh_expiration date,
     cnh_number character varying(255),
-    user_id uuid
+    user_id uuid,
+    cost_per_hour double precision DEFAULT 0.0
 );
 
 
@@ -134,7 +135,8 @@ CREATE TABLE public.equipament_group_table (
     observation character varying(255),
     equipament1_id uuid NOT NULL,
     equipament2_id uuid,
-    equipament3_id uuid
+    equipament3_id uuid,
+    status character varying(255)
 );
 
 
@@ -157,7 +159,8 @@ CREATE TABLE public.equipament_table (
     number_axles integer,
     plate character varying(255),
     renavam character varying(255),
-    company_id uuid
+    company_id uuid,
+    status character varying(255) DEFAULT 'ATIVO'::character varying
 );
 
 
@@ -315,8 +318,8 @@ ALTER TABLE public.telemetry_table OWNER TO admin;
 CREATE TABLE public.tractor_table (
     type_fuel character varying(255),
     id uuid NOT NULL,
-    km_per_liter double precision,
-    co2_per_km double precision DEFAULT 0.0
+    cost_per_kilometer double precision,
+    co2_per_kilometer double precision
 );
 
 
@@ -363,7 +366,10 @@ CREATE TABLE public.transport_table (
     total_time_calculed integer,
     driver_id uuid,
     equipament_group_id uuid NOT NULL,
-    transporter_id uuid NOT NULL
+    transporter_id uuid NOT NULL,
+    cost_km_calculed double precision DEFAULT 0.0,
+    cost_hour_calculed double precision DEFAULT 0.0,
+    travel_duration integer DEFAULT 0.0
 );
 
 
@@ -396,8 +402,8 @@ CREATE TABLE public.type_transport_table (
     created_by character varying(255),
     updated_at timestamp(6) with time zone,
     updated_by character varying(255),
-    care character varying(255) NOT NULL,
-    description character varying(255) NOT NULL,
+    care text NOT NULL,
+    description text NOT NULL,
     name character varying(255) NOT NULL
 );
 
@@ -429,7 +435,31 @@ CREATE TABLE public.user_table (
 ALTER TABLE public.user_table OWNER TO admin;
 
 --
--- TOC entry 3567 (class 0 OID 16385)
+-- TOC entry 237 (class 1259 OID 17233)
+-- Name: work_schedule; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.work_schedule (
+    id uuid NOT NULL,
+    active boolean NOT NULL,
+    created_at timestamp(6) with time zone,
+    created_by character varying(255),
+    updated_at timestamp(6) with time zone,
+    updated_by character varying(255),
+    schedule_date date NOT NULL,
+    status character varying(255) NOT NULL,
+    driver_id uuid NOT NULL,
+    equipament_group_id uuid NOT NULL,
+    start_workday time without time zone,
+    end_workday time without time zone,
+    CONSTRAINT work_schedule_status_check CHECK (((status)::text = ANY ((ARRAY['ATIVO'::character varying, 'INATIVO'::character varying, 'EM_OPERACAO'::character varying])::text[])))
+);
+
+
+ALTER TABLE public.work_schedule OWNER TO admin;
+
+--
+-- TOC entry 3580 (class 0 OID 16385)
 -- Dependencies: 219
 -- Data for Name: address_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -447,7 +477,7 @@ ff6ead7c-ceb6-4ffd-bef9-9e3782bed510	t	2026-06-06 15:57:22.627025+00	admin@admin
 
 
 --
--- TOC entry 3579 (class 0 OID 16809)
+-- TOC entry 3592 (class 0 OID 16809)
 -- Dependencies: 231
 -- Data for Name: collect_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -458,7 +488,7 @@ COPY public.collect_table (id, active, created_at, created_by, updated_at, updat
 
 
 --
--- TOC entry 3568 (class 0 OID 16394)
+-- TOC entry 3581 (class 0 OID 16394)
 -- Dependencies: 220
 -- Data for Name: company_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -476,57 +506,59 @@ ca7dee83-4beb-4e06-ae2b-b45b509e2720	t	2026-06-06 15:51:55.292648+00	admin@admin
 
 
 --
--- TOC entry 3569 (class 0 OID 16403)
+-- TOC entry 3582 (class 0 OID 16403)
 -- Dependencies: 221
 -- Data for Name: driver_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
-COPY public.driver_table (id, active, created_at, created_by, updated_at, updated_by, cnh_expiration, cnh_number, user_id) FROM stdin;
-0fa0d515-0c4b-47be-bfd6-ef042669c0a0	t	2026-03-15 23:05:41.222869+00	Admin Master	2026-03-15 23:05:41.222869+00	Admin Master	2030-10-10	85983282551	438eca76-a0cf-480b-8c85-f129ec3e9216
-ac949c17-ffc7-4869-adac-76a96cff9f0c	t	2026-06-10 21:26:08.350364+00	admin@admin.com	2026-06-10 21:26:08.350364+00	admin@admin.com	2030-10-10	85983282456	03d49770-0d3a-496f-81c1-367a94250c6d
-3a0316ab-20d7-40f2-9be5-c28a2e5381f9	t	2026-06-10 21:26:18.898096+00	admin@admin.com	2026-06-10 21:26:18.898096+00	admin@admin.com	2030-10-10	85983287878	8f0f3bb3-3f65-4d6a-9abd-d4edf71e3298
-d4acae16-4769-4261-be0f-919958968647	t	2026-06-10 21:26:29.676849+00	admin@admin.com	2026-06-10 21:26:29.676849+00	admin@admin.com	2030-10-10	85983284545	2bd51947-406b-4bdf-9c75-b0a401c6bd72
-a960b64d-995e-4d59-b7cb-f11c99664b8e	t	2026-06-10 21:26:44.132866+00	admin@admin.com	2026-06-10 21:26:44.132866+00	admin@admin.com	2030-10-10	85983282545	92fb79a3-7d79-4570-b903-9c2b3df6dd13
-030a95e6-4dfc-46a2-8621-c8ca1612b86e	t	2026-06-10 21:26:56.222972+00	admin@admin.com	2026-06-10 21:26:56.222972+00	admin@admin.com	2030-10-10	85923682545	2bd3809f-71ed-4092-9e0c-1fba247ff45e
+COPY public.driver_table (id, active, created_at, created_by, updated_at, updated_by, cnh_expiration, cnh_number, user_id, cost_per_hour) FROM stdin;
+3a0316ab-20d7-40f2-9be5-c28a2e5381f9	t	2026-06-10 21:26:18.898096+00	admin@admin.com	2026-06-10 21:26:18.898096+00	admin@admin.com	2030-10-10	85983287878	8f0f3bb3-3f65-4d6a-9abd-d4edf71e3298	20
+d4acae16-4769-4261-be0f-919958968647	t	2026-06-10 21:26:29.676849+00	admin@admin.com	2026-06-10 21:26:29.676849+00	admin@admin.com	2030-10-10	85983284545	2bd51947-406b-4bdf-9c75-b0a401c6bd72	20
+a960b64d-995e-4d59-b7cb-f11c99664b8e	t	2026-06-10 21:26:44.132866+00	admin@admin.com	2026-06-10 21:26:44.132866+00	admin@admin.com	2030-10-10	85983282545	92fb79a3-7d79-4570-b903-9c2b3df6dd13	20
+030a95e6-4dfc-46a2-8621-c8ca1612b86e	t	2026-06-10 21:26:56.222972+00	admin@admin.com	2026-06-10 21:26:56.222972+00	admin@admin.com	2030-10-10	85923682545	2bd3809f-71ed-4092-9e0c-1fba247ff45e	20
+0fa0d515-0c4b-47be-bfd6-ef042669c0a0	t	2026-03-15 23:05:41.222869+00	Admin Master	2026-08-27 19:12:42.662548+00	admin@admin.com	2035-10-10	49021546958	438eca76-a0cf-480b-8c85-f129ec3e9216	20
+ac949c17-ffc7-4869-adac-76a96cff9f0c	t	2026-06-10 21:26:08.350364+00	admin@admin.com	2026-09-04 19:55:01.354873+00	admin@admin.com	2035-10-10	49021546958	03d49770-0d3a-496f-81c1-367a94250c6d	20
 \.
 
 
 --
--- TOC entry 3570 (class 0 OID 16412)
+-- TOC entry 3583 (class 0 OID 16412)
 -- Dependencies: 222
 -- Data for Name: equipament_group_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
-COPY public.equipament_group_table (id, active, created_at, created_by, updated_at, updated_by, observation, equipament1_id, equipament2_id, equipament3_id) FROM stdin;
-07796d8e-bacb-40f9-beb8-c02b6d00ff9d	t	2026-04-08 23:01:26.888952+00	Admin Master	2026-06-01 12:58:48.170686+00	admin@admin.com	Conjunto 1	60380c2a-025b-426f-b922-32c82f5209f4	\N	\N
-9df01abb-f14a-49ef-955d-2d87185f8a51	t	2026-04-08 23:21:24.827769+00	Admin Master	2026-06-01 12:59:52.238563+00	admin@admin.com	Conjunto 2	bcf58715-e5ea-4e31-b356-d9b1abf6631c	01484413-6789-40b1-8d95-af53b235fc8b	\N
-d681c272-2657-4800-a298-9310aafdceda	t	2026-04-08 23:15:26.413148+00	Admin Master	2026-06-01 13:00:56.568358+00	admin@admin.com	Conjunto 3	614b9420-d569-4f8f-a63d-e260752db17c	dec0b3c8-4302-4aa7-a78b-3281e6337602	\N
-d5820f33-c8d2-44a7-90b9-8914d127e77a	t	2026-04-08 23:14:57.914549+00	Admin Master	2026-06-01 13:03:02.604983+00	admin@admin.com	Conjunto 4	dc4f5f09-1d69-4838-96bf-9e81639676f2	\N	\N
-e56df2ca-a445-4e1e-ab3b-d1ba5bb9192b	t	2026-06-04 12:22:44.086062+00	admin@admin.com	2026-06-04 12:22:44.086062+00	admin@admin.com	Conjunct 5	35f4e73d-bb9e-43d3-b4c3-3220c5dac7e7	\N	\N
-17f54b48-7a3a-4a45-b7df-827bff7d9b05	t	2026-06-06 16:02:07.243877+00	admin@admin.com	2026-06-06 16:02:07.243877+00	admin@admin.com	Conjunct 5	19593a85-e1b3-4b2f-b747-112a13f1d5d5	\N	\N
+COPY public.equipament_group_table (id, active, created_at, created_by, updated_at, updated_by, observation, equipament1_id, equipament2_id, equipament3_id, status) FROM stdin;
+07796d8e-bacb-40f9-beb8-c02b6d00ff9d	t	2026-04-08 23:01:26.888952+00	Admin Master	2026-06-01 12:58:48.170686+00	admin@admin.com	Conjunto 1	60380c2a-025b-426f-b922-32c82f5209f4	\N	\N	DISPONIVEL
+9df01abb-f14a-49ef-955d-2d87185f8a51	t	2026-04-08 23:21:24.827769+00	Admin Master	2026-06-01 12:59:52.238563+00	admin@admin.com	Conjunto 2	bcf58715-e5ea-4e31-b356-d9b1abf6631c	01484413-6789-40b1-8d95-af53b235fc8b	\N	DISPONIVEL
+d681c272-2657-4800-a298-9310aafdceda	t	2026-04-08 23:15:26.413148+00	Admin Master	2026-06-01 13:00:56.568358+00	admin@admin.com	Conjunto 3	614b9420-d569-4f8f-a63d-e260752db17c	dec0b3c8-4302-4aa7-a78b-3281e6337602	\N	DISPONIVEL
+d5820f33-c8d2-44a7-90b9-8914d127e77a	t	2026-04-08 23:14:57.914549+00	Admin Master	2026-06-01 13:03:02.604983+00	admin@admin.com	Conjunto 4	dc4f5f09-1d69-4838-96bf-9e81639676f2	\N	\N	DISPONIVEL
+e56df2ca-a445-4e1e-ab3b-d1ba5bb9192b	t	2026-06-04 12:22:44.086062+00	admin@admin.com	2026-06-04 12:22:44.086062+00	admin@admin.com	Conjunct 5	35f4e73d-bb9e-43d3-b4c3-3220c5dac7e7	\N	\N	DISPONIVEL
+17f54b48-7a3a-4a45-b7df-827bff7d9b05	t	2026-06-06 16:02:07.243877+00	admin@admin.com	2026-06-06 16:02:07.243877+00	admin@admin.com	Conjunct 5	19593a85-e1b3-4b2f-b747-112a13f1d5d5	\N	\N	DISPONIVEL
 \.
 
 
 --
--- TOC entry 3571 (class 0 OID 16422)
+-- TOC entry 3584 (class 0 OID 16422)
 -- Dependencies: 223
 -- Data for Name: equipament_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
-COPY public.equipament_table (id, active, created_at, created_by, updated_at, updated_by, maximum_capacity, model, number_axles, plate, renavam, company_id) FROM stdin;
-dec0b3c8-4302-4aa7-a78b-3281e6337602	t	2026-04-08 20:27:37.074362+00	Admin Master	2026-06-01 12:50:54.133992+00	admin@admin.com	24000	Carreta	3	CZC-3363	56541235125	7f564f96-d90f-42cc-beb2-e37cf63a324d
-01484413-6789-40b1-8d95-af53b235fc8b	t	2026-03-15 23:13:12.143619+00	Admin Master	2026-06-01 12:52:03.803+00	admin@admin.com	20000	Carreta	3	DAH-5853	12354689109	7f564f96-d90f-42cc-beb2-e37cf63a324d
-614b9420-d569-4f8f-a63d-e260752db17c	t	2026-06-01 12:49:37.675201+00	admin@admin.com	2026-06-04 00:10:43.431368+00	admin@admin.com	22000	Cavalo	2	DPE-1919	21321458568	7f564f96-d90f-42cc-beb2-e37cf63a324d
-dc4f5f09-1d69-4838-96bf-9e81639676f2	t	2026-06-01 13:02:04.118019+00	admin@admin.com	2026-06-04 00:11:02.724005+00	admin@admin.com	550	Fiorino	2	CNH-1513	21321458545	7f564f96-d90f-42cc-beb2-e37cf63a324d
-60380c2a-025b-426f-b922-32c82f5209f4	t	2026-04-08 19:48:33.714133+00	Admin Master	2026-06-04 00:11:28.370257+00	admin@admin.com	650	Fiorino	3	ERP-0D21	12345678911	7f564f96-d90f-42cc-beb2-e37cf63a324d
-bcf58715-e5ea-4e31-b356-d9b1abf6631c	t	2026-06-01 12:47:56.673897+00	admin@admin.com	2026-06-04 00:11:44.681981+00	admin@admin.com	24000	Cavalo	3	CNI-5243	21321458723	7f564f96-d90f-42cc-beb2-e37cf63a324d
-35f4e73d-bb9e-43d3-b4c3-3220c5dac7e7	t	2026-06-04 12:21:15.060738+00	admin@admin.com	2026-06-04 12:33:38.748768+00	admin@admin.com	10000	Truck	2	CNI-2526	21321458542	7f564f96-d90f-42cc-beb2-e37cf63a324d
-19593a85-e1b3-4b2f-b747-112a13f1d5d5	t	2026-06-06 16:01:23.947602+00	admin@admin.com	2026-06-06 16:01:23.947602+00	admin@admin.com	12500	Truck	2	APE-8032	21322459542	7f564f96-d90f-42cc-beb2-e37cf63a324d
+COPY public.equipament_table (id, active, created_at, created_by, updated_at, updated_by, maximum_capacity, model, number_axles, plate, renavam, company_id, status) FROM stdin;
+dc4f5f09-1d69-4838-96bf-9e81639676f2	t	2026-06-01 13:02:04.118019+00	admin@admin.com	2026-09-06 23:07:46.498997+00	admin@admin.com	550	Fiorino	2	CNH-1513	21321458545	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+01484413-6789-40b1-8d95-af53b235fc8b	t	2026-03-15 23:13:12.143619+00	Admin Master	2026-09-06 23:07:54.934308+00	admin@admin.com	20000	Carreta	3	DAH-5853	12354689109	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+35f4e73d-bb9e-43d3-b4c3-3220c5dac7e7	t	2026-06-04 12:21:15.060738+00	admin@admin.com	2026-09-06 23:08:03.892784+00	admin@admin.com	10000	Truck	2	CNI-2526	21321458542	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+bcf58715-e5ea-4e31-b356-d9b1abf6631c	t	2026-06-01 12:47:56.673897+00	admin@admin.com	2026-09-06 23:08:18.409251+00	admin@admin.com	24000	Cavalo	3	CNI-5243	21321458723	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+60380c2a-025b-426f-b922-32c82f5209f4	t	2026-04-08 19:48:33.714133+00	Admin Master	2026-09-06 23:08:25.930013+00	admin@admin.com	650	Fiorino	3	ERP-0D21	12345678911	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+614b9420-d569-4f8f-a63d-e260752db17c	t	2026-06-01 12:49:37.675201+00	admin@admin.com	2026-09-06 23:08:34.829826+00	admin@admin.com	22000	Cavalo	2	DPE-1919	21321458568	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+64be515d-cfa7-4cd6-8265-3f3e94a88d60	t	2026-09-02 02:41:52.962354+00	admin@admin.com	2026-09-06 23:08:45.710706+00	admin@admin.com	12500	Truck	2	ECU-8032	21322459842	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+19593a85-e1b3-4b2f-b747-112a13f1d5d5	t	2026-06-06 16:01:23.947602+00	admin@admin.com	2026-09-06 23:08:57.08982+00	admin@admin.com	12500	Truck	2	APE-8032	21322459542	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+9351b9a4-f2d0-4769-b53d-88fb9944d23f	t	2026-09-04 18:36:30.150164+00	admin@admin.com	2026-09-06 23:09:08.338891+00	admin@admin.com	3000	Volvo FH	2	CNI-5435	12345678910	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
+dec0b3c8-4302-4aa7-a78b-3281e6337602	t	2026-04-08 20:27:37.074362+00	Admin Master	2026-06-01 12:50:54.133992+00	admin@admin.com	24000	Carreta	3	CZC-3363	56541235125	7f564f96-d90f-42cc-beb2-e37cf63a324d	ATIVO
 \.
 
 
 --
--- TOC entry 3575 (class 0 OID 16561)
+-- TOC entry 3588 (class 0 OID 16561)
 -- Dependencies: 227
 -- Data for Name: group_transport_type_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -536,57 +568,47 @@ COPY public.group_transport_type_table (equipament_group_id, type_transport_id) 
 
 
 --
--- TOC entry 3580 (class 0 OID 16933)
+-- TOC entry 3593 (class 0 OID 16933)
 -- Dependencies: 232
 -- Data for Name: occurrence_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
 COPY public.occurrence_table (id, active, created_at, created_by, updated_at, updated_by, attachment, description, type, sender_id, delivery_id, transport_id, date_time) FROM stdin;
-fbf3337a-a032-4493-9052-92b5a0f951a8	t	2026-06-09 02:13:58.43137+00	admin@admin.com	2026-06-09 02:13:58.43137+00	admin@admin.com	https://storage.golog.com/evidencias/avaria_001.jpg	Identificada avaria na embalagem externa de 02 paletes durante o descarregamento no CD Araras.	AVARIA CARGA	438eca76-a0cf-480b-8c85-f129ec3e9216	c826ec50-9680-42b7-a00a-64258f9ab8ad	8561f7a1-8db7-43bc-910e-99908dd83a5a	\N
-4662ef35-a579-45c5-87af-c64a18f5fd51	t	2026-06-09 02:46:31.247646+00	admin@admin.com	2026-06-09 02:46:31.247646+00	admin@admin.com	https://storage.golog.com/evidencias/avaria_001.jpg	Identificada avaria na embalagem externa de 02 paletes durante o descarregamento no CD Araras.	AVARIA CARGA	438eca76-a0cf-480b-8c85-f129ec3e9216	c826ec50-9680-42b7-a00a-64258f9ab8ad	8561f7a1-8db7-43bc-910e-99908dd83a5a	\N
-e362c855-db16-4e3a-bc0b-2c014721ed70	t	2026-06-09 02:48:17.981328+00	admin@admin.com	2026-06-09 02:48:17.981328+00	admin@admin.com	https://storage.golog.com/evidencias/avaria_001.jpg	Identificada avaria na embalagem externa de 02 paletes durante o descarregamento no CD Araras.	AVARIA CARGA	438eca76-a0cf-480b-8c85-f129ec3e9216	c826ec50-9680-42b7-a00a-64258f9ab8ad	8561f7a1-8db7-43bc-910e-99908dd83a5a	2026-06-09 02:25:18.31376+00
 \.
 
 
 --
--- TOC entry 3584 (class 0 OID 17153)
+-- TOC entry 3597 (class 0 OID 17153)
 -- Dependencies: 236
 -- Data for Name: route_stop_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
 COPY public.route_stop_table (id, active, created_at, created_by, updated_at, updated_by, calculated_cost, calculated_distance, calculated_duration, calculated_wait, realized_cots, realized_distance, realized_duration, realized_wait, route_completed, route_planned, sequence_order, volume, weight, shipment_id, transport_id) FROM stdin;
-15b4ae48-b476-4877-b406-4793810e4cd9	t	2026-06-09 23:13:33.136863+00	admin@admin.com	2026-06-09 23:13:33.166428+00	admin@admin.com	2.56479	1819	312	0	\N	\N	\N	\N	\N	z~mgCrcg`Hx@uU~ARrBpA~DyQzZyVpAhBpD_DiDw@aAx@	1	250	5000	64dd3adc-8f9c-4b9e-a651-580bcead99cc	8561f7a1-8db7-43bc-910e-99908dd83a5a
-43a7d26d-84d6-44e6-accc-711e4d13bf4f	t	2026-06-09 23:13:33.141868+00	admin@admin.com	2026-06-09 23:13:33.166525+00	admin@admin.com	4.04247	2867	378	5622	\N	\N	\N	\N	\N	|iogCzce`H}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	2	250	5000	c826ec50-9680-42b7-a00a-64258f9ab8ad	8561f7a1-8db7-43bc-910e-99908dd83a5a
-cec70a1f-834d-47b4-be15-5525b37e8f01	t	2026-06-09 23:13:33.239065+00	admin@admin.com	2026-06-09 23:13:33.283667+00	admin@admin.com	0.62934	3702	315	0	\N	\N	\N	\N	\N	dargCbqa`HXq@jDbAbEeTK_@sHcCnBqGxAbD`@@lAqAbATj@v@HzAuXzxA}BdTo@b_@{@dBCbA	1	100	350	486b3d5d-0466-4e76-9c04-e139921f15b7	b6b7b82b-3e41-4afa-9394-4c94c30452de
-e345ce6b-ec2e-4cdf-adfc-2ca08f7ab37c	t	2026-06-09 23:13:33.241681+00	admin@admin.com	2026-06-09 23:13:33.283768+00	admin@admin.com	0.5980599999999999	3518	349	3251	\N	\N	\N	\N	\N	~oqgCfke`H`@f@t@CZ]A_A}@c@aDv@uMq@eDaAuEGwSmGi@u@o@Tq\\eJgE_@kDaBaFoEiDkGeF_e@i@A}@rA_OvHy@JgD{@	2	100	350	daa19285-39c2-40cb-85ac-d7de4229e655	b6b7b82b-3e41-4afa-9394-4c94c30452de
-244dbe1d-e0d4-4914-894e-902e09aa2f99	t	2026-06-09 23:13:33.243848+00	admin@admin.com	2026-06-09 23:13:33.283806+00	admin@admin.com	0.49044999999999994	2885	427	773	\N	\N	\N	\N	\N	jcmgClcc`HeBM}@|CeFdFr@j@vHcCbAAvKhLpAjBbFzLrB|AjD^~@p@t@hCSzEfHfHJfGv@ACcBfMQlB|BfAP`J_IiDw@aAx@	3	50	400	64dd3adc-8f9c-4b9e-a651-580bcead99cc	b6b7b82b-3e41-4afa-9394-4c94c30452de
-d7e54096-a924-461b-bcb1-24b331139b3a	t	2026-06-09 23:13:33.245365+00	admin@admin.com	2026-06-09 23:13:33.283851+00	admin@admin.com	0.42652999999999996	2509	457	19943	\N	\N	\N	\N	\N	|iogCzce`HeXhU{BtAwADqAtI}t@eDgBy@Da@}G@_Dr@mHEH_G	4	50	400	157fb504-8cf6-478f-9442-5410129c47ff	b6b7b82b-3e41-4afa-9394-4c94c30452de
-22f18a0b-b9f9-426e-93d5-aa6cca7acf32	t	2026-06-09 23:13:33.327365+00	admin@admin.com	2026-06-09 23:13:33.338463+00	admin@admin.com	3.06624	3194	325	0	\N	\N	\N	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA	1	200	2500	486b3d5d-0466-4e76-9c04-e139921f15b7	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
-5af6dc3a-36b1-409a-bded-4931ff7b30bf	t	2026-06-09 23:13:33.328872+00	admin@admin.com	2026-06-09 23:13:33.33855+00	admin@admin.com	2.03712	2122	313	6287	\N	\N	\N	\N	\N	~oqgCfke`H`@f@t@CZ]A_As@c@kCv@uNq@wD_AWb@PhAoGbQsPq@oOuCtDuO_FaBaAx@	2	500	8000	64dd3adc-8f9c-4b9e-a651-580bcead99cc	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
-d3cac842-e5dd-4737-9c8c-8a28582a5de9	t	2026-06-09 23:13:33.330897+00	admin@admin.com	2026-06-09 23:13:33.338608+00	admin@admin.com	2.4604799999999996	2563	348	16452	\N	\N	\N	\N	\N	|iogCzce`H}F~E_GgIqEb@mCe@uDaDHgFm@kCoAuAgDk@hDiK}@eDwDw]l@u@jFu@tAFXi@g@]aGlAc@eAEcBsADKuA	3	200	2500	614903d2-34be-418e-ae26-bfb17d327bc0	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
-c103aac1-894e-453c-8286-43a80934f000	t	2026-06-09 23:13:33.333971+00	admin@admin.com	2026-06-09 23:13:33.33865+00	admin@admin.com	5.071680000000001	5283	646	9554	\N	\N	\N	\N	\N	v|mgCxpb`HJtArAEDbBb@dA_BHg@cAkCyVFyCaJut@c@iHsDsPXu@aDkF_PaOCw@g@C{EeWsIkWkFcMhIoEhEwDUYMwGVS]EOwG@{@\\LL_@o@a@SyIoGwPi@T	4	500	8000	a380d58f-d17b-4ef1-9058-17ba76a6c848	50cde3ea-30fc-4c21-aaa5-3dfb3067f315
 \.
 
 
 --
--- TOC entry 3581 (class 0 OID 16946)
+-- TOC entry 3594 (class 0 OID 16946)
 -- Dependencies: 233
 -- Data for Name: shipment_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
 COPY public.shipment_table (id, active, created_at, created_by, updated_at, updated_by, schedulind, status, type_operation, volume, weight, shipment_address_id, shipment_customer_id, carga_origem_id, shipment_type_id, type_transport_id, responsible_id) FROM stdin;
-64dd3adc-8f9c-4b9e-a651-580bcead99cc	t	2026-06-06 15:26:25.630314+00	admin@admin.com	2026-06-07 21:43:30.356747+00	admin@admin.com	2026-06-11 09:50:00	Aguardando Inicio	COLETA	800	13400	550e8400-e29b-41d4-a716-446655440000	d9d7b435-c256-405b-877c-848f4a22e22a	\N	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
-486b3d5d-0466-4e76-9c04-e139921f15b7	t	2026-06-06 15:25:41.607796+00	admin@admin.com	2026-06-07 21:43:30.356941+00	admin@admin.com	2026-06-11 07:30:00	Aguardando Inicio	COLETA	300	2850	ace29b92-0e59-437a-b7f6-de8c2fa772c5	af29a1ab-407a-497d-b721-f3b93450d9eb	\N	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
-c826ec50-9680-42b7-a00a-64258f9ab8ad	t	2026-06-06 15:28:33.901076+00	admin@admin.com	2026-06-07 21:43:30.35708+00	admin@admin.com	2026-06-11 12:00:00	Aguardando Inicio	ENTREGA	250	5000	6e51b327-bec5-48eb-b881-76daf766ea1e	a92a50c7-b904-4637-b7ca-0f794ad50eaa	64dd3adc-8f9c-4b9e-a651-580bcead99cc	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
-157fb504-8cf6-478f-9442-5410129c47ff	t	2026-06-06 15:33:21.231099+00	admin@admin.com	2026-06-07 21:43:30.357159+00	admin@admin.com	2026-06-11 16:00:00	Aguardando Inicio	ENTREGA	50	400	1e58d64a-16bc-421d-b671-e0a52cb440a4	eb97a8b5-a5ae-4985-a4d7-dbf30eefe347	64dd3adc-8f9c-4b9e-a651-580bcead99cc	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
-a380d58f-d17b-4ef1-9058-17ba76a6c848	t	2026-06-06 15:32:18.129253+00	admin@admin.com	2026-06-07 21:43:30.357221+00	admin@admin.com	2026-06-11 18:20:00	Aguardando Inicio	ENTREGA	500	8000	1f2f0764-3e1c-4665-aefa-daa1da658564	ab393f44-c83b-485e-b152-d6403e41163e	64dd3adc-8f9c-4b9e-a651-580bcead99cc	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
-daa19285-39c2-40cb-85ac-d7de4229e655	t	2026-06-06 15:54:06.754088+00	admin@admin.com	2026-06-07 21:43:30.357287+00	admin@admin.com	2026-06-11 09:00:00	Aguardando Inicio	ENTREGA	100	350	cb277df2-e4fc-4d9d-8948-7eccc7a3d556	ca7dee83-4beb-4e06-ae2b-b45b509e2720	486b3d5d-0466-4e76-9c04-e139921f15b7	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
-614903d2-34be-418e-ae26-bfb17d327bc0	t	2026-06-06 15:59:29.342995+00	admin@admin.com	2026-06-07 21:43:30.357347+00	admin@admin.com	2026-06-11 15:00:00	Aguardando Inicio	ENTREGA	200	2500	ff6ead7c-ceb6-4ffd-bef9-9e3782bed510	754fcc36-c7be-4b0d-9a96-a504675ebb7e	486b3d5d-0466-4e76-9c04-e139921f15b7	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
+486b3d5d-0466-4e76-9c04-e139921f15b7	t	2026-06-06 15:25:41.607796+00	admin@admin.com	2026-09-08 21:09:33.464502+00	admin@admin.com	2026-09-14 07:30:00	PENDENTE	COLETA	0	0	ace29b92-0e59-437a-b7f6-de8c2fa772c5	af29a1ab-407a-497d-b721-f3b93450d9eb	\N	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
+64dd3adc-8f9c-4b9e-a651-580bcead99cc	t	2026-06-06 15:26:25.630314+00	admin@admin.com	2026-09-08 21:09:33.464601+00	admin@admin.com	2026-09-14 09:50:00	PENDENTE	COLETA	800	13400	550e8400-e29b-41d4-a716-446655440000	d9d7b435-c256-405b-877c-848f4a22e22a	\N	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
+c826ec50-9680-42b7-a00a-64258f9ab8ad	t	2026-06-06 15:28:33.901076+00	admin@admin.com	2026-09-08 21:09:33.464658+00	admin@admin.com	2026-09-14 12:00:00	PENDENTE	ENTREGA	250	5000	6e51b327-bec5-48eb-b881-76daf766ea1e	a92a50c7-b904-4637-b7ca-0f794ad50eaa	64dd3adc-8f9c-4b9e-a651-580bcead99cc	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
+614903d2-34be-418e-ae26-bfb17d327bc0	t	2026-06-06 15:59:29.342995+00	admin@admin.com	2026-09-08 21:09:33.464716+00	admin@admin.com	2026-09-14 15:00:00	PENDENTE	ENTREGA	200	2500	ff6ead7c-ceb6-4ffd-bef9-9e3782bed510	754fcc36-c7be-4b0d-9a96-a504675ebb7e	486b3d5d-0466-4e76-9c04-e139921f15b7	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
+b46bf313-b640-4c45-a940-fbe2227988d2	t	2026-08-30 23:08:30.718292+00	admin@admin.com	2026-09-08 21:09:33.4974+00	admin@admin.com	2026-09-14 10:00:00	PENDENTE	COLETA	270	130	ace29b92-0e59-437a-b7f6-de8c2fa772c5	7f564f96-d90f-42cc-beb2-e37cf63a324d	\N	70524754-52c2-41d6-94d1-a4c7307cd9c1	6cc53c4f-a0cb-438f-b4d0-17b9a6cb516e	438eca76-a0cf-480b-8c85-f129ec3e9216
+276fa297-b37b-411a-90eb-df7a54d7d9dd	t	2026-08-30 23:10:15.492113+00	admin@admin.com	2026-09-08 21:09:33.497487+00	admin@admin.com	2026-09-14 13:00:00	PENDENTE	ENTREGA	250	80	1f2f0764-3e1c-4665-aefa-daa1da658564	eb97a8b5-a5ae-4985-a4d7-dbf30eefe347	b46bf313-b640-4c45-a940-fbe2227988d2	70524754-52c2-41d6-94d1-a4c7307cd9c1	6cc53c4f-a0cb-438f-b4d0-17b9a6cb516e	438eca76-a0cf-480b-8c85-f129ec3e9216
+daa19285-39c2-40cb-85ac-d7de4229e655	t	2026-06-06 15:54:06.754088+00	admin@admin.com	2026-09-08 21:09:33.527702+00	admin@admin.com	2026-09-14 09:00:00	PENDENTE	ENTREGA	100	350	cb277df2-e4fc-4d9d-8948-7eccc7a3d556	ca7dee83-4beb-4e06-ae2b-b45b509e2720	486b3d5d-0466-4e76-9c04-e139921f15b7	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
+157fb504-8cf6-478f-9442-5410129c47ff	t	2026-06-06 15:33:21.231099+00	admin@admin.com	2026-09-08 21:09:33.527765+00	admin@admin.com	2026-09-15 16:00:00	PENDENTE	ENTREGA	50	400	1e58d64a-16bc-421d-b671-e0a52cb440a4	eb97a8b5-a5ae-4985-a4d7-dbf30eefe347	64dd3adc-8f9c-4b9e-a651-580bcead99cc	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
+a380d58f-d17b-4ef1-9058-17ba76a6c848	t	2026-06-06 15:32:18.129253+00	admin@admin.com	2026-09-08 21:09:33.553774+00	admin@admin.com	2026-09-15 18:20:00	PENDENTE	ENTREGA	500	8000	1f2f0764-3e1c-4665-aefa-daa1da658564	ab393f44-c83b-485e-b152-d6403e41163e	64dd3adc-8f9c-4b9e-a651-580bcead99cc	877e764a-85aa-4857-b667-819480449650	d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	c916e36f-4846-41be-9b32-9e0ff8850a29
+0e43f917-7594-472b-997b-979b55f6295b	t	2026-08-30 23:17:28.191709+00	admin@admin.com	2026-09-08 21:09:33.563684+00	admin@admin.com	2026-09-15 16:00:00	PENDENTE	ENTREGA	20	50	550e8400-e29b-41d4-a716-446655440000	d9d7b435-c256-405b-877c-848f4a22e22a	b46bf313-b640-4c45-a940-fbe2227988d2	70524754-52c2-41d6-94d1-a4c7307cd9c1	6cc53c4f-a0cb-438f-b4d0-17b9a6cb516e	438eca76-a0cf-480b-8c85-f129ec3e9216
 \.
 
 
 --
--- TOC entry 3577 (class 0 OID 16685)
+-- TOC entry 3590 (class 0 OID 16685)
 -- Dependencies: 229
 -- Data for Name: shipment_type; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -600,7 +622,7 @@ ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	t	2026-05-01 15:43:52.785258+00	admin@admin
 
 
 --
--- TOC entry 3578 (class 0 OID 16790)
+-- TOC entry 3591 (class 0 OID 16790)
 -- Dependencies: 230
 -- Data for Name: telemetry_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -616,23 +638,25 @@ ea668745-3e96-4eab-8628-bde1ea96eae9	t	2026-06-09 02:32:17.233066+00	admin@admin
 
 
 --
--- TOC entry 3572 (class 0 OID 16431)
+-- TOC entry 3585 (class 0 OID 16431)
 -- Dependencies: 224
 -- Data for Name: tractor_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
-COPY public.tractor_table (type_fuel, id, km_per_liter, co2_per_km) FROM stdin;
-DIESEL	614b9420-d569-4f8f-a63d-e260752db17c	1.9	1.41
-GASOLINA	dc4f5f09-1d69-4838-96bf-9e81639676f2	13.6	0.17
-GASOLINA	60380c2a-025b-426f-b922-32c82f5209f4	12.4	0.18
-DIESEL	bcf58715-e5ea-4e31-b356-d9b1abf6631c	2.2	1.22
-DIESEL	35f4e73d-bb9e-43d3-b4c3-3220c5dac7e7	2.5	1.07
-DIESEL	19593a85-e1b3-4b2f-b747-112a13f1d5d5	2.8	0.96
+COPY public.tractor_table (type_fuel, id, cost_per_kilometer, co2_per_kilometer) FROM stdin;
+GASOLINA	dc4f5f09-1d69-4838-96bf-9e81639676f2	8.5	\N
+DIESEL	35f4e73d-bb9e-43d3-b4c3-3220c5dac7e7	5	\N
+DIESEL	bcf58715-e5ea-4e31-b356-d9b1abf6631c	4	\N
+GASOLINA	60380c2a-025b-426f-b922-32c82f5209f4	9	\N
+DIESEL	614b9420-d569-4f8f-a63d-e260752db17c	6	\N
+DIESEL	64be515d-cfa7-4cd6-8265-3f3e94a88d60	9	\N
+DIESEL	19593a85-e1b3-4b2f-b747-112a13f1d5d5	4	\N
+GASOLINA	9351b9a4-f2d0-4769-b53d-88fb9944d23f	9	\N
 \.
 
 
 --
--- TOC entry 3573 (class 0 OID 16437)
+-- TOC entry 3586 (class 0 OID 16437)
 -- Dependencies: 225
 -- Data for Name: trailer_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -644,21 +668,17 @@ COPY public.trailer_table (maximum_volume, id) FROM stdin;
 
 
 --
--- TOC entry 3582 (class 0 OID 16965)
+-- TOC entry 3595 (class 0 OID 16965)
 -- Dependencies: 234
 -- Data for Name: transport_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
-COPY public.transport_table (id, active, created_at, created_by, updated_at, updated_by, calculed_distance, code_transport, distance_traveled, route_completed, route_planned, route_return_completed, route_return_planned, shipment_quantity, time_stopped, time_stopped_calculed, total_cost, total_cost_calculed, total_time, total_time_calculed, driver_id, equipament_group_id, transporter_id) FROM stdin;
-b6b7b82b-3e41-4afa-9394-4c94c30452de	t	2026-06-07 21:53:44.419839+00	admin@admin.com	2026-06-10 21:30:15.650579+00	admin@admin.com	12614	1	\N	\N	dargCbqa`HXq@jDbAbEeTK_@sHcCnBqGxAbD`@@lAqAbATj@v@HzAuXzxA}BdTo@b_@{@dBCbA??`@f@t@CZ]A_A}@c@aDv@uMq@eDaAuEGwSmGi@u@o@Tq\\eJgE_@kDaBaFoEiDkGeF_e@i@A}@rA_OvHy@JgD{@??eBM}@|CeFdFr@j@vHcCbAAvKhLpAjBbFzLrB|AjD^~@p@t@hCSzEfHfHJfGv@ACcBfMQlB|BfAP`J_IiDw@aAx@??eXhU{BtAwADqAtI}t@eDgBy@Da@}G@_Dr@mHEH_G	\N	\N	4	\N	41067	\N	2.14438	\N	1548	ac949c17-ffc7-4869-adac-76a96cff9f0c	d5820f33-c8d2-44a7-90b9-8914d127e77a	7f564f96-d90f-42cc-beb2-e37cf63a324d
-8561f7a1-8db7-43bc-910e-99908dd83a5a	t	2026-06-07 22:36:58.7572+00	admin@admin.com	2026-06-10 21:30:43.879276+00	admin@admin.com	4686	4	\N	\N	z~mgCrcg`Hx@uU~ARrBpA~DyQzZyVpAhBpD_DiDw@aAx@??}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	\N	\N	2	\N	37122	\N	6.607259999999999	\N	690	030a95e6-4dfc-46a2-8621-c8ca1612b86e	d681c272-2657-4800-a298-9310aafdceda	7f564f96-d90f-42cc-beb2-e37cf63a324d
-b9493772-b173-4800-aee8-8a81474793c8	t	2026-06-07 21:53:44.452931+00	admin@admin.com	2026-06-10 21:31:41.090995+00	admin@admin.com	6769	2	\N	\N	v~qgCvua`HqA|CyAr@eNyHeCbGwAnGoAnB}j@fZaBT{@hQaCdOaOzKHt@jDvAwHjDtBpFrG|HfAP`J_IiDw@aAx@??}F~E_GgImCb@qBGmBuFfKeEbA@Lu@xAy@l@eA~GeF|Aa@Wk@hBcL~A_Xb@qAOmDr@_Ol@oA[o@`AqS	\N	\N	2	\N	37122	\N	7.2428300000000005	\N	927	0fa0d515-0c4b-47be-bfd6-ef042669c0a0	e56df2ca-a445-4e1e-ab3b-d1ba5bb9192b	7f564f96-d90f-42cc-beb2-e37cf63a324d
-50cde3ea-30fc-4c21-aaa5-3dfb3067f315	t	2026-06-07 21:53:44.476573+00	admin@admin.com	2026-06-10 21:32:05.626727+00	admin@admin.com	13162	3	\N	\N	v~qgCvua`HqA|CyAr@eNyHmGbR_OdIrQda@vLkDlAAr@v@wBra@M~S{@dBCbA??`@f@t@CZ]A_As@c@kCv@uNq@wD_AWb@PhAoGbQsPq@oOuCtDuO_FaBaAx@??}F~E_GgIqEb@mCe@uDaDHgFm@kCoAuAgDk@hDiK}@eDwDw]l@u@jFu@tAFXi@g@]aGlAc@eAEcBsADKuA??JtArAEDbBb@dA_BHg@cAkCyVFyCaJut@c@iHsDsPXu@aDkF_PaOCw@g@C{EeWsIkWkFcMhIoEhEwDUYMwGVS]EOwG@{@\\LL_@o@a@SyIoGwPi@T	\N	\N	4	\N	40993	\N	12.63552	\N	1632	d4acae16-4769-4261-be0f-919958968647	17f54b48-7a3a-4a45-b7df-827bff7d9b05	7f564f96-d90f-42cc-beb2-e37cf63a324d
+COPY public.transport_table (id, active, created_at, created_by, updated_at, updated_by, calculed_distance, code_transport, distance_traveled, route_completed, route_planned, route_return_completed, route_return_planned, shipment_quantity, time_stopped, time_stopped_calculed, total_cost, total_cost_calculed, total_time, total_time_calculed, driver_id, equipament_group_id, transporter_id, cost_km_calculed, cost_hour_calculed, travel_duration) FROM stdin;
 \.
 
 
 --
--- TOC entry 3576 (class 0 OID 16568)
+-- TOC entry 3589 (class 0 OID 16568)
 -- Dependencies: 228
 -- Data for Name: type_transport_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -667,11 +687,14 @@ COPY public.type_transport_table (id, active, created_at, created_by, updated_at
 2d23232b-898c-43a1-9729-c073883e82eb	t	2026-04-12 21:35:12.890605+00	Admin Master	2026-04-12 21:47:09.271674+00	Admin Master	Verificar o funcionamento do termostato a cada 4 horas e manter as portas seladas.	Transporte de carga com controle rigoroso de temperatura entre 0°C e 8°C.	REFRIGERADO
 fd402f1c-49a6-414b-bc37-d79d7f4895d1	t	2026-04-12 21:52:24.364042+00	Admin Master	2026-04-12 21:52:24.364042+00	Admin Master	Exige motorista com curso MOPP, kit de emergência completo e painéis de segurança com número da ONU visíveis.	Transporte de substâncias inflamáveis, corrosivas ou tóxicas que exigem sinalização específica.	CARGA PERIGOSA
 d12c989b-46d3-4ebd-9ef4-d7f35a9a225f	t	2026-06-01 13:53:03.085394+00	admin@admin.com	2026-06-01 13:53:03.085394+00	admin@admin.com	Exige baú ou sider totalmente seco e vedado contra luz solar direta e umidade para evitar a contaminação ou empedramento dos produtos	Transporte de alimentos industrializados ensacados e enlatados, não perecíveis, organizados em pallets.	ALIMENTOS MATINAIS
+ed322840-eaa3-4483-a866-a548a2e8e970	f	2026-08-30 23:03:01.926361+00	admin@admin.com	2026-08-30 23:03:01.926361+00	admin@admin.com	Carga que exige manuseio diferenciado durante transporte e armazenagem devido à fragilidade, sensibilidade a impacto, umidade, temperatura ou orientação (posição). Inclui itens como eletrônicos, vidros, obras de arte, equipamentos de precisão e produtos frágeis em geral. Requer sinalização visível (frágil, este lado para cima), fixação adequada na carroceria e, em alguns casos, restrição de empilhamento.	Carga fracionada, composta por pacotes e caixas de pequeno a médio porte, provenientes de vendas online (B2C). Caracteriza-se por alto volume de itens, baixo peso unitário, necessidade de rastreamento individual por pacote e prazos de entrega apertados (last-mile). Geralmente não requer manuseio especial, mas exige alta rastreabilidade e SLA de entrega rigoroso.	ECOMERCE
+6cc53c4f-a0cb-438f-b4d0-17b9a6cb516e	t	2026-08-30 23:05:09.262262+00	admin@admin.com	2026-08-30 23:05:09.262262+00	admin@admin.com	Carga frágil ou sensível a impacto, umidade ou temperatura (eletrônicos, vidros, equipamentos de precisão). Exige sinalização de fragilidade, fixação adequada e restrição de empilhamento.	Carga fracionada de e-commerce (B2C): pacotes pequenos/médios, alto volume, baixo peso, com rastreamento individual e prazos de entrega apertados (last-mile).	ECOMERCE
+9b6e6694-4ac9-48ec-b81f-dbca8eddbe27	f	2026-08-30 23:03:35.395215+00	admin@admin.com	2026-08-30 23:03:35.395215+00	admin@admin.com	Carga frágil ou sensível a impacto, umidade ou temperatura (eletrônicos, vidros, equipamentos de precisão). Exige sinalização de fragilidade, fixação adequada e restrição de empilhamento.	Carga fracionada, composta por pacotes e caixas de pequeno a médio porte, provenientes de vendas online (B2C). Caracteriza-se por alto volume de itens, baixo peso unitário, necessidade de rastreamento individual por pacote e prazos de entrega apertados (last-mile). Geralmente não requer manuseio especial, mas exige alta rastreabilidade e SLA de entrega rigoroso.	ECOMERCE
 \.
 
 
 --
--- TOC entry 3574 (class 0 OID 16443)
+-- TOC entry 3587 (class 0 OID 16443)
 -- Dependencies: 226
 -- Data for Name: user_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -688,16 +711,32 @@ c916e36f-4846-41be-9b32-9e0ff8850a29	t	2026-03-15 22:23:57.149323+00	\N	2026-03-
 
 
 --
--- TOC entry 3590 (class 0 OID 0)
+-- TOC entry 3598 (class 0 OID 17233)
+-- Dependencies: 237
+-- Data for Name: work_schedule; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.work_schedule (id, active, created_at, created_by, updated_at, updated_by, schedule_date, status, driver_id, equipament_group_id, start_workday, end_workday) FROM stdin;
+48995587-3142-4e64-a61f-d30794e942cc	t	2026-09-05 15:23:47.871878+00	admin@admin.com	2026-09-05 15:46:20.312065+00	admin@admin.com	2026-09-30	ATIVO	d4acae16-4769-4261-be0f-919958968647	d5820f33-c8d2-44a7-90b9-8914d127e77a	18:00:00	04:00:00
+faef58dc-2c98-40bf-9896-72f3c96a5979	t	2026-09-05 15:47:07.752956+00	admin@admin.com	2026-09-08 21:09:33.428082+00	admin@admin.com	2026-09-30	ATIVO	a960b64d-995e-4d59-b7cb-f11c99664b8e	e56df2ca-a445-4e1e-ab3b-d1ba5bb9192b	06:00:00	16:00:00
+36d30de1-2c39-43d3-983d-23d7be7401b1	t	2026-09-04 22:22:08.327292+00	admin@admin.com	2026-09-08 21:09:33.464847+00	admin@admin.com	2026-09-30	ATIVO	3a0316ab-20d7-40f2-9be5-c28a2e5381f9	07796d8e-bacb-40f9-beb8-c02b6d00ff9d	06:00:00	16:00:00
+d31fd21d-64e5-41d7-badb-37ff75d2c58d	t	2026-09-04 22:43:00.617414+00	admin@admin.com	2026-09-08 21:09:33.497564+00	admin@admin.com	2026-09-30	ATIVO	0fa0d515-0c4b-47be-bfd6-ef042669c0a0	9df01abb-f14a-49ef-955d-2d87185f8a51	06:00:00	16:00:00
+bc0ba485-cfb1-4473-83f1-c5b201271ac0	t	2026-09-05 15:47:59.274535+00	admin@admin.com	2026-09-08 21:09:33.52782+00	admin@admin.com	2026-09-30	ATIVO	030a95e6-4dfc-46a2-8621-c8ca1612b86e	d681c272-2657-4800-a298-9310aafdceda	08:00:00	18:00:00
+cc6e1472-06ed-4969-bd7a-44a02247d01a	t	2026-09-05 16:33:43.713575+00	admin@admin.com	2026-09-08 21:09:33.553828+00	admin@admin.com	2026-09-30	ATIVO	ac949c17-ffc7-4869-adac-76a96cff9f0c	17f54b48-7a3a-4a45-b7df-827bff7d9b05	08:00:00	18:00:00
+\.
+
+
+--
+-- TOC entry 3604 (class 0 OID 0)
 -- Dependencies: 235
 -- Name: transport_table_code_transport_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
 
-SELECT pg_catalog.setval('public.transport_table_code_transport_seq', 4, true);
+SELECT pg_catalog.setval('public.transport_table_code_transport_seq', 51, true);
 
 
 --
--- TOC entry 3357 (class 2606 OID 16393)
+-- TOC entry 3366 (class 2606 OID 16393)
 -- Name: address_table address_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -706,7 +745,7 @@ ALTER TABLE ONLY public.address_table
 
 
 --
--- TOC entry 3385 (class 2606 OID 16820)
+-- TOC entry 3394 (class 2606 OID 16820)
 -- Name: collect_table collect_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -715,7 +754,7 @@ ALTER TABLE ONLY public.collect_table
 
 
 --
--- TOC entry 3359 (class 2606 OID 16402)
+-- TOC entry 3368 (class 2606 OID 16402)
 -- Name: company_table company_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -724,7 +763,7 @@ ALTER TABLE ONLY public.company_table
 
 
 --
--- TOC entry 3381 (class 2606 OID 16693)
+-- TOC entry 3390 (class 2606 OID 16693)
 -- Name: shipment_type delivery_type_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -733,7 +772,7 @@ ALTER TABLE ONLY public.shipment_type
 
 
 --
--- TOC entry 3363 (class 2606 OID 16411)
+-- TOC entry 3372 (class 2606 OID 16411)
 -- Name: driver_table driver_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -742,7 +781,7 @@ ALTER TABLE ONLY public.driver_table
 
 
 --
--- TOC entry 3367 (class 2606 OID 16421)
+-- TOC entry 3376 (class 2606 OID 16421)
 -- Name: equipament_group_table equipament_group_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -751,7 +790,7 @@ ALTER TABLE ONLY public.equipament_group_table
 
 
 --
--- TOC entry 3369 (class 2606 OID 16430)
+-- TOC entry 3378 (class 2606 OID 16430)
 -- Name: equipament_table equipament_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -760,7 +799,7 @@ ALTER TABLE ONLY public.equipament_table
 
 
 --
--- TOC entry 3377 (class 2606 OID 16567)
+-- TOC entry 3386 (class 2606 OID 16567)
 -- Name: group_transport_type_table group_transport_type_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -769,7 +808,7 @@ ALTER TABLE ONLY public.group_transport_type_table
 
 
 --
--- TOC entry 3387 (class 2606 OID 16945)
+-- TOC entry 3396 (class 2606 OID 16945)
 -- Name: occurrence_table occurrence_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -778,7 +817,7 @@ ALTER TABLE ONLY public.occurrence_table
 
 
 --
--- TOC entry 3393 (class 2606 OID 17164)
+-- TOC entry 3402 (class 2606 OID 17164)
 -- Name: route_stop_table route_stop_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -787,7 +826,7 @@ ALTER TABLE ONLY public.route_stop_table
 
 
 --
--- TOC entry 3389 (class 2606 OID 16964)
+-- TOC entry 3398 (class 2606 OID 16964)
 -- Name: shipment_table shipment_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -796,7 +835,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3383 (class 2606 OID 16803)
+-- TOC entry 3392 (class 2606 OID 16803)
 -- Name: telemetry_table telemetry_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -805,7 +844,7 @@ ALTER TABLE ONLY public.telemetry_table
 
 
 --
--- TOC entry 3371 (class 2606 OID 16436)
+-- TOC entry 3380 (class 2606 OID 16436)
 -- Name: tractor_table tractor_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -814,7 +853,7 @@ ALTER TABLE ONLY public.tractor_table
 
 
 --
--- TOC entry 3373 (class 2606 OID 16442)
+-- TOC entry 3382 (class 2606 OID 16442)
 -- Name: trailer_table trailer_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -823,7 +862,7 @@ ALTER TABLE ONLY public.trailer_table
 
 
 --
--- TOC entry 3391 (class 2606 OID 16981)
+-- TOC entry 3400 (class 2606 OID 16981)
 -- Name: transport_table transport_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -832,7 +871,7 @@ ALTER TABLE ONLY public.transport_table
 
 
 --
--- TOC entry 3379 (class 2606 OID 16579)
+-- TOC entry 3388 (class 2606 OID 16579)
 -- Name: type_transport_table type_transport_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -841,7 +880,7 @@ ALTER TABLE ONLY public.type_transport_table
 
 
 --
--- TOC entry 3361 (class 2606 OID 16454)
+-- TOC entry 3370 (class 2606 OID 16454)
 -- Name: company_table ukd521k4bkmmpvykqinw8y2xll4; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -850,7 +889,7 @@ ALTER TABLE ONLY public.company_table
 
 
 --
--- TOC entry 3365 (class 2606 OID 16456)
+-- TOC entry 3374 (class 2606 OID 16456)
 -- Name: driver_table ukljh0t57m3aq70di1sr03mkamm; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -859,7 +898,7 @@ ALTER TABLE ONLY public.driver_table
 
 
 --
--- TOC entry 3375 (class 2606 OID 16452)
+-- TOC entry 3384 (class 2606 OID 16452)
 -- Name: user_table user_table_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -868,7 +907,16 @@ ALTER TABLE ONLY public.user_table
 
 
 --
--- TOC entry 3403 (class 2606 OID 16580)
+-- TOC entry 3404 (class 2606 OID 17246)
+-- Name: work_schedule work_schedule_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.work_schedule
+    ADD CONSTRAINT work_schedule_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3414 (class 2606 OID 16580)
 -- Name: group_transport_type_table fk1bfj2jwykvj40s14xpbit6oek; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -877,7 +925,7 @@ ALTER TABLE ONLY public.group_transport_type_table
 
 
 --
--- TOC entry 3417 (class 2606 OID 17037)
+-- TOC entry 3428 (class 2606 OID 17037)
 -- Name: transport_table fk1olqh7bbaqv47l0b82b0tao46; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -886,7 +934,7 @@ ALTER TABLE ONLY public.transport_table
 
 
 --
--- TOC entry 3406 (class 2606 OID 16828)
+-- TOC entry 3417 (class 2606 OID 16828)
 -- Name: collect_table fk1v4kxyoyvnulwlkj2r2319iin; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -895,7 +943,7 @@ ALTER TABLE ONLY public.collect_table
 
 
 --
--- TOC entry 3394 (class 2606 OID 16457)
+-- TOC entry 3405 (class 2606 OID 16457)
 -- Name: company_table fk3pinakiucrrpni74drxw40wry; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -904,7 +952,7 @@ ALTER TABLE ONLY public.company_table
 
 
 --
--- TOC entry 3408 (class 2606 OID 16982)
+-- TOC entry 3419 (class 2606 OID 16982)
 -- Name: occurrence_table fk7q3cx7bp1dxpx2boxw9jv2ew9; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -913,7 +961,7 @@ ALTER TABLE ONLY public.occurrence_table
 
 
 --
--- TOC entry 3399 (class 2606 OID 16858)
+-- TOC entry 3410 (class 2606 OID 16858)
 -- Name: equipament_table fk84lg3hccqka845mvuf1kdmsdp; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -922,7 +970,7 @@ ALTER TABLE ONLY public.equipament_table
 
 
 --
--- TOC entry 3405 (class 2606 OID 16804)
+-- TOC entry 3416 (class 2606 OID 16804)
 -- Name: telemetry_table fk8agm95f2i43eipl5gct1cooys; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -931,7 +979,7 @@ ALTER TABLE ONLY public.telemetry_table
 
 
 --
--- TOC entry 3402 (class 2606 OID 16492)
+-- TOC entry 3413 (class 2606 OID 16492)
 -- Name: user_table fk8fosf57y9aqnb15l1sp7v6hx9; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -940,7 +988,7 @@ ALTER TABLE ONLY public.user_table
 
 
 --
--- TOC entry 3407 (class 2606 OID 16823)
+-- TOC entry 3418 (class 2606 OID 16823)
 -- Name: collect_table fk98bdo785jud8dhdkq401vwlfi; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -949,7 +997,16 @@ ALTER TABLE ONLY public.collect_table
 
 
 --
--- TOC entry 3411 (class 2606 OID 17002)
+-- TOC entry 3431 (class 2606 OID 17252)
+-- Name: work_schedule fkb4c733vxlwsaqokpii1o0gahe; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.work_schedule
+    ADD CONSTRAINT fkb4c733vxlwsaqokpii1o0gahe FOREIGN KEY (equipament_group_id) REFERENCES public.equipament_group_table(id);
+
+
+--
+-- TOC entry 3422 (class 2606 OID 17002)
 -- Name: shipment_table fkcgv9usnlrjtyy6jqi2swc8bt4; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -958,7 +1015,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3412 (class 2606 OID 16997)
+-- TOC entry 3423 (class 2606 OID 16997)
 -- Name: shipment_table fkglufum5fu0woe8l5sgvv2caqy; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -967,7 +1024,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3413 (class 2606 OID 17007)
+-- TOC entry 3424 (class 2606 OID 17007)
 -- Name: shipment_table fkgt551brhr2yun1k0e8jta9gok; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -976,7 +1033,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3396 (class 2606 OID 16467)
+-- TOC entry 3407 (class 2606 OID 16467)
 -- Name: equipament_group_table fkh75qjn0g3oegn5ah11dkjswtp; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -985,7 +1042,7 @@ ALTER TABLE ONLY public.equipament_group_table
 
 
 --
--- TOC entry 3414 (class 2606 OID 17027)
+-- TOC entry 3425 (class 2606 OID 17027)
 -- Name: shipment_table fkj4lv0k7r84uy4a21y9b1osq9q; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -994,7 +1051,16 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3397 (class 2606 OID 16477)
+-- TOC entry 3432 (class 2606 OID 17247)
+-- Name: work_schedule fkjddd0allq2gq2sm26jen4a9cr; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.work_schedule
+    ADD CONSTRAINT fkjddd0allq2gq2sm26jen4a9cr FOREIGN KEY (driver_id) REFERENCES public.driver_table(id);
+
+
+--
+-- TOC entry 3408 (class 2606 OID 16477)
 -- Name: equipament_group_table fkjrnonengpn01rsb9hgvsfufwn; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1003,7 +1069,7 @@ ALTER TABLE ONLY public.equipament_group_table
 
 
 --
--- TOC entry 3409 (class 2606 OID 16992)
+-- TOC entry 3420 (class 2606 OID 16992)
 -- Name: occurrence_table fkk9by0f888xgeaf06iayekcc1t; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1012,7 +1078,7 @@ ALTER TABLE ONLY public.occurrence_table
 
 
 --
--- TOC entry 3415 (class 2606 OID 17022)
+-- TOC entry 3426 (class 2606 OID 17022)
 -- Name: shipment_table fklwth0k8ilxqqgqm4w2b74ui38; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1021,7 +1087,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3398 (class 2606 OID 16472)
+-- TOC entry 3409 (class 2606 OID 16472)
 -- Name: equipament_group_table fkmnl5l7kynnf1te95f6qdmf7y5; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1030,7 +1096,7 @@ ALTER TABLE ONLY public.equipament_group_table
 
 
 --
--- TOC entry 3416 (class 2606 OID 17012)
+-- TOC entry 3427 (class 2606 OID 17012)
 -- Name: shipment_table fkmqb3pgh812dxho5rxniyv576i; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1039,7 +1105,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3418 (class 2606 OID 17042)
+-- TOC entry 3429 (class 2606 OID 17042)
 -- Name: transport_table fknec9ddum3gpddey2lbnm9fsea; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1048,7 +1114,7 @@ ALTER TABLE ONLY public.transport_table
 
 
 --
--- TOC entry 3419 (class 2606 OID 17032)
+-- TOC entry 3430 (class 2606 OID 17032)
 -- Name: transport_table fknxy4bqqoludqmoryh5wdefbmh; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1057,7 +1123,7 @@ ALTER TABLE ONLY public.transport_table
 
 
 --
--- TOC entry 3404 (class 2606 OID 16585)
+-- TOC entry 3415 (class 2606 OID 16585)
 -- Name: group_transport_type_table fkp4vpw3inbalv3b3hw184r9i37; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1066,7 +1132,7 @@ ALTER TABLE ONLY public.group_transport_type_table
 
 
 --
--- TOC entry 3395 (class 2606 OID 16462)
+-- TOC entry 3406 (class 2606 OID 16462)
 -- Name: driver_table fkq31c4b12e6xftex24003i1qqd; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1075,7 +1141,7 @@ ALTER TABLE ONLY public.driver_table
 
 
 --
--- TOC entry 3410 (class 2606 OID 16987)
+-- TOC entry 3421 (class 2606 OID 16987)
 -- Name: occurrence_table fkq8hvp7bmro6xsr237qy6yha1q; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1084,7 +1150,7 @@ ALTER TABLE ONLY public.occurrence_table
 
 
 --
--- TOC entry 3401 (class 2606 OID 16487)
+-- TOC entry 3412 (class 2606 OID 16487)
 -- Name: trailer_table fkte47awk3lga1d0faeec89bhye; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1093,7 +1159,7 @@ ALTER TABLE ONLY public.trailer_table
 
 
 --
--- TOC entry 3400 (class 2606 OID 16482)
+-- TOC entry 3411 (class 2606 OID 16482)
 -- Name: tractor_table fktpyy3ovef9vtfaubofrwkr6w1; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1101,11 +1167,11 @@ ALTER TABLE ONLY public.tractor_table
     ADD CONSTRAINT fktpyy3ovef9vtfaubofrwkr6w1 FOREIGN KEY (id) REFERENCES public.equipament_table(id);
 
 
--- Completed on 2026-06-10 21:33:27 UTC
+-- Completed on 2026-09-08 21:12:46 UTC
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict JylluaZS4k0TppggHAfzP01EyPJhZeKk0krXBaw5m81NUTi9gYhmKP6XEfFdTlP
+\unrestrict QorojtfveeQi7cILt5K4olN2heExHabXc9irjHdEXkBoXrn2t2PiQDsh7zbGZmr
 

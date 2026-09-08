@@ -52,13 +52,22 @@ public class Transport extends Audit {
     @Column(name = "time_stopped", nullable = true)
     private Integer timeStopped;
 
+    @Column(name = "travel_duration", nullable = false)
+    private Integer travelDuration;
+
     @Column(name = "total_time_calculed")
     private Integer totalTimeCalculed;
 
     @Column(name = "total_time", nullable = true)
     private Integer totalTime;
 
-    @Column(name = "total_cost_calculed", nullable = false)
+    @Column(name = "cost_km_calculed")
+    private Double costKmCalculed;
+
+    @Column(name = "cost_hour_calculed")
+    private Double costHourCalculed;
+
+    @Column(name = "total_cost_calculed")
     private Double totalCostCalculed;
 
     @Column(name = "total_cost")

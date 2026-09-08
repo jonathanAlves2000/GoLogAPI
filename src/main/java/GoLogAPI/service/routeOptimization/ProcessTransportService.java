@@ -35,7 +35,7 @@ public class ProcessTransportService {
     }
 
     @Transactional
-    public Transport processTransport(ApiVehicleRoute vehicleRoute, Double totalCost) {
+    public Transport processTransport(ApiVehicleRoute vehicleRoute, Double costKmCalculed, Double costHourCalculaed, Double custoTotalCalculed) {
         if(vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty()) {
             return null;
         }
@@ -43,7 +43,13 @@ public class ProcessTransportService {
         String vehicleLabel = vehicleRoute.vehicleLabel();
 
         Integer totalDistance = vehicleRoute.metrics().travelDistanceMeters();
-        Integer totalDuration = parseApiRouteDuration(vehicleRoute.metrics().travelDuration());
+
+        Integer totalDuration = vehicleRoute.metrics().totalDuration() != null ?
+                parseApiRouteDuration(vehicleRoute.metrics().totalDuration()) : 0;
+
+        Integer travelDuration = vehicleRoute.metrics().travelDuration() != null ?
+                parseApiRouteDuration(vehicleRoute.metrics().travelDuration()) : 0;
+
         Integer totalWait = vehicleRoute.metrics().waitDuration() != null ?
                 parseApiRouteDuration(vehicleRoute.metrics().waitDuration().toString()) : 0;
 
@@ -68,9 +74,12 @@ public class ProcessTransportService {
 
         transport.setShipmentQuantity(vehicleRoute.visits().size());
         transport.setCalculedDistance(totalDistance);
+        transport.setTravelDuration(travelDuration);
         transport.setTotalTimeCalculed(totalDuration);
         transport.setTimeStoppedCalculed(totalWait);
-        transport.setTotalCostCalculed(totalCost);
+        transport.setCostKmCalculed(costKmCalculed);
+        transport.setCostHourCalculed(costHourCalculaed);
+        transport.setTotalCostCalculed(custoTotalCalculed);
         transport.setEquipamentGroup(equipamentGroup);
         transport.setTransporter(company);
         transport.setDriver(driver);
