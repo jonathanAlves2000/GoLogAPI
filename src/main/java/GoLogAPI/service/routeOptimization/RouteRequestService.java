@@ -94,14 +94,12 @@ public class RouteRequestService {
             }
 
             double kmMultiplier = switch (optimizeRouteRequest.routePriority()){
-                case ECONOMIA -> 2.0;
-                case EQUILIBRIO -> 1.0;
+                case ECONOMIA -> 1;
                 case TEMPO -> 0.1;
             };
 
             double hourMultiplier = switch (optimizeRouteRequest.routePriority()){
-                case ECONOMIA -> 0.1;
-                case EQUILIBRIO -> 1.0;
+                case ECONOMIA -> 1;
                 case TEMPO -> 2.0;
             };
 

@@ -21,14 +21,14 @@ import java.util.*;
 
 @Service
 @Transactional
-public class ProcessShipmentServcie {
+public class ProcessRouteStopService {
 
     private final ShipmentRepository shipmentRepository;
     private final ProcessTransportService processTransportService;
     private final RouteStopRepository routeStopRepository;
 
-    public ProcessShipmentServcie(ShipmentRepository shipmentRepository, ProcessTransportService processTransportService,
-                                  RouteStopRepository routeStopRepository)
+    public ProcessRouteStopService(ShipmentRepository shipmentRepository, ProcessTransportService processTransportService,
+                                   RouteStopRepository routeStopRepository)
     {
         this.shipmentRepository = shipmentRepository;
         this.processTransportService = processTransportService;
@@ -42,28 +42,7 @@ public class ProcessShipmentServcie {
             if(vehicleRoute.transitions() == null || vehicleRoute.transitions().isEmpty())
                 continue;
 
-            double kmMultiplier = switch (routePriority) {
-                case ECONOMIA -> 2.0;
-                case EQUILIBRIO -> 1.0;
-                case TEMPO -> 0.1;
-            };
-
-            double hourMultiplier = switch (routePriority) {
-                case ECONOMIA -> 0.1;
-                case EQUILIBRIO -> 1.0;
-                case TEMPO -> 2.0;
-            };
-
-            Map<String, Double> routeCosts = vehicleRoute.routeCosts();
-            Double costKmMultiplied = routeCosts.get("model.vehicles.cost_per_kilometer");
-            Double costHourMultiplied = routeCosts.get("model.vehicles.cost_per_hour");
-
-            Double costKmCalculated = costKmMultiplied != null ? costKmMultiplied / kmMultiplier : 0.0;
-            Double costHourCalculated = costHourMultiplied != null ? costHourMultiplied / hourMultiplier : 0.0;
-
-            Double custoTotalCalculated = costKmCalculated + costHourCalculated;
-
-            Transport transport = processTransportService.processTransport(vehicleRoute, costKmCalculated, costHourCalculated, custoTotalCalculated);
+            Transport transport = processTransportService.processTransport(vehicleRoute, routePriority);
 
             if(transport == null)
                 continue;
@@ -73,6 +52,7 @@ public class ProcessShipmentServcie {
             routeStopRepository.flush(); // Força o commit da trandação
 
             Double distanceTotal = (vehicleRoute.metrics() != null) ? vehicleRoute.metrics().travelDistanceMeters() : 0.0;
+
             List<ApiRouteStop> visits = vehicleRoute.visits();
             List<ApiRouteTransition> transitions = vehicleRoute.transitions();
             List<RouteStop> newStops = new ArrayList<>();
@@ -85,8 +65,10 @@ public class ProcessShipmentServcie {
                         continue;
 
                     Integer duration = parseApiRouteDuration(routeTransition.travelDuration().toString());
+
                     Integer waitDuration = routeTransition.waitDuration() != null ?
                             parseApiRouteDuration(routeTransition.waitDuration().toString()) : 0;
+
                     Integer travelDistanceMeters = routeTransition.travelDistanceMeters() != null ?
                             routeTransition.travelDistanceMeters().intValue() : 0;
 
@@ -95,7 +77,7 @@ public class ProcessShipmentServcie {
 
                     Double costRoute = 0.0;
                     if (distanceTotal > 0) {
-                        costRoute = (travelDistanceMeters / distanceTotal) * custoTotalCalculated;
+                        costRoute = (travelDistanceMeters / distanceTotal) * 0.0;
                     }
 
                     int sequenceOrder = i + 1;

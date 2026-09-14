@@ -15,7 +15,7 @@ public interface WorkScheduleRepository extends JpaRepository<WorkSchedule, UUID
 
     Boolean existsByEquipamentGroupId(UUID equipamentGroupId);
 
-    List<WorkSchedule> findByEquipamentGroupId(UUID equipamentGroupId);
+    WorkSchedule findByEquipamentGroupId(UUID equipamentGroupId);
 
     @Query("SELECT w " +
           "FROM WorkSchedule w " +

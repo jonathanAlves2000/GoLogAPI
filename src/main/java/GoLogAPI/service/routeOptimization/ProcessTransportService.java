@@ -4,6 +4,7 @@ import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.*;
+import GoLogAPI.model.enums.RoutePriority;
 import GoLogAPI.model.enums.WorkScheduleStatus;
 import GoLogAPI.repository.*;
 import GoLogAPI.service.MessageException;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -35,23 +37,13 @@ public class ProcessTransportService {
     }
 
     @Transactional
-    public Transport processTransport(ApiVehicleRoute vehicleRoute, Double costKmCalculed, Double costHourCalculaed, Double custoTotalCalculed) {
-        if(vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty()) {
+    public Transport processTransport(ApiVehicleRoute vehicleRoute, RoutePriority routePriority) {
+
+        if (vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty()) {
             return null;
         }
 
         String vehicleLabel = vehicleRoute.vehicleLabel();
-
-        Integer totalDistance = vehicleRoute.metrics().travelDistanceMeters();
-
-        Integer totalDuration = vehicleRoute.metrics().totalDuration() != null ?
-                parseApiRouteDuration(vehicleRoute.metrics().totalDuration()) : 0;
-
-        Integer travelDuration = vehicleRoute.metrics().travelDuration() != null ?
-                parseApiRouteDuration(vehicleRoute.metrics().travelDuration()) : 0;
-
-        Integer totalWait = vehicleRoute.metrics().waitDuration() != null ?
-                parseApiRouteDuration(vehicleRoute.metrics().waitDuration().toString()) : 0;
 
         Equipament equipament = equipamentRepository.findByPlate(vehicleLabel)
                 .orElseThrow(() -> new RuntimeException("Placa: " + vehicleLabel + " não encontrada"));
@@ -65,39 +57,66 @@ public class ProcessTransportService {
         Transport transport = transportRepository.findByEquipamentGroup(equipamentGroup)
                 .orElse(new Transport());
 
+        WorkSchedule workSchedule = workScheduleRepository.findByEquipamentGroupId(equipamentGroup.getId());
         Driver driver = null;
-        for(WorkSchedule workSchedule : workScheduleRepository.findByEquipamentGroupId(equipamentGroup.getId())) {
-            driver = workSchedule.getDriver();
-            workSchedule.setStatus(WorkScheduleStatus.EM_OPERACAO);
-            workScheduleRepository.save(workSchedule);
-        }
+        driver = workSchedule.getDriver();
+        workSchedule.setStatus(WorkScheduleStatus.EM_OPERACAO);
+        workScheduleRepository.save(workSchedule);
+
+        Integer totalDistance = vehicleRoute.metrics().travelDistanceMeters();
+
+        Integer visitDuration = vehicleRoute.metrics().visitDuration() != null ?
+                parseApiRouteDuration(vehicleRoute.metrics().visitDuration()) : 0;
+
+        Integer travelDuration = vehicleRoute.metrics().travelDuration() != null ?
+                parseApiRouteDuration(vehicleRoute.metrics().travelDuration()) : 0;
+
+        Integer totalDuration = vehicleRoute.metrics().totalDuration() != null ?
+                parseApiRouteDuration(vehicleRoute.metrics().totalDuration()) : 0;
+
+        Integer operationalDuration = visitDuration + travelDuration;
+        Integer operarionDurationHour = operationalDuration / 3600;
+
+        Integer totalWait = vehicleRoute.metrics().waitDuration() != null ?
+                parseApiRouteDuration(vehicleRoute.metrics().waitDuration().toString()) : 0;
+
+        double kmMultiplier = switch (routePriority) {
+            case ECONOMIA -> 1;
+            case TEMPO -> 0.1;
+        };
+
+        Map<String, Double> routeCosts = vehicleRoute.routeCosts();
+        Double costKmMultiplied = routeCosts.get("model.vehicles.cost_per_kilometer");
+        Double costKmCalculated = costKmMultiplied != null ? costKmMultiplied / kmMultiplier : 0.0;
+        Double costHourCalculated = operarionDurationHour * driver.getCostPerHour();
+        Double custoTotalCalculated = costKmCalculated + costHourCalculated;
 
         transport.setShipmentQuantity(vehicleRoute.visits().size());
         transport.setCalculedDistance(totalDistance);
         transport.setTravelDuration(travelDuration);
-        transport.setTotalTimeCalculed(totalDuration);
+        transport.setTotalTimeCalculed(operationalDuration);
         transport.setTimeStoppedCalculed(totalWait);
-        transport.setCostKmCalculed(costKmCalculed);
-        transport.setCostHourCalculed(costHourCalculaed);
-        transport.setTotalCostCalculed(custoTotalCalculed);
+        transport.setCostKmCalculed(costKmCalculated);
+        transport.setCostHourCalculed(costHourCalculated);
+        transport.setTotalCostCalculed(custoTotalCalculated);
         transport.setEquipamentGroup(equipamentGroup);
         transport.setTransporter(company);
         transport.setDriver(driver);
 
         List<LatLng> totalRoutePoints = new ArrayList<>();
 
-        if(vehicleRoute.transitions() != null) {
-            for(ApiRouteTransition transition : vehicleRoute.transitions()) {
-                if(transition.routePolyline() != null && transition.routePolyline().points() != null) {
+        if (vehicleRoute.transitions() != null) {
+            for (ApiRouteTransition transition : vehicleRoute.transitions()) {
+                if (transition.routePolyline() != null && transition.routePolyline().points() != null) {
                     List<LatLng> points = OptimizeListLocation.procesingRouteGoogle(transition.routePolyline().points());
-                    if(points != null) {
+                    if (points != null) {
                         totalRoutePoints.addAll(points);
                     }
                 }
             }
         }
 
-        if(!totalRoutePoints.isEmpty()) {
+        if (!totalRoutePoints.isEmpty()) {
             String totalPolylineCode = com.google.maps.internal.PolylineEncoding.encode(totalRoutePoints);
             transport.setRoutePlanned(totalPolylineCode);
         }
@@ -105,7 +124,7 @@ public class ProcessTransportService {
         return transportRepository.save(transport);
     }
 
-    private Integer parseApiRouteDuration (String durationStr) {
+    private Integer parseApiRouteDuration(String durationStr) {
         if (durationStr == null || durationStr.isEmpty()) {
             return 0;
         }

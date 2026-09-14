@@ -8,5 +8,7 @@ public record ApiRouteMetrics (
         Integer travelDistanceMeters,   // Distância total que o veículo rodou
         String travelDuration,      // Tempo total dele em movimento
         String waitDuration,
+        String visitDuration,
         String totalDuration
 ){ }
+

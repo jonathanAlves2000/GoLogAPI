@@ -1,7 +1,6 @@
 package GoLogAPI.service.routeOptimization;
 
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteOptimizationResponse;
-import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
 import GoLogAPI.model.enums.RoutePriority;
 import GoLogAPI.repository.ShipmentRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,10 +14,10 @@ public class ProcessRouteService {
 
     private final RouteRequestService routeRequestService;
     private final ObjectMapper objectMapper;
-    private final ProcessShipmentServcie processShipment;
+    private final ProcessRouteStopService processShipment;
 
     public ProcessRouteService(RouteRequestService routeRequestService, ObjectMapper objectMapper,
-                               ShipmentRepository shipmentRepository, ProcessShipmentServcie processShipment)
+                               ShipmentRepository shipmentRepository, ProcessRouteStopService processShipment)
     {
         this.routeRequestService = routeRequestService;
         this.objectMapper = objectMapper;
