@@ -19,6 +19,9 @@ public class ShipementValidate {
 
     public void validate(ShipmentRequest shipmentRequest){
 
+        if(shipmentRequest.operationOrigemId() == null)
+            return;
+
         Shipment shipmentCollect = shipmentRepository.findByOperationOrigemId(shipmentRequest.operationOrigemId());
 
         if(shipmentCollect == null)

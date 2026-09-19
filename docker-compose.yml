@@ -40,7 +40,7 @@ services:
 
   frontend:
     build:
-      context: ./GoLogWEB
+      context: ../GoLogWeb
       dockerfile: Dockerfile
     container_name: golog-web
     restart: always
