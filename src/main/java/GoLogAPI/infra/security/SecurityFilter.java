@@ -36,9 +36,16 @@ public class SecurityFilter extends OncePerRequestFilter {
                 try {
                     var email = tokenService.getSubject(token);
                     var role = tokenService.getClaim(token, "role");
+
+                    if(role.equals("POWERBI") && !tokenService.isPowerBiTokenValid(token)){
+                        sendError(response, "Token do Power BI revogado ou invalido.");
+                        return;
+                    }
+
                     var authority = new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role);
                     var authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
                 } catch (TokenExpiredException exception) {
                     sendError(response, "Token expirado. Por favor, faça login novamente.");
                     return;

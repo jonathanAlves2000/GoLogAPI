@@ -1,6 +1,7 @@
 package GoLogAPI.controller;
 
 import GoLogAPI.dto.login.LoginRequest;
+import GoLogAPI.dto.login.PowerBiTokenResponse;
 import GoLogAPI.dto.login.TokenResponse;
 import GoLogAPI.infra.security.TokenService;
 import GoLogAPI.model.User;
@@ -38,5 +39,12 @@ public class AuthController {
         User user = (User) authentication.getPrincipal();
 
         return ResponseEntity.ok(new TokenResponse(tokenJWT, user.getId()));
+    }
+
+    @Operation(summary = "Gerar token Power BI", description = "Gera um token JWT sem expiração para consumo via Power BI. Requer role ADMIN.")
+    @PostMapping("/powerbi-token")
+    public ResponseEntity<PowerBiTokenResponse> generatePowerBiToken() {
+        var tokenJWT = tokenService.createPowerBiToken();
+        return ResponseEntity.ok(new PowerBiTokenResponse(tokenJWT));
     }
 }

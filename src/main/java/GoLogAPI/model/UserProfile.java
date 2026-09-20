@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum UserProfile {
     ADMIN("ADMIN"),
     DRIVER("DRIVER"),
-    OPERATOR("OPERATOR");
+    OPERATOR("OPERATOR"),
+    POWERBI("POWER BI");
 
     private final String profile;
 }

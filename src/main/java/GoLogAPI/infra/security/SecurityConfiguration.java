@@ -40,12 +40,19 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/user").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/user").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/user").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/login/powerbi-token").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/**").hasAnyRole("ADMIN", "DRIVER", "POWERBI")
+                        .requestMatchers(HttpMethod.POST, "/**").hasAnyRole("ADMIN", "DRIVER")
+                        .requestMatchers(HttpMethod.PUT, "/**").hasAnyRole("ADMIN", "DRIVER")
+                        .requestMatchers(HttpMethod.PATCH, "/**").hasAnyRole("ADMIN", "DRIVER")
+                        .requestMatchers(HttpMethod.DELETE, "/**").hasAnyRole("ADMIN", "DRIVER")
                         .anyRequest().authenticated())
                 
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(councorrencyLimiterFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
         return web -> {
