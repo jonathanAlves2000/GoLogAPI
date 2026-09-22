@@ -28,4 +28,5 @@ public record CompanyCreateRequest(
 
         @NotNull(message = "AddressId nulo")
         UUID addressId
+
 ) implements CompanyRequest { }

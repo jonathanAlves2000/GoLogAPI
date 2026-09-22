@@ -34,7 +34,7 @@ public abstract class Audit{
 
     @PrePersist
     public void onPrePersist(){
-        String username = getUserAuthenticatedName();
+        String username = createdBy == null ? getUserAuthenticatedName() : createdBy;
         createdAt = Instant.now();
         createdBy = username;
         updatedAt = this.createdAt;

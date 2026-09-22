@@ -4,7 +4,9 @@ import GoLogAPI.dto.login.LoginRequest;
 import GoLogAPI.dto.login.PowerBiTokenResponse;
 import GoLogAPI.dto.login.TokenResponse;
 import GoLogAPI.infra.security.TokenService;
+import GoLogAPI.model.AuthLog;
 import GoLogAPI.model.User;
+import GoLogAPI.service.AuthLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,10 +25,12 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
+    private final AuthLogService authLogService;
 
-    public AuthController(AuthenticationManager authenticationManager, TokenService tokenService){
+    public AuthController(AuthenticationManager authenticationManager, TokenService tokenService, AuthLogService authLogService){
         this.authenticationManager = authenticationManager;
         this.tokenService = tokenService;
+        this.authLogService = authLogService;
     }
 
     @Operation(summary = "Autenticar", description = "Realiza a autenticação do usuário e retorna o token JWT")
@@ -37,7 +41,7 @@ public class AuthController {
         var tokenJWT = tokenService.createToken((User) authentication.getPrincipal());
 
         User user = (User) authentication.getPrincipal();
-
+        authLogService.save(user);
         return ResponseEntity.ok(new TokenResponse(tokenJWT, user.getId()));
     }
 
