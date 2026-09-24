@@ -125,9 +125,13 @@ public class RouteRequestService {
         for (Shipment collect : collects) {
             List<Shipment> deliveries = shipmentRepository.findByOperationOrigem(collect);
 
-            List<String> collectVisitTypes = (collect.getVisitTypes() != null && !collect.getVisitTypes().isEmpty())
-                    ? collect.getVisitTypes().stream().map(VisitType::getCode).toList()
-                    : null;
+            List<String> collectVisitTypes = new ArrayList<>();
+            if (collect.getTypeTransport() != null && collect.getTypeTransport().getName() != null) {
+                collectVisitTypes.add(collect.getTypeTransport().getName().trim().toUpperCase().replaceAll("[^A-Z0-9_]", "_"));
+            }
+            if (collect.getVisitTypes() != null) {
+                collectVisitTypes.addAll(collect.getVisitTypes().stream().map(VisitType::getCode).toList());
+            }
 
             Stop pickupStop = new Stop(
                     new Location(collect.getAddress().getLatitude(), collect.getAddress().getLongitude()),
@@ -136,13 +140,17 @@ public class RouteRequestService {
                             collect.getSchedulind().minusMinutes(settings.timeWindowLeadMinutes()).atOffset(offset).format(formatter),
                             collect.getSchedulind().atOffset(offset).format(formatter)
                     )),
-                    collectVisitTypes
+                    collectVisitTypes.isEmpty() ? null : collectVisitTypes
             );
 
             for (Shipment delivery : deliveries) {
-                List<String> deliveryVisitTypes = (delivery.getVisitTypes() != null && !delivery.getVisitTypes().isEmpty())
-                        ? delivery.getVisitTypes().stream().map(VisitType::getCode).toList()
-                        : null;
+                List<String> deliveryVisitTypes = new ArrayList<>();
+                if (delivery.getTypeTransport() != null && delivery.getTypeTransport().getName() != null) {
+                    deliveryVisitTypes.add(delivery.getTypeTransport().getName().trim().toUpperCase().replaceAll("[^A-Z0-9_]", "_"));
+                }
+                if (delivery.getVisitTypes() != null) {
+                    deliveryVisitTypes.addAll(delivery.getVisitTypes().stream().map(VisitType::getCode).toList());
+                }
 
                 Stop deliveryStop = new Stop(
                         new Location(delivery.getAddress().getLatitude(), delivery.getAddress().getLongitude()),
@@ -151,7 +159,7 @@ public class RouteRequestService {
                                 delivery.getSchedulind().minusMinutes(settings.timeWindowLeadMinutes()).atOffset(offset).format(formatter),
                                 delivery.getSchedulind().atOffset(offset).format(formatter)
                         )),
-                        deliveryVisitTypes
+                        deliveryVisitTypes.isEmpty() ? null : deliveryVisitTypes
                 );
 
                 // Resolução dinâmica de demandas de carga (peso, volume, paletes...) com fallback
