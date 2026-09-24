@@ -2,6 +2,7 @@ package GoLogAPI.service;
 
 import GoLogAPI.dto.company.*;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.CompanyMapper;
 import GoLogAPI.model.Address;
 import GoLogAPI.model.Company;
@@ -48,7 +49,19 @@ public class CompanyService {
     }
 
     public List<CompanyResponseList> getAll(){
-        List<Company> companies = companyRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Company> companies;
+        if (TenantContext.isMaster() && currentTenant == null) {
+            companies = companyRepository.findAll();
+        } else {
+            // Retorna parceiros comerciais (CLIENT / SUPPLIER) e as empresas do grupo
+            companies = companyRepository.findAll().stream()
+                    .filter(c -> c.getCompanyType() == GoLogAPI.model.enums.CompanyType.CLIENT
+                            || c.getCompanyType() == GoLogAPI.model.enums.CompanyType.SUPPLIER
+                            || (currentTenant != null && (c.getId().equals(currentTenant)
+                                || (c.getParentCompany() != null && c.getParentCompany().getId().equals(currentTenant)))))
+                    .toList();
+        }
         return companyMapper.toResponses(companies);
     }
 

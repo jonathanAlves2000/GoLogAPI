@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface AddressRepository extends JpaRepository<Address, UUID> {
     boolean existsByCepAndNumber(String cep, String number);
     List<Address> findAll();
+    List<Address> findByCompanyId(UUID companyId);
 }

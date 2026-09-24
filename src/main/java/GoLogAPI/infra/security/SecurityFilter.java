@@ -15,6 +15,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
+import GoLogAPI.infra.tenant.TenantContext;
+import java.util.UUID;
+
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
@@ -30,32 +33,60 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-            var token = recoverToken(request);
+        var token = recoverToken(request);
 
-            if(token != null){
-                try {
-                    var email = tokenService.getSubject(token);
-                    var role = tokenService.getClaim(token, "role");
+        if(token != null){
+            try {
+                var email = tokenService.getSubject(token);
+                var role = tokenService.getClaim(token, "role");
 
-                    if(role.equals("POWERBI") && !tokenService.isPowerBiTokenValid(token)){
-                        sendError(response, "Token do Power BI revogado ou invalido.");
-                        return;
-                    }
-
-                    var authority = new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role);
-                    var authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                } catch (TokenExpiredException exception) {
-                    sendError(response, "Token expirado. Por favor, faça login novamente.");
-                    return;
-                } catch (JWTVerificationException exception) {
-                    sendError(response, "Token inválido ou malformatado.");
+                if("POWERBI".equals(role) && !tokenService.isPowerBiTokenValid(token)){
+                    sendError(response, "Token do Power BI revogado ou invalido.");
                     return;
                 }
-            }
 
+                var authority = new SimpleGrantedAuthority(role != null && role.startsWith("ROLE_") ? role : "ROLE_" + role);
+                var authentication = new UsernamePasswordAuthenticationToken(email, null, List.of(authority));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                String companyIdClaim = tokenService.getClaim(token, "companyId");
+                Boolean isMasterClaim = tokenService.getBooleanClaim(token, "isMaster");
+                String companyTypeClaim = tokenService.getClaim(token, "companyType");
+
+                UUID userCompanyId = companyIdClaim != null ? UUID.fromString(companyIdClaim) : null;
+                boolean isMaster = Boolean.TRUE.equals(isMasterClaim);
+
+                TenantContext.setUserCompanyId(userCompanyId);
+                TenantContext.setMaster(isMaster);
+                TenantContext.setCompanyType(companyTypeClaim);
+
+                String headerTenant = request.getHeader("X-Tenant-Id");
+                if (isMaster && headerTenant != null && !headerTenant.isBlank() && !"all".equalsIgnoreCase(headerTenant)) {
+                    try {
+                        TenantContext.setCurrentTenantId(UUID.fromString(headerTenant.trim()));
+                    } catch (IllegalArgumentException e) {
+                        TenantContext.setCurrentTenantId(null);
+                    }
+                } else if (isMaster) {
+                    TenantContext.setCurrentTenantId(null);
+                } else {
+                    TenantContext.setCurrentTenantId(userCompanyId);
+                }
+
+            } catch (TokenExpiredException exception) {
+                sendError(response, "Token expirado. Por favor, faça login novamente.");
+                return;
+            } catch (JWTVerificationException exception) {
+                sendError(response, "Token inválido ou malformatado.");
+                return;
+            }
+        }
+
+        try {
             filterChain.doFilter(request, response);
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     private void sendError(HttpServletResponse response, String mensagem) throws IOException {

@@ -12,6 +12,7 @@ import java.util.List;
 public interface AddressMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "company", ignore = true)
     Address toEntity(AddressCreateRequest addressCreateRequest);
 
     AddressResponse toResponse(Address address);

@@ -16,6 +16,7 @@ public class TractorResponse extends EquipamentResponse {
     private TypeFuel typeFuel;
     private Double costPerKilometer;
     private UUID companyId;
+    private GoLogAPI.dto.company.CompanyResponse company;
 
     public TractorResponse(UUID id, String plate, String renavam, String model,
                            Integer numberAxles, Double maximumCapacity, TypeFuel typeFuel,

@@ -4,6 +4,7 @@ import GoLogAPI.dto.trailer.TrailerCreateRequest;
 import GoLogAPI.dto.trailer.TrailerUpdateRequest;
 import GoLogAPI.dto.trailer.TrailerResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.TrailerMapper;
 import GoLogAPI.model.Company;
 import GoLogAPI.model.Trailer;
@@ -54,7 +55,10 @@ public class TrailerService {
     }
 
     public List<TrailerResponse> getAll() {
-        List<Trailer> trailers = trailerRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Trailer> trailers = (currentTenant != null)
+                ? trailerRepository.findByCompanyId(currentTenant)
+                : trailerRepository.findAll();
         return trailerMapper.toResponses(trailers);
     }
 

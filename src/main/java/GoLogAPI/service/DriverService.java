@@ -5,6 +5,7 @@ import GoLogAPI.dto.driver.DriverUpdateRequest;
 import GoLogAPI.dto.driver.DriverResponseList;
 import GoLogAPI.dto.driver.DriverResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.DriverMapper;
 import GoLogAPI.model.Driver;
 import GoLogAPI.model.User;
@@ -43,6 +44,7 @@ public class DriverService {
         User user = userRepository.findById(driverCreateRequest.userId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, driverCreateRequest.userId()));
         driver.setUser(user);
+        driver.setCompany(user.getCompany());
         driverRepository.save(driver);
         return driverMapper.toResponse(driver);
     }
@@ -54,7 +56,10 @@ public class DriverService {
     }
 
     public List<DriverResponseList> getAll(){
-        List<Driver> drivers = driverRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Driver> drivers = (currentTenant != null)
+                ? driverRepository.findByCompanyId(currentTenant)
+                : driverRepository.findAll();
         return driverMapper.toResponses(drivers);
     }
 

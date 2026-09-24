@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/optimization-profile")
-@Tag(name = "Perfis de Otimização", description = "Gerenciamento de regras de negócio, pesos e custos de cálculo")
+@Tag(name = "Regras de Otimização & Custos", description = "Gerenciamento de regras de negócio, pesos e custos de cálculo")
 public class OptimizationProfileController {
 
     private final OptimizationProfileService optimizationProfileService;

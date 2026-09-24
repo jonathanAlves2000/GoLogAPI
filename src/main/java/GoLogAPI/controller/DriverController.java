@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/driver")
-@Tag(name = "Motorista")
+@Tag(name = "Motoristas & Escalas")
 public class DriverController {
 
     private final DriverService driverService;

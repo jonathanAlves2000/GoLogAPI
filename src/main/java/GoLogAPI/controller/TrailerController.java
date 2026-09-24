@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/trailer")
-@Tag(name = "Carreta")
+@Tag(name = "Frotas & Equipamentos")
 public class TrailerController {
 
     private final TrailerService trailerService;

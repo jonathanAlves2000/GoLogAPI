@@ -1,5 +1,6 @@
 package GoLogAPI.dto.equipamentGroup;
 
+import GoLogAPI.dto.company.CompanyResponse;
 import GoLogAPI.dto.equipament.EquipamentResponse;
 import GoLogAPI.dto.typeTransport.TypeTransportResponse;
 
@@ -12,5 +13,6 @@ public record EquipamentGroupResponse(
        EquipamentResponse equipament1,
        EquipamentResponse equipament2,
        EquipamentResponse equipament3,
-       Set<TypeTransportResponse> typeTransports
+       Set<TypeTransportResponse> typeTransports,
+       CompanyResponse company
 ) { }

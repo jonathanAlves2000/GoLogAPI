@@ -60,4 +60,10 @@ public class Address extends Audit {
 
     @Column(name = "longitude", nullable = false)
     private String longitude;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @jakarta.persistence.ManyToOne
+    @jakarta.persistence.JoinColumn(name = "company_id")
+    @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
+    private Company company;
 }

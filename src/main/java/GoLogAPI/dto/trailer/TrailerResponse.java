@@ -14,6 +14,7 @@ public class TrailerResponse extends EquipamentResponse {
 
     private Double maximumVolume;
     private UUID companyId;
+    private GoLogAPI.dto.company.CompanyResponse company;
 
     public TrailerResponse(UUID id, String plate, String renavam, String model,
                            Integer numberAxles, Double maximumCapacity, Double maximumVolume, EquipamentStatus status , UUID companyId) {

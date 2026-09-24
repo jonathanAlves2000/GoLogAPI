@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/shipment")
-@Tag(name = "Carga/Remessa")
+@Tag(name = "Cargas e Remessas (Shipments)")
 public class ShipmentController {
 
     private final ShipmentService shipmentService;

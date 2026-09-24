@@ -10,6 +10,7 @@ import GoLogAPI.service.AuthLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -42,7 +43,23 @@ public class AuthController {
 
         User user = (User) authentication.getPrincipal();
         authLogService.save(user);
-        return ResponseEntity.ok(new TokenResponse(tokenJWT, user.getId()));
+
+        UUID companyId = user.getCompany() != null ? user.getCompany().getId() : null;
+        String companyName = user.getCompany() != null ? user.getCompany().getLegalName() : null;
+        String companyType = (user.getCompany() != null && user.getCompany().getCompanyType() != null)
+                ? user.getCompany().getCompanyType().name() : null;
+        Boolean isMaster = user.getCompany() != null && Boolean.TRUE.equals(user.getCompany().getIsMaster());
+
+        return ResponseEntity.ok(new TokenResponse(
+                tokenJWT,
+                user.getId(),
+                user.getName(),
+                user.getUserProfile().name(),
+                companyId,
+                companyName,
+                companyType,
+                isMaster
+        ));
     }
 
     @Operation(summary = "Gerar token Power BI", description = "Gera um token JWT sem expiração para consumo via Power BI. Requer role ADMIN.")

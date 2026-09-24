@@ -90,4 +90,9 @@ public class Shipment extends Audit {
     )
     @Builder.Default
     private Set<VisitType> visitTypes = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Company company;
 }

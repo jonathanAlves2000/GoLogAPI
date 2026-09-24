@@ -21,4 +21,6 @@ public interface WorkScheduleRepository extends JpaRepository<WorkSchedule, UUID
           "FROM WorkSchedule w " +
           "WHERE w.status = :status")
     List<WorkSchedule> findByStatus(@Param("status")WorkScheduleStatus status);
+
+    List<WorkSchedule> findByCompanyId(UUID companyId);
 }

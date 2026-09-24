@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api-route-optimization")
-@Tag(name = "Otimização de Rota")
+@Tag(name = "Transportes & Roteirização")
 public class RouteOptimizationController {
 
     private final RouteRequestService routeRequestService;

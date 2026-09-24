@@ -17,6 +17,7 @@ public interface TrailerMapper {
     Trailer toEntity(TrailerCreateRequest trailerCreateRequest);
 
     @Mapping(target = "companyId", source = "company.id")
+    @Mapping(target = "company", source = "company")
     TrailerResponse toResponse(Trailer trailer);
 
     List<TrailerResponse> toResponses(List<Trailer> trailers);

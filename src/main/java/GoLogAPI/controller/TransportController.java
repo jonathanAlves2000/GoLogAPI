@@ -19,7 +19,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/transport")
-@Tag(name = "Transporte")
+@Tag(name = "Transportes & Roteirização")
 public class TransportController {
 
     private final TransportService transportService;

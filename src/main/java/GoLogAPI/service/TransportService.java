@@ -5,6 +5,7 @@ import GoLogAPI.dto.transport.TransportCreateResponse;
 import GoLogAPI.dto.transport.TransportResponse;
 import GoLogAPI.dto.transport.TransportUpdateRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.TransportMapper;
 import GoLogAPI.model.Company;
 import GoLogAPI.model.Driver;
@@ -72,7 +73,10 @@ public class TransportService {
     }
 
     public List<TransportResponse> getAll(){
-        List<Transport> transports = transportRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Transport> transports = (currentTenant != null)
+                ? transportRepository.findByTransporterId(currentTenant)
+                : transportRepository.findAll();
         return transportMapper.toResponses(transports);
     }
 

@@ -4,7 +4,10 @@ import GoLogAPI.dto.shipmentType.DeliveryTypeCreateRequest;
 import GoLogAPI.dto.shipmentType.DeliveryTypeResponse;
 import GoLogAPI.dto.shipmentType.DeliveryTypeUpdateRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
+import GoLogAPI.model.Company;
 import GoLogAPI.model.ShipmentType;
+import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.ShipmentTypeRepository;
 import GoLogAPI.validation.DeliveryTypeValidate;
 import org.springframework.stereotype.Service;
@@ -19,10 +22,14 @@ public class ShipmentTypeService {
 
     private final ShipmentTypeRepository shipmentTypeRepository;
     private final DeliveryTypeValidate deliveryTypeValidate;
+    private final CompanyRepository companyRepository;
 
-    public ShipmentTypeService(ShipmentTypeRepository shipmentTypeRepository, DeliveryTypeValidate deliveryTypeValidate){
+    public ShipmentTypeService(ShipmentTypeRepository shipmentTypeRepository,
+                               DeliveryTypeValidate deliveryTypeValidate,
+                               CompanyRepository companyRepository){
         this.deliveryTypeValidate = deliveryTypeValidate;
         this.shipmentTypeRepository = shipmentTypeRepository;
+        this.companyRepository = companyRepository;
     }
 
     @Transactional
@@ -30,10 +37,14 @@ public class ShipmentTypeService {
 
         deliveryTypeValidate.validate(deliveryTypeCreateRequest);
 
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        Company company = currentTenant != null ? companyRepository.findById(currentTenant).orElse(null) : null;
+
         ShipmentType shipmentType = ShipmentType.builder()
                 .name(deliveryTypeCreateRequest.name())
                 .description(deliveryTypeCreateRequest.description())
                 .care(deliveryTypeCreateRequest.care())
+                .company(company)
                 .build();
 
         shipmentType = shipmentTypeRepository.save(shipmentType);
@@ -59,7 +70,8 @@ public class ShipmentTypeService {
     }
 
     public List<DeliveryTypeResponse> getAll() {
-        List<ShipmentType> shipmentTypes = shipmentTypeRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<ShipmentType> shipmentTypes = shipmentTypeRepository.findAvailableForCompany(currentTenant);
         return shipmentTypes.stream()
                 .map(st -> new DeliveryTypeResponse(st.getId(), st.getName(), st.getDescription(), st.getCare()))
                 .toList();

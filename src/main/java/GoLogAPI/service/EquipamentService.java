@@ -2,6 +2,7 @@ package GoLogAPI.service;
 
 import GoLogAPI.dto.equipament.EquipamentResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.EquipamentMapper;
 import GoLogAPI.model.Equipament;
 import GoLogAPI.repository.EquipamentRepository;
@@ -30,7 +31,10 @@ public class EquipamentService {
     }
 
     public List<EquipamentResponse> getAll(){
-        List<Equipament> equipaments = equipamentRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Equipament> equipaments = (currentTenant != null)
+                ? equipamentRepository.findByCompanyId(currentTenant)
+                : equipamentRepository.findAll();
         return equipamentMapper.toResponseList(equipaments);
     }
 }

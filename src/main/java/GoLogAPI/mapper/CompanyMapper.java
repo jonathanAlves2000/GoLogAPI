@@ -15,8 +15,11 @@ public interface CompanyMapper {
 
     @Mapping(target = "address", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "parentCompany", ignore = true)
+    @Mapping(target = "branches", ignore = true)
     Company toEntity(CompanyCreateRequest companyCreateRequest);
 
+    @Mapping(source = "parentCompany.id", target = "parentCompanyId")
     CompanyResponse toResponse(Company company);
 
     CompanyCreateResponse toCreateResponse(Company company);

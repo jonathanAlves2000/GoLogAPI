@@ -16,6 +16,7 @@ public interface TractorMapper {
     Tractor toEntity(TractorCreateRequest tractorCreateRequest);
 
     @Mapping(target = "companyId", source = "company.id")
+    @Mapping(target = "company", source = "company")
     TractorResponse toResponse(Tractor tractor);
 
     List<TractorResponse> toResponses(List<Tractor> tractors);

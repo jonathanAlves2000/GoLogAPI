@@ -1,6 +1,7 @@
 package GoLogAPI.dto.company;
 
 import GoLogAPI.dto.address.AddressResponse;
+import GoLogAPI.model.enums.CompanyType;
 
 import java.util.UUID;
 
@@ -11,5 +12,8 @@ public record CompanyResponse(
         String phoneNumber,
         String email,
         String cnpjCpf,
-        AddressResponse address
+        AddressResponse address,
+        CompanyType companyType,
+        Boolean isMaster,
+        UUID parentCompanyId
 ) { }

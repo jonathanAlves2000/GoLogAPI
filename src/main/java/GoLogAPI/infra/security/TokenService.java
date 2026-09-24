@@ -30,13 +30,26 @@ public class TokenService {
     public String createToken(User user){
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.create()
+            var builder = JWT.create()
                     .withIssuer("golog-api")
                     .withSubject(user.getEmail())
                     .withClaim("user", user.getName())
                     .withClaim("role", user.getUserProfile().name())
-                    .withExpiresAt(dateExpiration())
-                    .sign(algorithm);
+                    .withClaim("userId", user.getId().toString())
+                    .withExpiresAt(dateExpiration());
+
+            if (user.getCompany() != null) {
+                builder.withClaim("companyId", user.getCompany().getId().toString());
+                builder.withClaim("companyName", user.getCompany().getLegalName());
+                if (user.getCompany().getCompanyType() != null) {
+                    builder.withClaim("companyType", user.getCompany().getCompanyType().name());
+                }
+                builder.withClaim("isMaster", Boolean.TRUE.equals(user.getCompany().getIsMaster()));
+            } else {
+                builder.withClaim("isMaster", false);
+            }
+
+            return builder.sign(algorithm);
         }catch (JWTCreationException exception){
             throw new RuntimeException("Erro ao gerar token jwt", exception);
         }
@@ -66,6 +79,16 @@ public class TokenService {
                 .verify(tokenJWT)
                 .getClaim(claimName)
                 .asString();
+    }
+
+    public Boolean getBooleanClaim(String tokenJWT, String claimName) {
+        Algorithm algorithm = Algorithm.HMAC256(secret);
+        var claim = JWT.require(algorithm)
+                .withIssuer("golog-api")
+                .build()
+                .verify(tokenJWT)
+                .getClaim(claimName);
+        return claim.asBoolean();
     }
 
     public String createPowerBiToken(){

@@ -1,5 +1,7 @@
 package GoLogAPI.dto.company;
 
+import GoLogAPI.model.enums.CompanyType;
+
 import java.util.UUID;
 
 public record CompanyResponseList(
@@ -8,5 +10,7 @@ public record CompanyResponseList(
         Boolean isCliente,
         String phoneNumber,
         String email,
-        String cnpjCpf
+        String cnpjCpf,
+        CompanyType companyType,
+        Boolean isMaster
 ) { }

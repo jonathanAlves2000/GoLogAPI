@@ -16,6 +16,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -52,4 +53,8 @@ public class Driver extends Audit {
     @NotFound(action = NotFoundAction.IGNORE)
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Company company;
 }

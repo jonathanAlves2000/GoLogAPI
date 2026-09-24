@@ -4,9 +4,12 @@ import GoLogAPI.dto.address.AddressCreateRequest;
 import GoLogAPI.dto.address.AddressUpdateRequest;
 import GoLogAPI.dto.address.AddressResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.AddressMapper;
 import GoLogAPI.model.Address;
+import GoLogAPI.model.Company;
 import GoLogAPI.repository.AddressRepository;
+import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.validation.AddressValidate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -21,17 +24,25 @@ public class AddressService {
     private final AddressRepository addressRepository;
     private final AddressMapper addressMapper;
     private final AddressValidate addressValidate;
+    private final CompanyRepository companyRepository;
 
-    public AddressService(AddressRepository addressRepository, AddressMapper addressMapper, AddressValidate addressValidate){
+    public AddressService(AddressRepository addressRepository, AddressMapper addressMapper,
+                          AddressValidate addressValidate, CompanyRepository companyRepository){
         this.addressRepository = addressRepository;
         this.addressMapper = addressMapper;
         this.addressValidate = addressValidate;
+        this.companyRepository = companyRepository;
     }
 
     @Transactional
     public AddressResponse save(AddressCreateRequest addressCreateRequest){
         addressValidate.validate(addressCreateRequest);
         Address address = addressMapper.toEntity(addressCreateRequest);
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        if (currentTenant != null) {
+            Company company = companyRepository.findById(currentTenant).orElse(null);
+            address.setCompany(company);
+        }
         addressRepository.save(address);
         return addressMapper.toResponse(address);
     }
@@ -43,7 +54,10 @@ public class AddressService {
     }
 
     public List<AddressResponse> getAll(){
-        List<Address> adddressList = addressRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Address> adddressList = (currentTenant != null)
+                ? addressRepository.findByCompanyId(currentTenant)
+                : addressRepository.findAll();
         return addressMapper.toResponses(adddressList);
     }
 

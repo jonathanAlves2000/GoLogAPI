@@ -6,6 +6,7 @@ import GoLogAPI.dto.equipamentGroup.EquipamentGroupCreateRequest;
 import GoLogAPI.dto.equipamentGroup.EquipamentGroupUpdateRequest;
 import GoLogAPI.dto.equipamentGroup.EquipamentGroupResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.EquipamentGroupMapper;
 import GoLogAPI.mapper.SupportedTypeMapper;
 import GoLogAPI.model.Equipament;
@@ -55,6 +56,7 @@ public class EquipamentGroupService {
         Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament1Id()));
         equipamentGroup.setEquipament1(equipament1);
+        equipamentGroup.setCompany(equipament1.getCompany());
 
         if(equipamentGroupCreateRequest.equipament2Id() != null) {
             Equipament equipament2 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament2Id())
@@ -78,7 +80,10 @@ public class EquipamentGroupService {
     }
 
     public List<EquipamentGroupResponse> getAll() {
-        List<EquipamentGroup> equipamentGroups = equipamentGroupRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<EquipamentGroup> equipamentGroups = (currentTenant != null)
+                ? equipamentGroupRepository.findByCompanyId(currentTenant)
+                : equipamentGroupRepository.findAll();
         return equipamentGroupMapper.toResponses(equipamentGroups);
     }
 
@@ -100,6 +105,7 @@ public class EquipamentGroupService {
         Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament1Id()));
         equipamentGroup.setEquipament1(equipament1);
+        equipamentGroup.setCompany(equipament1.getCompany());
 
         if(equipamentGroupCreateRequest.equipament2Id() != null) {
             Equipament equipament2 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament2Id())

@@ -5,6 +5,7 @@ import GoLogAPI.dto.user.UserUpdateRequest;
 import GoLogAPI.dto.user.UserResponse;
 import GoLogAPI.dto.user.UserResponseList;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.UserMapper;
 import GoLogAPI.model.Company;
 import GoLogAPI.repository.CompanyRepository;
@@ -63,7 +64,10 @@ public class UserService {
     }
 
     public List<UserResponseList> getAll(){
-        List<User> users = userRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<User> users = (currentTenant != null)
+                ? userRepository.findByCompanyId(currentTenant)
+                : userRepository.findAll();
         return userMapper.toResponses(users);
     }
 

@@ -4,8 +4,11 @@ import GoLogAPI.dto.typeTransport.TypeTransportCreateRequest;
 import GoLogAPI.dto.typeTransport.TypeTransportResponse;
 import GoLogAPI.dto.typeTransport.TypeTransportUpdateRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.TypeTransportMapper;
+import GoLogAPI.model.Company;
 import GoLogAPI.model.TypeTransport;
+import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.TypeTransportRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,16 +23,24 @@ public class TypeTransportService {
 
     private final TypeTransportRepository typeTransportRepository;
     private final TypeTransportMapper typeTransportMapper;
+    private final CompanyRepository companyRepository;
 
     public TypeTransportService(TypeTransportRepository typeTransportRepository,
-                                TypeTransportMapper typeTransportMapper){
+                                TypeTransportMapper typeTransportMapper,
+                                CompanyRepository companyRepository){
         this.typeTransportRepository = typeTransportRepository;
         this.typeTransportMapper = typeTransportMapper;
+        this.companyRepository = companyRepository;
     }
 
     @Transactional
     public TypeTransportResponse save(TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransport typeTransport = typeTransportMapper.toEntity(typeTransportCreateRequest);
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        if (currentTenant != null) {
+            Company company = companyRepository.findById(currentTenant).orElse(null);
+            typeTransport.setCompany(company);
+        }
         typeTransportRepository.save(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
@@ -41,7 +52,8 @@ public class TypeTransportService {
     }
 
     public List<TypeTransportResponse> getAll() {
-        List<TypeTransport> typeTransports = typeTransportRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<TypeTransport> typeTransports = typeTransportRepository.findAvailableForCompany(currentTenant);
         return typeTransportMapper.toResponses(typeTransports);
     }
 

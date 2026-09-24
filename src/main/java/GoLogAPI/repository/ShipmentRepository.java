@@ -25,6 +25,14 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     List<Shipment> findByIdInAndTypeOperation(List<UUID> shipmentId, TypeOperation typeOperation);
     List<Shipment> findByOperationOrigem(Shipment shipment);
 
+    List<Shipment> findByCompanyId(UUID companyId);
+    List<Shipment> findByCompanyIdAndStatus(UUID companyId, ShipmentStatus status);
+
+    @Query("SELECT s, rs, t FROM Shipment s " +
+            "INNER JOIN RouteStop rs ON rs.shipment = s " +
+            "INNER JOIN rs.transport t " +
+            "WHERE s.active = true AND (:companyId IS NULL OR s.company.id = :companyId)")
+    List<Object[]> findAllShipmentsWithRoutesAndTransportMandatoryByCompanyId(@Param("companyId") UUID companyId);
 
     // Une as 3 tabelas (Shipment + RouteStop + Transport) de forma limpa e rápida
     @Query("SELECT s, rs, t FROM Shipment s " +
