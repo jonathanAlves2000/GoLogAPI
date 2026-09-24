@@ -27,7 +27,7 @@ public class RouteOptimizationController {
     @PostMapping
     public String optimizeRoutes(@RequestBody OptimizeRouteRequest optimizeRouteRequest){
         String routeOtimized = routeRequestService.optimizeRoutes(optimizeRouteRequest);
-        processRouteService.processRoute(routeOtimized, optimizeRouteRequest.routePriority());
+        processRouteService.processRoute(routeOtimized, optimizeRouteRequest);
         return routeOtimized;
     }
 }

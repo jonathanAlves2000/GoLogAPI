@@ -8,5 +8,20 @@ import java.util.UUID;
 public record OptimizeRouteRequest(
         List<UUID> shipmentIds,
         List<UUID> workScheduleIds,
-        RoutePriority routePriority
-) { }
+        RoutePriority routePriority,
+
+        // Configuração de Regras / Perfil dinâmico
+        UUID profileId,
+
+        // Overrides pontuais opcionais da interface
+        Double kmCostMultiplier,
+        Double hourCostMultiplier,
+        Double fixedCostPerVehicle,
+        Double penaltyCostUnserved,
+        Integer defaultServiceDurationSeconds,
+        Integer timeWindowLeadMinutes
+) {
+    public OptimizeRouteRequest(List<UUID> shipmentIds, List<UUID> workScheduleIds, RoutePriority routePriority) {
+        this(shipmentIds, workScheduleIds, routePriority, null, null, null, null, null, null, null);
+    }
+}
