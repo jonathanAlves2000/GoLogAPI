@@ -15,6 +15,11 @@ public class ConflictException extends RuntimeException {
         errorList.clear();
     }
 
+    public ConflictException(String error){
+        super(error);
+        this.errors = List.of(error);
+    }
+
     public List<String> getErrors(){
         return errors;
     }

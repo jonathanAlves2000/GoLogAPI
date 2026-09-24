@@ -3,6 +3,7 @@ package GoLogAPI.service.routeOptimization;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteStop;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
+import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.RouteStop;
 import GoLogAPI.model.Shipment;
@@ -37,12 +38,17 @@ public class ProcessRouteStopService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public void processShipment(List<ApiVehicleRoute> routes, RoutePriority routePriority) {
+        processShipment(routes, new OptimizeRouteRequest(null, null, routePriority));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    public void processShipment(List<ApiVehicleRoute> routes, OptimizeRouteRequest optimizeRouteRequest) {
         for(ApiVehicleRoute vehicleRoute : routes) {
 
             if(vehicleRoute.transitions() == null || vehicleRoute.transitions().isEmpty())
                 continue;
 
-            Transport transport = processTransportService.processTransport(vehicleRoute, routePriority);
+            Transport transport = processTransportService.processTransport(vehicleRoute, optimizeRouteRequest);
 
             if(transport == null)
                 continue;
