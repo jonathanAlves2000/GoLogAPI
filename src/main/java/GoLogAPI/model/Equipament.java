@@ -1,5 +1,7 @@
 package GoLogAPI.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import GoLogAPI.model.enums.EquipamentStatus;
@@ -55,4 +57,6 @@ public class Equipament extends Audit {
     @NotFound(action = NotFoundAction.IGNORE)
     private Company company;
 
+    @OneToMany(mappedBy = "equipament", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<EquipamentCapacity> capacities = new ArrayList<>();
 }

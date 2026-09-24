@@ -9,6 +9,10 @@ import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -73,4 +77,17 @@ public class Shipment extends Audit {
     @JoinColumn(name = "carga_origem_id", nullable = true)
     @NotFound(action = NotFoundAction.IGNORE)
     private Shipment operationOrigem;
+
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ShipmentDemand> shipmentDemands = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "shipment_visit_type_table",
+            joinColumns = @JoinColumn(name = "shipment_id"),
+            inverseJoinColumns = @JoinColumn(name = "visit_type_id")
+    )
+    @Builder.Default
+    private Set<VisitType> visitTypes = new HashSet<>();
 }

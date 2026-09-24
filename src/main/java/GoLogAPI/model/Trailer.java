@@ -11,8 +11,6 @@ import org.hibernate.annotations.SQLRestriction;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@SQLDelete(sql = "UPDATE telemetry_table SET active=false WHERE id = ?")
-@SQLRestriction("active = true")
 public class Trailer extends Equipament {
 
     @Column(name = "maximum_volume", nullable = false)
