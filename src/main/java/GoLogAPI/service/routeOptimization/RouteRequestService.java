@@ -1,51 +1,29 @@
 package GoLogAPI.service.routeOptimization;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import GoLogAPI.dto.dtoRouteOptimization.request.DeliveryRequest;
-import GoLogAPI.dto.dtoRouteOptimization.request.LoadDemand;
-import GoLogAPI.dto.dtoRouteOptimization.request.LoadDemands;
-import GoLogAPI.dto.dtoRouteOptimization.request.LoadLimit;
-import GoLogAPI.dto.dtoRouteOptimization.request.LoadLimits;
-import GoLogAPI.dto.dtoRouteOptimization.request.Location;
-import GoLogAPI.dto.dtoRouteOptimization.request.Model;
-import GoLogAPI.dto.dtoRouteOptimization.request.PickupRequest;
-import GoLogAPI.dto.dtoRouteOptimization.request.RouteOptimizationRequest;
-import GoLogAPI.dto.dtoRouteOptimization.request.RouteShipment;
-import GoLogAPI.dto.dtoRouteOptimization.request.ShipmentTypeIncompatibility;
-import GoLogAPI.dto.dtoRouteOptimization.request.Stop;
-import GoLogAPI.dto.dtoRouteOptimization.request.TimeWindow;
-import GoLogAPI.dto.dtoRouteOptimization.request.Vehicle;
 import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.infra.client.RouteOptimizationClient;
-import GoLogAPI.model.Company;
-import GoLogAPI.model.Driver;
-import GoLogAPI.model.EquipamentGroup;
+import GoLogAPI.model.*;
 import GoLogAPI.model.Shipment;
-import GoLogAPI.model.Telemetry;
-import GoLogAPI.model.Tractor;
-import GoLogAPI.model.VisitType;
-import GoLogAPI.model.VisitTypeRule;
-import GoLogAPI.model.WorkSchedule;
 import GoLogAPI.model.enums.TypeOperation;
 import GoLogAPI.model.enums.VisitTypeRuleType;
-import GoLogAPI.repository.ShipmentRepository;
-import GoLogAPI.repository.TelemetryRepository;
-import GoLogAPI.repository.TractorRepository;
-import GoLogAPI.repository.VisitTypeRuleRepository;
-import GoLogAPI.repository.WorkScheduleRepository;
+import GoLogAPI.repository.*;
 import GoLogAPI.service.MessageException;
-import ch.qos.logback.core.model.Model;
+import com.google.cloud.optimization.v1.OptimizeToursRequest;
+import com.google.cloud.optimization.v1.OptimizeToursResponse;
+import com.google.cloud.optimization.v1.ShipmentModel;
+import com.google.cloud.optimization.v1.TimeWindow;
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.type.LatLng;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -77,12 +55,11 @@ public class RouteRequestService {
     }
 
     @Transactional
-    public String optimizeRoutes(OptimizeRouteRequest optimizeRouteRequest) {
+    public OptimizeToursResponse optimizeRoutes(OptimizeRouteRequest optimizeRouteRequest) {
 
         List<WorkSchedule> workSchedules = workScheduleRepository.findAllById(optimizeRouteRequest.workScheduleIds());
         List<Shipment> collects = shipmentRepository.findByIdInAndTypeOperation(optimizeRouteRequest.shipmentIds(), TypeOperation.COLETA);
 
-        // Identifica a empresa principal da operação para resolução de perfil/regras
         Company company = null;
         if (!workSchedules.isEmpty() && workSchedules.get(0).getEquipamentGroup() != null && workSchedules.get(0).getEquipamentGroup().getEquipament1() != null) {
             company = workSchedules.get(0).getEquipamentGroup().getEquipament1().getCompany();
@@ -90,15 +67,13 @@ public class RouteRequestService {
             company = collects.get(0).getCustomer();
         }
 
-        // Resolução hierárquica de regras, custos e janelas operacionais (Request -> Perfil -> Fallback Default)
         OptimizationConfigResolver.ResolvedOptimizationSettings settings = configResolver.resolveSettings(optimizeRouteRequest, company);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
         ZoneOffset offset = ZoneOffset.of("-03:00");
-        String stopDurationStr = settings.defaultServiceDurationSeconds() + "s";
+        Duration stopDuration = Duration.newBuilder().setSeconds(settings.defaultServiceDurationSeconds()).build();
 
-        List<Vehicle> vehicles = new ArrayList<>();
+        ShipmentModel.Builder shipmentModelBuilder = ShipmentModel.newBuilder();
 
+        // 1. Montagem dos Veículos usando classes nativas do protobuf
         for (WorkSchedule workSchedule : workSchedules) {
             EquipamentGroup equipament = workSchedule.getEquipamentGroup();
             Driver driver = workSchedule.getDriver();
@@ -109,48 +84,69 @@ public class RouteRequestService {
             Tractor tractor = tractorRepository.findById(equipament.getEquipament1().getId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));
 
+            String latStr = (telemetry != null && !telemetry.getLatitude().isEmpty())
+                    ? telemetry.getLatitude()
+                    : equipament.getEquipament1().getCompany().getAddress().getLatitude();
+            String lngStr = (telemetry != null && !telemetry.getLongitude().isEmpty())
+                    ? telemetry.getLongitude()
+                    : equipament.getEquipament1().getCompany().getAddress().getLongitude();
+
+            LatLng startLocation = LatLng.newBuilder()
+                    .setLatitude(Double.parseDouble(latStr))
+                    .setLongitude(Double.parseDouble(lngStr))
+                    .build();
+
+            com.google.cloud.optimization.v1.Vehicle.Builder vehicleBuilder = com.google.cloud.optimization.v1.Vehicle.newBuilder()
+                    .setLabel(equipament.getEquipament1().getPlate())
+                    .setStartLocation(startLocation)
+                    .setCostPerKilometer(tractor.getCostPerKilometer() * settings.kmCostMultiplier())
+                    .setCostPerHour(driver.getCostPerHour() * settings.hourCostMultiplier());
+
+            if (settings.fixedCostPerVehicle() > 0) {
+                vehicleBuilder.setFixedCost(settings.fixedCostPerVehicle());
+            }
+            if (settings.costPerTraveledHour() > 0) {
+                vehicleBuilder.setCostPerTraveledHour(settings.costPerTraveledHour());
+            }
+
+            // Janelas de tempo do veículo
             LocalDate today = LocalDate.now();
             LocalDate validUntil = workSchedule.getScheduleDate();
-
-            List<TimeWindow> startWindows = new ArrayList<>();
-            List<TimeWindow> endWindows = new ArrayList<>();
-
             for (LocalDate date = today; !date.isAfter(validUntil); date = date.plusDays(1)) {
                 OffsetDateTime start = date.atTime(workSchedule.getStartWorkday()).atOffset(offset);
                 OffsetDateTime end = date.atTime(workSchedule.getEndWorkday()).atOffset(offset);
-                if (end.isBefore(start)) end = end.plusDays(1); // turno noturno
+                if (end.isBefore(start)) end = end.plusDays(1);
 
-                startWindows.add(new TimeWindow(
-                        start.format(formatter),
-                        end.minusHours(settings.vehicleStartWindowLeadHours()).format(formatter)
-                ));
-                endWindows.add(new TimeWindow(
-                        end.format(formatter),
-                        end.plusHours(settings.vehicleEndWindowMarginHours()).format(formatter)
-                ));
+                Instant startInstant = start.toInstant();
+                Instant endMinusLead = end.minusHours(settings.vehicleStartWindowLeadHours()).toInstant();
+
+                vehicleBuilder.addStartTimeWindows(TimeWindow.newBuilder()
+                        .setStartTime(Timestamp.newBuilder().setSeconds(startInstant.getEpochSecond()).setNanos(startInstant.getNano()))
+                        .setEndTime(Timestamp.newBuilder().setSeconds(endMinusLead.getEpochSecond()).setNanos(endMinusLead.getNano()))
+                        .build());
+
+                Instant endInstant = end.toInstant();
+                Instant endPlusMargin = end.plusHours(settings.vehicleEndWindowMarginHours()).toInstant();
+
+                vehicleBuilder.addEndTimeWindows(TimeWindow.newBuilder()
+                        .setStartTime(Timestamp.newBuilder().setSeconds(endInstant.getEpochSecond()).setNanos(endInstant.getNano()))
+                        .setEndTime(Timestamp.newBuilder().setSeconds(endPlusMargin.getEpochSecond()).setNanos(endPlusMargin.getNano()))
+                        .build());
             }
 
-            // Resolução dinâmica de capacidades (peso, volume, paletes, etc.) com fallback
-            Map<String, LoadLimit> vehicleLimits = configResolver.resolveVehicleLoadLimits(equipament);
+            // Capacidades do veículo
+            var vehicleLimits = configResolver.resolveVehicleLoadLimits(equipament);
+            for (var entry : vehicleLimits.entrySet()) {
+                long max = entry.getValue().maxLoad() != null ? Long.parseLong(entry.getValue().maxLoad()) : 0L;
+                vehicleBuilder.putLoadLimits(entry.getKey(), com.google.cloud.optimization.v1.Vehicle.LoadLimit.newBuilder()
+                        .setMaxLoad(max)
+                        .build());
+            }
 
-            vehicles.add(new Vehicle(
-                    equipament.getEquipament1().getPlate(),
-                    new Location(
-                            telemetry != null && !telemetry.getLatitude().isEmpty() ? telemetry.getLatitude() : equipament.getEquipament1().getCompany().getAddress().getLatitude(),
-                            telemetry != null && !telemetry.getLongitude().isEmpty() ? telemetry.getLongitude() : equipament.getEquipament1().getCompany().getAddress().getLongitude()
-                    ),
-                    new LoadLimits(vehicleLimits),
-                    startWindows,
-                    endWindows,
-                    tractor.getCostPerKilometer() * settings.kmCostMultiplier(),
-                    driver.getCostPerHour() * settings.hourCostMultiplier(),
-                    settings.fixedCostPerVehicle() > 0 ? settings.fixedCostPerVehicle() : null,
-                    settings.costPerTraveledHour() > 0 ? settings.costPerTraveledHour() : null,
-                    null
-            ));
+            shipmentModelBuilder.addVehicles(vehicleBuilder.build());
         }
 
-        List<RouteShipment> shipments = new ArrayList<>();
+        // 2. Montagem dos Shipments
         for (Shipment collect : collects) {
             List<Shipment> deliveries = shipmentRepository.findByOperationOrigem(collect);
 
@@ -162,15 +158,18 @@ public class RouteRequestService {
                 collectVisitTypes.addAll(collect.getVisitTypes().stream().map(VisitType::getCode).toList());
             }
 
-            Stop pickupStop = new Stop(
-                    new Location(collect.getAddress().getLatitude(), collect.getAddress().getLongitude()),
-                    stopDurationStr,
-                    List.of(new TimeWindow(
-                            collect.getSchedulind().minusMinutes(settings.timeWindowLeadMinutes()).atOffset(offset).format(formatter),
-                            collect.getSchedulind().atOffset(offset).format(formatter)
-                    )),
-                    collectVisitTypes.isEmpty() ? null : collectVisitTypes
-            );
+            LatLng pickupLocation = LatLng.newBuilder()
+                    .setLatitude(Double.parseDouble(collect.getAddress().getLatitude()))
+                    .setLongitude(Double.parseDouble(collect.getAddress().getLongitude()))
+                    .build();
+
+            Instant collectInstant = collect.getSchedulind().atOffset(offset).toInstant();
+            Instant collectMinusLead = collect.getSchedulind().minusMinutes(settings.timeWindowLeadMinutes()).atOffset(offset).toInstant();
+
+            TimeWindow pickupWindow = TimeWindow.newBuilder()
+                    .setStartTime(Timestamp.newBuilder().setSeconds(collectMinusLead.getEpochSecond()).setNanos(collectMinusLead.getNano()))
+                    .setEndTime(Timestamp.newBuilder().setSeconds(collectInstant.getEpochSecond()).setNanos(collectInstant.getNano()))
+                    .build();
 
             for (Shipment delivery : deliveries) {
                 List<String> deliveryVisitTypes = new ArrayList<>();
@@ -181,36 +180,58 @@ public class RouteRequestService {
                     deliveryVisitTypes.addAll(delivery.getVisitTypes().stream().map(VisitType::getCode).toList());
                 }
 
-                Stop deliveryStop = new Stop(
-                        new Location(delivery.getAddress().getLatitude(), delivery.getAddress().getLongitude()),
-                        stopDurationStr,
-                        List.of(new TimeWindow(
-                                delivery.getSchedulind().minusMinutes(settings.timeWindowLeadMinutes()).atOffset(offset).format(formatter),
-                                delivery.getSchedulind().atOffset(offset).format(formatter)
-                        )),
-                        deliveryVisitTypes.isEmpty() ? null : deliveryVisitTypes
-                );
+                LatLng deliveryLocation = LatLng.newBuilder()
+                        .setLatitude(Double.parseDouble(delivery.getAddress().getLatitude()))
+                        .setLongitude(Double.parseDouble(delivery.getAddress().getLongitude()))
+                        .build();
 
-                // Resolução dinâmica de demandas de carga (peso, volume, paletes...) com fallback
-                Map<String, LoadDemand> deliveryDemands = configResolver.resolveShipmentLoadDemands(delivery);
+                Instant deliveryInstant = delivery.getSchedulind().atOffset(offset).toInstant();
+                Instant deliveryMinusLead = delivery.getSchedulind().minusMinutes(settings.timeWindowLeadMinutes()).atOffset(offset).toInstant();
 
-                List<PickupRequest> pickups = List.of(
-                        new PickupRequest(pickupStop, new LoadDemands(deliveryDemands))
-                );
+                TimeWindow deliveryWindow = TimeWindow.newBuilder()
+                        .setStartTime(Timestamp.newBuilder().setSeconds(deliveryMinusLead.getEpochSecond()).setNanos(deliveryMinusLead.getNano()))
+                        .setEndTime(Timestamp.newBuilder().setSeconds(deliveryInstant.getEpochSecond()).setNanos(deliveryInstant.getNano()))
+                        .build();
 
-                List<DeliveryRequest> deliveryRequests = List.of(
-                        new DeliveryRequest(deliveryStop, new LoadDemands(deliveryDemands))
-                );
+                var deliveryDemands = configResolver.resolveShipmentLoadDemands(delivery);
+                Map<String, com.google.cloud.optimization.v1.Shipment.Load> protoDemands = new HashMap<>();
+                for (var demandEntry : deliveryDemands.entrySet()) {
+                    long amount = demandEntry.getValue().amount() != null ? Long.parseLong(demandEntry.getValue().amount()) : 0L;
+                    protoDemands.put(demandEntry.getKey(), com.google.cloud.optimization.v1.Shipment.Load.newBuilder()
+                            .setAmount(amount)
+                            .build());
+                }
 
-                shipments.add(new RouteShipment(
-                        collect.getId().toString() + "/" + delivery.getId().toString(),
-                        pickups,
-                        deliveryRequests,
-                        settings.penaltyCostUnserved()
-                ));
+                com.google.cloud.optimization.v1.Shipment.VisitRequest.Builder pickupReqBuilder = com.google.cloud.optimization.v1.Shipment.VisitRequest.newBuilder()
+                        .setArrivalLocation(pickupLocation)
+                        .setDuration(stopDuration)
+                        .addTimeWindows(pickupWindow)
+                        .putAllLoadDemands(protoDemands);
+                if (!collectVisitTypes.isEmpty()) {
+                    pickupReqBuilder.addAllVisitTypes(collectVisitTypes);
+                }
+
+                com.google.cloud.optimization.v1.Shipment.VisitRequest.Builder deliveryReqBuilder = com.google.cloud.optimization.v1.Shipment.VisitRequest.newBuilder()
+                        .setArrivalLocation(deliveryLocation)
+                        .setDuration(stopDuration)
+                        .addTimeWindows(deliveryWindow)
+                        .putAllLoadDemands(protoDemands);
+                if (!deliveryVisitTypes.isEmpty()) {
+                    deliveryReqBuilder.addAllVisitTypes(deliveryVisitTypes);
+                }
+
+                com.google.cloud.optimization.v1.Shipment protoShipment = com.google.cloud.optimization.v1.Shipment.newBuilder()
+                        .setLabel(collect.getId().toString() + "/" + delivery.getId().toString())
+                        .addPickups(pickupReqBuilder.build())
+                        .addDeliveries(deliveryReqBuilder.build())
+                        .setPenaltyCost(settings.penaltyCostUnserved())
+                        .build();
+
+                shipmentModelBuilder.addShipments(protoShipment);
             }
         }
 
+        // Horizonte Global
         LocalDate maxValidUntil = LocalDate.now();
         for (WorkSchedule workSchedule : workSchedules) {
             if (workSchedule.getScheduleDate().isAfter(maxValidUntil)) {
@@ -218,39 +239,37 @@ public class RouteRequestService {
             }
         }
 
-        OffsetDateTime globalStart = LocalDate.now().atStartOfDay().atOffset(offset);
-        OffsetDateTime globalEnd = maxValidUntil.plusDays(settings.globalHorizonExtraDays()).atStartOfDay().atOffset(offset);
+        Instant globalStartInstant = LocalDate.now().atStartOfDay().atOffset(offset).toInstant();
+        Instant globalEndInstant = maxValidUntil.plusDays(settings.globalHorizonExtraDays()).atStartOfDay().atOffset(offset).toInstant();
 
-        String globalStartTime = globalStart.format(formatter);
-        String globalEndTime = globalEnd.format(formatter);
+        shipmentModelBuilder.setGlobalStartTime(Timestamp.newBuilder()
+                .setSeconds(globalStartInstant.getEpochSecond())
+                .setNanos(globalStartInstant.getNano()));
+        shipmentModelBuilder.setGlobalEndTime(Timestamp.newBuilder()
+                .setSeconds(globalEndInstant.getEpochSecond())
+                .setNanos(globalEndInstant.getNano()));
 
-        // Regras de incompatibilidade morfológica cadastradas no banco
-        List<ShipmentTypeIncompatibility> incompatibilities = null;
+        // Incompatibilidades de Tipos
         if (company != null && company.getId() != null) {
             List<VisitTypeRule> rules = visitTypeRuleRepository.findAvailableByCompanyId(company.getId());
-            List<ShipmentTypeIncompatibility> mappedIncompatibilities = new ArrayList<>();
             for (VisitTypeRule rule : rules) {
                 if (rule.getRuleType() == VisitTypeRuleType.INCOMPATIBLE_ON_SAME_VEHICLE) {
-                    mappedIncompatibilities.add(new ShipmentTypeIncompatibility(
-                            List.of(rule.getVisitType1().getCode(), rule.getVisitType2().getCode()),
-                            ShipmentTypeIncompatibility.NOT_PERFORMED_BY_SAME_VEHICLE
-                    ));
+                    shipmentModelBuilder.addShipmentTypeIncompatibilities(com.google.cloud.optimization.v1.ShipmentTypeIncompatibility.newBuilder()
+                            .addTypes(rule.getVisitType1().getCode())
+                            .addTypes(rule.getVisitType2().getCode())
+                            .setIncompatibilityMode(com.google.cloud.optimization.v1.ShipmentTypeIncompatibility.IncompatibilityMode.NOT_PERFORMED_BY_SAME_VEHICLE)
+                            .build());
                 }
-            }
-            if (!mappedIncompatibilities.isEmpty()) {
-                incompatibilities = mappedIncompatibilities;
             }
         }
 
-        Model model = new Model(
-                vehicles,
-                shipments,
-                globalStartTime,
-                globalEndTime,
-                incompatibilities
-        );
+        OptimizeToursRequest request = OptimizeToursRequest.newBuilder()
+                .setParent("projects/" + routeOptimizationClient.getProjectId())
+                .setModel(shipmentModelBuilder.build())
+                .setPopulatePolylines(true)
+                .setPopulateTransitionPolylines(true)
+                .build();
 
-        RouteOptimizationRequest request = new RouteOptimizationRequest(model, true, true);
-        return routeOptimizationClient.fetchOptimizedRoute(request);
+        return routeOptimizationClient.optimizeTours(request);
     }
 }

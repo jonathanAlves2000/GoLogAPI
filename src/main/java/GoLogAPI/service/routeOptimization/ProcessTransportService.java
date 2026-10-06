@@ -1,32 +1,20 @@
 package GoLogAPI.service.routeOptimization;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
+import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.model.*;
+import GoLogAPI.model.enums.RoutePriority;
+import GoLogAPI.model.enums.WorkScheduleStatus;
+import GoLogAPI.repository.*;
+import GoLogAPI.service.MessageException;
+import com.google.cloud.optimization.v1.ShipmentRoute;
+import com.google.maps.model.LatLng;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.maps.model.LatLng;
-
-import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
-import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
-import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
-import GoLogAPI.exception.ResourceNotFoundException;
-import GoLogAPI.model.Company;
-import GoLogAPI.model.Driver;
-import GoLogAPI.model.Equipament;
-import GoLogAPI.model.EquipamentGroup;
-import GoLogAPI.model.Transport;
-import GoLogAPI.model.WorkSchedule;
-import GoLogAPI.model.enums.RoutePriority;
-import GoLogAPI.model.enums.WorkScheduleStatus;
-import GoLogAPI.repository.CompanyRepository;
-import GoLogAPI.repository.EquipamentGroupRepository;
-import GoLogAPI.repository.EquipamentRepository;
-import GoLogAPI.repository.TransportRepository;
-import GoLogAPI.repository.WorkScheduleRepository;
-import GoLogAPI.service.MessageException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -39,9 +27,13 @@ public class ProcessTransportService {
     private final WorkScheduleRepository workScheduleRepository;
     private final OptimizationConfigResolver configResolver;
 
-    public ProcessTransportService(TransportRepository transportRepository, EquipamentGroupRepository equipamentGroupRepository, EquipamentRepository equipamentRepository,
-                                   CompanyRepository companyRepository, WorkScheduleRepository workScheduleRepository,
-                                   OptimizationConfigResolver configResolver) {
+    public ProcessTransportService(
+            TransportRepository transportRepository,
+            EquipamentGroupRepository equipamentGroupRepository,
+            EquipamentRepository equipamentRepository,
+            CompanyRepository companyRepository,
+            WorkScheduleRepository workScheduleRepository,
+            OptimizationConfigResolver configResolver) {
         this.transportRepository = transportRepository;
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.equipamentRepository = equipamentRepository;
@@ -51,18 +43,18 @@ public class ProcessTransportService {
     }
 
     @Transactional
-    public Transport processTransport(ApiVehicleRoute vehicleRoute, RoutePriority routePriority) {
+    public Transport processTransport(ShipmentRoute vehicleRoute, RoutePriority routePriority) {
         return processTransport(vehicleRoute, new OptimizeRouteRequest(null, null, routePriority));
     }
 
     @Transactional
-    public Transport processTransport(ApiVehicleRoute vehicleRoute, OptimizeRouteRequest optimizeRouteRequest) {
+    public Transport processTransport(ShipmentRoute vehicleRoute, OptimizeRouteRequest optimizeRouteRequest) {
 
-        if (vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty()) {
+        if (vehicleRoute.getVisitsList().isEmpty()) {
             return null;
         }
 
-        String vehicleLabel = vehicleRoute.vehicleLabel();
+        String vehicleLabel = vehicleRoute.getVehicleLabel();
 
         Equipament equipament = equipamentRepository.findByPlate(vehicleLabel)
                 .orElseThrow(() -> new RuntimeException("Placa: " + vehicleLabel + " não encontrada"));
@@ -77,38 +69,28 @@ public class ProcessTransportService {
                 .orElse(new Transport());
 
         WorkSchedule workSchedule = workScheduleRepository.findByEquipamentGroupId(equipamentGroup.getId());
-        Driver driver = null;
-        driver = workSchedule.getDriver();
+        Driver driver = workSchedule.getDriver();
         workSchedule.setStatus(WorkScheduleStatus.EM_OPERACAO);
         workScheduleRepository.save(workSchedule);
 
-        Integer totalDistance = vehicleRoute.metrics().travelDistanceMeters();
-
-        Integer visitDuration = vehicleRoute.metrics().visitDuration() != null ?
-                parseApiRouteDuration(vehicleRoute.metrics().visitDuration()) : 0;
-
-        Integer travelDuration = vehicleRoute.metrics().travelDuration() != null ?
-                parseApiRouteDuration(vehicleRoute.metrics().travelDuration()) : 0;
-
-        Integer totalDuration = vehicleRoute.metrics().totalDuration() != null ?
-                parseApiRouteDuration(vehicleRoute.metrics().totalDuration()) : 0;
-
-        Integer operationalDuration = visitDuration + travelDuration;
-        Integer operarionDurationHour = operationalDuration / 3600;
-
-        Integer totalWait = vehicleRoute.metrics().waitDuration() != null ?
-                parseApiRouteDuration(vehicleRoute.metrics().waitDuration().toString()) : 0;
+        var metrics = vehicleRoute.getMetrics();
+        int totalDistance = (int) metrics.getTravelDistanceMeters();
+        int visitDuration = (int) metrics.getVisitDuration().getSeconds();
+        int travelDuration = (int) metrics.getTravelDuration().getSeconds();
+        int operationalDuration = visitDuration + travelDuration;
+        int operationDurationHour = operationalDuration / 3600;
+        int totalWait = (int) metrics.getWaitDuration().getSeconds();
 
         OptimizationConfigResolver.ResolvedOptimizationSettings settings = configResolver.resolveSettings(optimizeRouteRequest, company);
         double kmMultiplier = settings.kmCostMultiplier() > 0 ? settings.kmCostMultiplier() : 1.0;
 
-        Map<String, Double> routeCosts = vehicleRoute.routeCosts();
+        Map<String, Double> routeCosts = metrics.getCostsMap();
         Double costKmMultiplied = routeCosts.get("model.vehicles.cost_per_kilometer");
         Double costKmCalculated = costKmMultiplied != null ? costKmMultiplied / kmMultiplier : 0.0;
-        Double costHourCalculated = operarionDurationHour * driver.getCostPerHour();
+        Double costHourCalculated = operationDurationHour * driver.getCostPerHour();
         Double custoTotalCalculated = costKmCalculated + costHourCalculated + settings.fixedCostPerVehicle();
 
-        transport.setShipmentQuantity(vehicleRoute.visits().size());
+        transport.setShipmentQuantity(vehicleRoute.getVisitsCount());
         transport.setCalculedDistance(totalDistance);
         transport.setTravelDuration(travelDuration);
         transport.setTotalTimeCalculed(operationalDuration);
@@ -121,14 +103,11 @@ public class ProcessTransportService {
         transport.setDriver(driver);
 
         List<LatLng> totalRoutePoints = new ArrayList<>();
-
-        if (vehicleRoute.transitions() != null) {
-            for (ApiRouteTransition transition : vehicleRoute.transitions()) {
-                if (transition.routePolyline() != null && transition.routePolyline().points() != null) {
-                    List<LatLng> points = OptimizeListLocation.procesingRouteGoogle(transition.routePolyline().points());
-                    if (points != null) {
-                        totalRoutePoints.addAll(points);
-                    }
+        for (ShipmentRoute.Transition transition : vehicleRoute.getTransitionsList()) {
+            if (transition.hasRoutePolyline() && !transition.getRoutePolyline().getPoints().isEmpty()) {
+                List<LatLng> points = OptimizeListLocation.procesingRouteGoogle(transition.getRoutePolyline().getPoints());
+                if (points != null) {
+                    totalRoutePoints.addAll(points);
                 }
             }
         }
@@ -139,14 +118,5 @@ public class ProcessTransportService {
         }
 
         return transportRepository.save(transport);
-    }
-
-    private Integer parseApiRouteDuration(String durationStr) {
-        if (durationStr == null || durationStr.isEmpty()) {
-            return 0;
-        }
-        String number = durationStr.replace("s", "");
-
-        return Integer.parseInt(number);
     }
 }
