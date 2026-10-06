@@ -9,6 +9,7 @@ import GoLogAPI.model.enums.TypeOperation;
 import GoLogAPI.model.enums.VisitTypeRuleType;
 import GoLogAPI.repository.*;
 import GoLogAPI.service.MessageException;
+import com.google.cloud.optimization.v1.BreakRule;
 import com.google.cloud.optimization.v1.OptimizeToursRequest;
 import com.google.cloud.optimization.v1.OptimizeToursResponse;
 import com.google.cloud.optimization.v1.ShipmentModel;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -141,6 +143,64 @@ public class RouteRequestService {
                 vehicleBuilder.putLoadLimits(entry.getKey(), com.google.cloud.optimization.v1.Vehicle.LoadLimit.newBuilder()
                         .setMaxLoad(max)
                         .build());
+            }
+
+            // Regras de Jornada e Intervalos do Motorista (Lei nº 13.103 / Intervalos Flexíveis)
+            BreakRule.Builder breakRuleBuilder = BreakRule.newBuilder();
+
+            // 1. Descanso periódico obrigatório da Lei do Motorista (máx horas ininterruptas de direção)
+            if (workSchedule.getMaxDrivingHoursWithoutBreak() != null && workSchedule.getMaxDrivingHoursWithoutBreak() > 0) {
+                long maxDrivingSecs = workSchedule.getMaxDrivingHoursWithoutBreak() * 3600L;
+                long minDrivingBreakSecs = (workSchedule.getMinDrivingBreakMinutes() != null && workSchedule.getMinDrivingBreakMinutes() > 0)
+                        ? workSchedule.getMinDrivingBreakMinutes() * 60L
+                        : 1800L; // 30 minutos
+
+                breakRuleBuilder.addFrequencyConstraints(BreakRule.FrequencyConstraint.newBuilder()
+                        .setMaxInterBreakDuration(Duration.newBuilder().setSeconds(maxDrivingSecs).build())
+                        .setMinBreakDuration(Duration.newBuilder().setSeconds(minDrivingBreakSecs).build())
+                        .build());
+            }
+
+            // 2. Janelas de refeição / intervalo principal
+            Integer breakDuration = workSchedule.getBreakDurationMinutes();
+            if (breakDuration != null && breakDuration > 0) {
+                for (LocalDate date = today; !date.isAfter(validUntil); date = date.plusDays(1)) {
+                    LocalTime earliest = workSchedule.getEarliestBreakTime();
+                    LocalTime latest = workSchedule.getLatestBreakTime();
+
+                    OffsetDateTime earliestDt;
+                    OffsetDateTime latestDt;
+
+                    if (earliest != null && latest != null) {
+                        earliestDt = date.atTime(earliest).atOffset(offset);
+                        latestDt = date.atTime(latest).atOffset(offset);
+                        if (latestDt.isBefore(earliestDt)) {
+                            latestDt = latestDt.plusDays(1);
+                        }
+                    } else {
+                        // Calcula meio do turno como janela aproximada caso horários específicos não tenham sido definidos
+                        LocalTime startWork = workSchedule.getStartWorkday();
+                        LocalTime endWork = workSchedule.getEndWorkday();
+                        long shiftSecs = java.time.Duration.between(startWork, endWork.isBefore(startWork) ? endWork.plusHours(24) : endWork).getSeconds();
+                        long midSecs = shiftSecs / 2;
+                        OffsetDateTime midShift = date.atTime(startWork).atOffset(offset).plusSeconds(midSecs);
+                        earliestDt = midShift.minusMinutes(60);
+                        latestDt = midShift.plusMinutes(60);
+                    }
+
+                    Instant earliestInstant = earliestDt.toInstant();
+                    Instant latestInstant = latestDt.toInstant();
+
+                    breakRuleBuilder.addBreakRequests(BreakRule.BreakRequest.newBuilder()
+                            .setEarliestStartTime(Timestamp.newBuilder().setSeconds(earliestInstant.getEpochSecond()).setNanos(earliestInstant.getNano()).build())
+                            .setLatestStartTime(Timestamp.newBuilder().setSeconds(latestInstant.getEpochSecond()).setNanos(latestInstant.getNano()).build())
+                            .setMinDuration(Duration.newBuilder().setSeconds(breakDuration * 60L).build())
+                            .build());
+                }
+            }
+
+            if (breakRuleBuilder.getBreakRequestsCount() > 0 || breakRuleBuilder.getFrequencyConstraintsCount() > 0) {
+                vehicleBuilder.setBreakRule(breakRuleBuilder.build());
             }
 
             shipmentModelBuilder.addVehicles(vehicleBuilder.build());

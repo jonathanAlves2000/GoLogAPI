@@ -18,5 +18,11 @@ public record WorkSheduleResponses(
         LocalTime startWorkday,
         LocalTime endWorkday,
         Double costPerHour,
-        WorkScheduleStatus status
+        WorkScheduleStatus status,
+        GoLogAPI.model.WorkShiftTemplate shiftTemplate,
+        Integer breakDurationMinutes,
+        LocalTime earliestBreakTime,
+        LocalTime latestBreakTime,
+        Integer maxDrivingHoursWithoutBreak,
+        Integer minDrivingBreakMinutes
 ) { }

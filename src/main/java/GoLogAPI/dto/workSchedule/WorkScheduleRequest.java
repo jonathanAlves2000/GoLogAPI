@@ -15,4 +15,11 @@ public interface WorkScheduleRequest {
     LocalTime startWorkday();
     LocalTime endWorkday();
 
+    UUID shiftTemplateId();
+    Integer breakDurationMinutes();
+    LocalTime earliestBreakTime();
+    LocalTime latestBreakTime();
+    Integer maxDrivingHoursWithoutBreak();
+    Integer minDrivingBreakMinutes();
+
 }
