@@ -42,4 +42,9 @@ public class TypeTransport extends Audit{
 
     @Column(name = "care", nullable = false, columnDefinition = "text")
     String care;
+
+    @jakarta.persistence.ManyToOne
+    @jakarta.persistence.JoinColumn(name = "company_id")
+    @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
+    Company company;
 }

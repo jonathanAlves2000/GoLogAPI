@@ -46,4 +46,8 @@ public class WorkSchedule extends Audit {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private WorkScheduleStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 }

@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/occurrence")
-@Tag(name = "Ocorrência")
+@Tag(name = "Ocorrências & Telemetria")
 public class OccurrenceController {
 
     private final OccurrenceService occurrenceService;

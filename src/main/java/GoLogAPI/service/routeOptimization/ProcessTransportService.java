@@ -11,6 +11,7 @@ import com.google.maps.model.LatLng;
 
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
+import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.model.Company;
 import GoLogAPI.model.Driver;
@@ -36,18 +37,26 @@ public class ProcessTransportService {
     private final EquipamentRepository equipamentRepository;
     private final CompanyRepository companyRepository;
     private final WorkScheduleRepository workScheduleRepository;
+    private final OptimizationConfigResolver configResolver;
 
     public ProcessTransportService(TransportRepository transportRepository, EquipamentGroupRepository equipamentGroupRepository, EquipamentRepository equipamentRepository,
-                                   CompanyRepository companyRepository, WorkScheduleRepository workScheduleRepository) {
+                                   CompanyRepository companyRepository, WorkScheduleRepository workScheduleRepository,
+                                   OptimizationConfigResolver configResolver) {
         this.transportRepository = transportRepository;
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.equipamentRepository = equipamentRepository;
         this.companyRepository = companyRepository;
         this.workScheduleRepository = workScheduleRepository;
+        this.configResolver = configResolver;
     }
 
     @Transactional
     public Transport processTransport(ApiVehicleRoute vehicleRoute, RoutePriority routePriority) {
+        return processTransport(vehicleRoute, new OptimizeRouteRequest(null, null, routePriority));
+    }
+
+    @Transactional
+    public Transport processTransport(ApiVehicleRoute vehicleRoute, OptimizeRouteRequest optimizeRouteRequest) {
 
         if (vehicleRoute.visits() == null || vehicleRoute.visits().isEmpty()) {
             return null;
@@ -90,16 +99,14 @@ public class ProcessTransportService {
         Integer totalWait = vehicleRoute.metrics().waitDuration() != null ?
                 parseApiRouteDuration(vehicleRoute.metrics().waitDuration().toString()) : 0;
 
-        double kmMultiplier = switch (routePriority) {
-            case ECONOMIA -> 1;
-            case TEMPO -> 0.1;
-        };
+        OptimizationConfigResolver.ResolvedOptimizationSettings settings = configResolver.resolveSettings(optimizeRouteRequest, company);
+        double kmMultiplier = settings.kmCostMultiplier() > 0 ? settings.kmCostMultiplier() : 1.0;
 
         Map<String, Double> routeCosts = vehicleRoute.routeCosts();
         Double costKmMultiplied = routeCosts.get("model.vehicles.cost_per_kilometer");
         Double costKmCalculated = costKmMultiplied != null ? costKmMultiplied / kmMultiplier : 0.0;
         Double costHourCalculated = operarionDurationHour * driver.getCostPerHour();
-        Double custoTotalCalculated = costKmCalculated + costHourCalculated;
+        Double custoTotalCalculated = costKmCalculated + costHourCalculated + settings.fixedCostPerVehicle();
 
         transport.setShipmentQuantity(vehicleRoute.visits().size());
         transport.setCalculedDistance(totalDistance);

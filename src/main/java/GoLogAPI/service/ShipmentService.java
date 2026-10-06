@@ -3,6 +3,7 @@ package GoLogAPI.service;
 import GoLogAPI.dto.shipment.*;
 import GoLogAPI.dto.shipment.ShipmentResponseList;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.model.*;
 import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.*;
@@ -62,6 +63,14 @@ public class ShipmentService {
         Company customer = companyRepository.findById(shipmentCreateRequest.customerId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentCreateRequest.customerId()));
 
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        Company company = null;
+        if (currentTenant != null) {
+            company = companyRepository.findById(currentTenant).orElse(null);
+        } else if (user.getCompany() != null) {
+            company = user.getCompany();
+        }
+
         Shipment.ShipmentBuilder shipmentBuilder = Shipment.builder()
                 .weight(shipmentCreateRequest.weight())
                 .typeOperation(shipmentCreateRequest.typeOperation())
@@ -72,7 +81,8 @@ public class ShipmentService {
                 .shipmentType(shipmentType)
                 .address(shipmentAddress)
                 .typeTransport(typeTransport)
-                .customer(customer);
+                .customer(customer)
+                .company(company);
 
         if(shipmentCreateRequest.operationOrigemId() != null) {
             Shipment operationOrigem = shipmentRepository.findById(shipmentCreateRequest.operationOrigemId())
@@ -138,7 +148,11 @@ public class ShipmentService {
     }
 
     public List<ShipmentResponseList> getAll(){
-        List<Shipment> shipments = shipmentRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Shipment> shipments = (currentTenant != null)
+                ? shipmentRepository.findByCompanyId(currentTenant)
+                : shipmentRepository.findAll();
+
         return shipments.stream()
                 .map(shipment -> new ShipmentResponseList(
                         shipment.getId(),
@@ -158,7 +172,10 @@ public class ShipmentService {
     }
 
     public List<ShipmentResponseList> getByStatus(ShipmentStatus status){
-        List<Shipment> shipments = shipmentRepository.findByStatus(status);
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Shipment> shipments = (currentTenant != null)
+                ? shipmentRepository.findByCompanyIdAndStatus(currentTenant, status)
+                : shipmentRepository.findByStatus(status);
 
         return shipments.stream()
                 .map(shipment -> new ShipmentResponseList(
@@ -178,7 +195,8 @@ public class ShipmentService {
     }
 
     public List<ShipmentResponseListPersonalized> getAllWithQuery() {
-        List<Object[]> results = shipmentRepository.findAllShipmentsWithRoutesAndTransportMandatory();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Object[]> results = shipmentRepository.findAllShipmentsWithRoutesAndTransportMandatoryByCompanyId(currentTenant);
 
         return results.stream()
                 .map(result -> {

@@ -4,6 +4,7 @@ import GoLogAPI.dto.tractor.TractorCreateRequest;
 import GoLogAPI.dto.tractor.TractorUpdateRequest;
 import GoLogAPI.dto.tractor.TractorResponse;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.TractorMapper;
 import GoLogAPI.model.Company;
 import GoLogAPI.model.Tractor;
@@ -68,7 +69,10 @@ public class TractorService {
     }
 
     public List<TractorResponse> getAll() {
-        List<Tractor> tractors = tractorRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Tractor> tractors = (currentTenant != null)
+                ? tractorRepository.findByCompanyId(currentTenant)
+                : tractorRepository.findAll();
         return tractorMapper.toResponses(tractors);
     }
 

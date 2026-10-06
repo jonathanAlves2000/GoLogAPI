@@ -3,6 +3,8 @@ package GoLogAPI.service;
 import GoLogAPI.dto.workSchedule.WorkSheduleCreateRequest;
 import GoLogAPI.dto.workSchedule.WorkSheduleResponses;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
+import GoLogAPI.model.Company;
 import GoLogAPI.model.Driver;
 import GoLogAPI.model.EquipamentGroup;
 import GoLogAPI.model.WorkSchedule;
@@ -46,9 +48,14 @@ public class WorkScheduleService {
         Driver driver = driverRepository.findById(workSheduleCreateRequest.driverId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, workSheduleCreateRequest.driverId()));
 
+        Company company = equipamentGroup.getCompany() != null
+                ? equipamentGroup.getCompany()
+                : (driver.getUser() != null ? driver.getUser().getCompany() : null);
+
         WorkSchedule workSchedule = WorkSchedule.builder()
                 .driver(driver)
                 .equipamentGroup(equipamentGroup)
+                .company(company)
                 .scheduleDate(workSheduleCreateRequest.scheduleDate())
                 .startWorkday(workSheduleCreateRequest.startWorkday())
                 .endWorkday(workSheduleCreateRequest.endWorkday())
@@ -59,7 +66,10 @@ public class WorkScheduleService {
     }
 
     public List<WorkSheduleResponses> getAll(){
-        List<WorkSchedule> workSchedules = workScheduleRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<WorkSchedule> workSchedules = (currentTenant != null)
+                ? workScheduleRepository.findByCompanyId(currentTenant)
+                : workScheduleRepository.findAll();
 
         return workSchedules.stream()
                 .map(workSchedule -> new WorkSheduleResponses(

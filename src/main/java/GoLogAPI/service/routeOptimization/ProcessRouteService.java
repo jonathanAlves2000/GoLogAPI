@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteOptimizationResponse;
+import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
 import GoLogAPI.model.enums.RoutePriority;
 
 @Service
@@ -23,6 +24,10 @@ public class ProcessRouteService {
     }
 
     public void processRoute(String routeResponseString, RoutePriority optimizeRouteRequest) {
+        processRoute(routeResponseString, new OptimizeRouteRequest(null, null, optimizeRouteRequest));
+    }
+
+    public void processRoute(String routeResponseString, OptimizeRouteRequest optimizeRouteRequest) {
 
         try {
             ApiRouteOptimizationResponse routeResponseObject = objectMapper.readValue(

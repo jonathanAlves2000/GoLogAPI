@@ -54,4 +54,9 @@ public class Occurrence extends Audit {
     @JoinColumn(name = "sender_id", nullable = false)
     @NotFound(action = NotFoundAction.IGNORE)
     private User sender;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Company company;
 }

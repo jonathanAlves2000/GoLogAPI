@@ -27,7 +27,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/address")
-@Tag(name = "Endereço")
+@Tag(name = "Endereços & Coordenadas")
 public class AddressController {
 
     private final AddressService addressService;

@@ -1,5 +1,6 @@
 package GoLogAPI.dto.user;
 
+import GoLogAPI.dto.company.CompanyResponse;
 import GoLogAPI.model.UserProfile;
 
 import java.util.UUID;
@@ -10,5 +11,6 @@ public record UserResponseList(
         String email,
         String password,
         String cpf,
-        UserProfile userProfile
+        UserProfile userProfile,
+        CompanyResponse company
 ) { }

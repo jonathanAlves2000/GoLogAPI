@@ -2,6 +2,7 @@ package GoLogAPI.service;
 
 import GoLogAPI.dto.occurrence.*;
 import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.OccurrenceMapper;
 import GoLogAPI.model.*;
 import GoLogAPI.model.enums.ShipmentStatus;
@@ -60,6 +61,11 @@ public class OccurrenceService {
         occurrence.setTransport(transport);
         occurrence.setSender(sender);
 
+        Company company = transport.getTransporter() != null
+                ? transport.getTransporter()
+                : (shipment.getCompany() != null ? shipment.getCompany() : sender.getCompany());
+        occurrence.setCompany(company);
+
         occurrenceRepository.save(occurrence);
 
         return occurrenceMapper.toCreateResponse(occurrence);
@@ -73,7 +79,10 @@ public class OccurrenceService {
     }
 
     public List<OccurrenceResponseList> getAll(){
-        List<Occurrence> occurrences = occurrenceRepository.findAll();
+        UUID currentTenant = TenantContext.getCurrentTenantId();
+        List<Occurrence> occurrences = (currentTenant != null)
+                ? occurrenceRepository.findByCompanyId(currentTenant)
+                : occurrenceRepository.findAll();
         return occurrenceMapper.toResponseList(occurrences);
     }
 

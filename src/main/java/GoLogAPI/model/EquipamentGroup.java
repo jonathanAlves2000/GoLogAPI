@@ -1,5 +1,6 @@
 package GoLogAPI.model;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -63,6 +64,11 @@ public class EquipamentGroup extends Audit{
     @Column(name = "status", nullable = false)
     private EquipamentGroupStatus status;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Company company;
+
     @ManyToMany
     @JoinTable(
             name = "group_transport_type_table",
@@ -70,4 +76,12 @@ public class EquipamentGroup extends Audit{
             inverseJoinColumns = @JoinColumn(name = "type_transport_id")
     )
     private Set<TypeTransport> typeTransports;
+
+    @ManyToMany
+    @JoinTable(
+            name = "equipament_group_visit_type_table",
+            joinColumns = @JoinColumn(name = "equipament_group_id"),
+            inverseJoinColumns = @JoinColumn(name = "visit_type_id")
+    )
+    private Set<VisitType> supportedVisitTypes = new HashSet<>();
 }

@@ -31,4 +31,5 @@ public interface EquipamentGroupRepository extends JpaRepository<EquipamentGroup
     boolean isEquipamentUsed(@Param("id") UUID id);
 
     Optional<EquipamentGroup> findByEquipament1Id(UUID id);
+    java.util.List<EquipamentGroup> findByCompanyId(UUID companyId);
 }

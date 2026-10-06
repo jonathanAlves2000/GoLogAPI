@@ -50,9 +50,26 @@ public class Company extends Audit{
     @Column(name = "cnpj_cpf", nullable = false)
     private String cnpjCpf;
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"company"})
     @OneToOne
     @JoinColumn(name = "address_id", nullable = false)
     @NotFound(action = NotFoundAction.IGNORE)
     private Address address;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(name = "company_type")
+    private GoLogAPI.model.enums.CompanyType companyType;
+
+    @Column(name = "is_master")
+    private Boolean isMaster;
+
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"branches", "parentCompany"})
+    @jakarta.persistence.ManyToOne
+    @JoinColumn(name = "parent_company_id")
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Company parentCompany;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @jakarta.persistence.OneToMany(mappedBy = "parentCompany")
+    private java.util.List<Company> branches;
 }

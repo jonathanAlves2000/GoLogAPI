@@ -29,7 +29,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/equipament-group")
-@Tag(name = "Grupo de Equipamento")
+@Tag(name = "Frotas & Equipamentos")
 public class EquipamentGroupController {
 
     private final EquipamentGroupService equipamentGroupService;

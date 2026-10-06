@@ -14,6 +14,7 @@ public interface DriverMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "company", ignore = true)
     Driver toEntity(DriverCreateRequest driverCreateRequest);
 
     @Mapping(target = "name", source = "user.name")

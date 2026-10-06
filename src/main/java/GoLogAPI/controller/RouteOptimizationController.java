@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api-route-optimization")
-@Tag(name = "Otimização de Rota")
+@Tag(name = "Transportes & Roteirização")
 public class RouteOptimizationController {
 
     private final RouteRequestService routeRequestService;
@@ -27,7 +27,7 @@ public class RouteOptimizationController {
     @PostMapping
     public String optimizeRoutes(@RequestBody OptimizeRouteRequest optimizeRouteRequest){
         String routeOtimized = routeRequestService.optimizeRoutes(optimizeRouteRequest);
-        processRouteService.processRoute(routeOtimized, optimizeRouteRequest.routePriority());
+        processRouteService.processRoute(routeOtimized, optimizeRouteRequest);
         return routeOtimized;
     }
 }
