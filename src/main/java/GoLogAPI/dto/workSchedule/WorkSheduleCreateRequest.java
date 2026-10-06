@@ -1,12 +1,11 @@
 package GoLogAPI.dto.workSchedule;
 
-import GoLogAPI.model.enums.WorkScheduleStatus;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
+
+import GoLogAPI.model.enums.WorkScheduleStatus;
+import jakarta.validation.constraints.NotNull;
 
 public record WorkSheduleCreateRequest(
 

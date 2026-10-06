@@ -19,11 +19,9 @@ import java.util.List;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
-    private final GetUserDetailsService getUserDetailsService;
 
-    public SecurityFilter(TokenService tokenService, GetUserDetailsService getUserDetailsService){
+    public SecurityFilter(TokenService tokenService){
         this.tokenService = tokenService;
-        this.getUserDetailsService = getUserDetailsService;
     }
 
     @Override

@@ -1,8 +1,6 @@
 package GoLogAPI.dto.tractor;
 
 
-import GoLogAPI.model.enums.TypeFuel;
-
 import java.util.UUID;
 
 public interface TractorRequest {

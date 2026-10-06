@@ -1,17 +1,14 @@
 package GoLogAPI.mapper;
 
-import GoLogAPI.dto.occurrence.OccurrenceResponseList;
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import GoLogAPI.dto.transport.TransportCreateRequest;
 import GoLogAPI.dto.transport.TransportCreateResponse;
 import GoLogAPI.dto.transport.TransportResponse;
-import GoLogAPI.model.Occurrence;
 import GoLogAPI.model.Transport;
-import org.mapstruct.IterableMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {DriverMapper.class, CompanyMapper.class, EquipamentGroupMapper.class})
 public interface TransportMapper {

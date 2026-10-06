@@ -1,14 +1,13 @@
 package GoLogAPI.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import GoLogAPI.dto.login.AuthLogResponse;
 import GoLogAPI.model.AuthLog;
 import GoLogAPI.model.User;
 import GoLogAPI.repository.AuthLogRepository;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 public class AuthLogService {

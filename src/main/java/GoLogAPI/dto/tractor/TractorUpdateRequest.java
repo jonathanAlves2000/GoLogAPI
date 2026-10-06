@@ -1,9 +1,8 @@
 package GoLogAPI.dto.tractor;
 
-import GoLogAPI.model.enums.TypeFuel;
-import jakarta.validation.constraints.Pattern;
-
 import java.util.UUID;
+
+import jakarta.validation.constraints.Pattern;
 
 public record TractorUpdateRequest(
 

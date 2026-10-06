@@ -1,43 +1,60 @@
 package GoLogAPI.service.routeOptimization;
 
-import GoLogAPI.dto.dtoRouteOptimization.request.*;
-import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
-import GoLogAPI.exception.ResourceNotFoundException;
-import GoLogAPI.infra.client.RouteOptimizationClient;
-import GoLogAPI.model.*;
-import GoLogAPI.model.Shipment;
-import GoLogAPI.model.enums.TypeOperation;
-import GoLogAPI.repository.*;
-import GoLogAPI.service.MessageException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import GoLogAPI.dto.dtoRouteOptimization.request.DeliveryRequest;
+import GoLogAPI.dto.dtoRouteOptimization.request.LoadDemands;
+import GoLogAPI.dto.dtoRouteOptimization.request.LoadLimits;
+import GoLogAPI.dto.dtoRouteOptimization.request.Location;
+import GoLogAPI.dto.dtoRouteOptimization.request.Model;
+import GoLogAPI.dto.dtoRouteOptimization.request.PickupRequest;
+import GoLogAPI.dto.dtoRouteOptimization.request.RouteOptimizationRequest;
+import GoLogAPI.dto.dtoRouteOptimization.request.RouteShipment;
+import GoLogAPI.dto.dtoRouteOptimization.request.Stop;
+import GoLogAPI.dto.dtoRouteOptimization.request.TimeWindow;
+import GoLogAPI.dto.dtoRouteOptimization.request.Vehicle;
+import GoLogAPI.dto.dtoRouteOptimization.request.Weight;
+import GoLogAPI.dto.dtoRouteOptimization.request.WeightAmount;
+import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
+import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.infra.client.RouteOptimizationClient;
+import GoLogAPI.model.Driver;
+import GoLogAPI.model.EquipamentGroup;
+import GoLogAPI.model.Shipment;
+import GoLogAPI.model.Telemetry;
+import GoLogAPI.model.Tractor;
+import GoLogAPI.model.WorkSchedule;
+import GoLogAPI.model.enums.TypeOperation;
+import GoLogAPI.repository.AddressRepository;
+import GoLogAPI.repository.ShipmentRepository;
+import GoLogAPI.repository.TelemetryRepository;
+import GoLogAPI.repository.TractorRepository;
+import GoLogAPI.repository.WorkScheduleRepository;
+import GoLogAPI.service.MessageException;
 
 @Service
 @Transactional(readOnly = true)
 public class RouteRequestService {
 
-    private final EquipamentGroupRepository equipamentGroupRepository;
     private final ShipmentRepository shipmentRepository;
     private final RouteOptimizationClient routeOptimizationClient;
     private final TelemetryRepository telemetryRepository;
     private final TractorRepository tractorRepository;
     private final WorkScheduleRepository workScheduleRepository;
 
-    public RouteRequestService(EquipamentGroupRepository equipamentGroupRepository, ShipmentRepository shipmentRepository,
+    public RouteRequestService(ShipmentRepository shipmentRepository,
                                AddressRepository addressRepository, RouteOptimizationClient routeOptimizationClient,
                                TelemetryRepository telemetryRepository, TractorRepository tractorRepository,
                                WorkScheduleRepository workScheduleRepository)
     {
-        this.equipamentGroupRepository = equipamentGroupRepository;
         this.shipmentRepository = shipmentRepository;
         this.routeOptimizationClient = routeOptimizationClient;
         this.telemetryRepository = telemetryRepository;

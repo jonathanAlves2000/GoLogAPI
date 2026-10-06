@@ -1,13 +1,13 @@
 package GoLogAPI.dto.driver;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.UUID;
 
 public record DriverUpdateRequest(
 

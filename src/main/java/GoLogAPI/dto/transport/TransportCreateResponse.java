@@ -1,9 +1,5 @@
 package GoLogAPI.dto.transport;
 
-import GoLogAPI.dto.company.CompanyResponse;
-import GoLogAPI.dto.driver.DriverResponse;
-import GoLogAPI.dto.equipamentGroup.EquipamentGroupResponse;
-
 import java.util.UUID;
 
 public record TransportCreateResponse(

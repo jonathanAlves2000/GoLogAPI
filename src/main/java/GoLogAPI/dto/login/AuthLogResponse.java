@@ -1,7 +1,5 @@
 package GoLogAPI.dto.login;
 
-import jakarta.persistence.Column;
-
 import java.time.Instant;
 import java.util.UUID;
 

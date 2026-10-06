@@ -1,16 +1,10 @@
 package GoLogAPI.dto.transport;
 
-import GoLogAPI.dto.company.CompanyResponse;
-import GoLogAPI.dto.driver.DriverResponse;
-import GoLogAPI.dto.equipamentGroup.EquipamentGroupResponse;
+import java.util.UUID;
+
 import GoLogAPI.model.Company;
 import GoLogAPI.model.Driver;
 import GoLogAPI.model.EquipamentGroup;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
-import java.util.UUID;
 
 public record TransportResponse(
          UUID id,

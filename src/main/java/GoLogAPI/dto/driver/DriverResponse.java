@@ -1,10 +1,9 @@
 package GoLogAPI.dto.driver;
 
-import GoLogAPI.dto.user.UserResponse;
-
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.UUID;
+
+import GoLogAPI.dto.user.UserResponse;
 
 public record DriverResponse(
         UUID id,

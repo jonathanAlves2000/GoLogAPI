@@ -1,21 +1,31 @@
 package GoLogAPI.service.routeOptimization;
 
-import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
-import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
-import GoLogAPI.exception.ResourceNotFoundException;
-import GoLogAPI.model.*;
-import GoLogAPI.model.enums.RoutePriority;
-import GoLogAPI.model.enums.WorkScheduleStatus;
-import GoLogAPI.repository.*;
-import GoLogAPI.service.MessageException;
-import com.google.maps.model.LatLng;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.maps.model.LatLng;
+
+import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteTransition;
+import GoLogAPI.dto.dtoRouteOptimization.response.ApiVehicleRoute;
+import GoLogAPI.exception.ResourceNotFoundException;
+import GoLogAPI.model.Company;
+import GoLogAPI.model.Driver;
+import GoLogAPI.model.Equipament;
+import GoLogAPI.model.EquipamentGroup;
+import GoLogAPI.model.Transport;
+import GoLogAPI.model.WorkSchedule;
+import GoLogAPI.model.enums.RoutePriority;
+import GoLogAPI.model.enums.WorkScheduleStatus;
+import GoLogAPI.repository.CompanyRepository;
+import GoLogAPI.repository.EquipamentGroupRepository;
+import GoLogAPI.repository.EquipamentRepository;
+import GoLogAPI.repository.TransportRepository;
+import GoLogAPI.repository.WorkScheduleRepository;
+import GoLogAPI.service.MessageException;
 
 @Service
 @Transactional(readOnly = true)

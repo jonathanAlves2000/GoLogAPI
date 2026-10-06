@@ -1,11 +1,10 @@
 package GoLogAPI.dto.shipment;
 
-import GoLogAPI.model.*;
-import GoLogAPI.model.enums.ShipmentStatus;
-import GoLogAPI.model.enums.TypeOperation;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import GoLogAPI.model.enums.ShipmentStatus;
+import GoLogAPI.model.enums.TypeOperation;
 
 public interface ShipmentRequest {
     TypeOperation typeOperation();

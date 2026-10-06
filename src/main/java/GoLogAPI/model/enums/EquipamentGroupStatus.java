@@ -10,7 +10,7 @@ public enum EquipamentGroupStatus {
         this.status = status;
     }
 
-    public String getStatus(String status){
-        return status;
+    public String getStatus(){
+        return this.status;
     }
 }

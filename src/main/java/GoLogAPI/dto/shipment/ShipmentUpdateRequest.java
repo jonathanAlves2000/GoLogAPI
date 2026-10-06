@@ -1,14 +1,12 @@
 package GoLogAPI.dto.shipment;
 
-import GoLogAPI.model.enums.ShipmentStatus;
-import GoLogAPI.model.enums.TypeOperation;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import GoLogAPI.model.enums.ShipmentStatus;
+import GoLogAPI.model.enums.TypeOperation;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Positive;
 
 public record ShipmentUpdateRequest(
 

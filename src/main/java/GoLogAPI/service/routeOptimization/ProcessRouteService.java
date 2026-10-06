@@ -1,25 +1,23 @@
 package GoLogAPI.service.routeOptimization;
 
-import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteOptimizationResponse;
-import GoLogAPI.model.enums.RoutePriority;
-import GoLogAPI.repository.ShipmentRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import GoLogAPI.dto.dtoRouteOptimization.response.ApiRouteOptimizationResponse;
+import GoLogAPI.model.enums.RoutePriority;
 
 @Service
 @Transactional(readOnly = true)
 public class ProcessRouteService {
 
-    private final RouteRequestService routeRequestService;
     private final ObjectMapper objectMapper;
     private final ProcessRouteStopService processShipment;
 
-    public ProcessRouteService(RouteRequestService routeRequestService, ObjectMapper objectMapper,
-                               ShipmentRepository shipmentRepository, ProcessRouteStopService processShipment)
+    public ProcessRouteService(ObjectMapper objectMapper, ProcessRouteStopService processShipment)
     {
-        this.routeRequestService = routeRequestService;
         this.objectMapper = objectMapper;
         this.processShipment = processShipment;
     }

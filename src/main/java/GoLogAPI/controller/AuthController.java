@@ -1,15 +1,5 @@
 package GoLogAPI.controller;
 
-import GoLogAPI.dto.login.LoginRequest;
-import GoLogAPI.dto.login.PowerBiTokenResponse;
-import GoLogAPI.dto.login.TokenResponse;
-import GoLogAPI.infra.security.TokenService;
-import GoLogAPI.model.AuthLog;
-import GoLogAPI.model.User;
-import GoLogAPI.service.AuthLogService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +7,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import GoLogAPI.dto.login.LoginRequest;
+import GoLogAPI.dto.login.PowerBiTokenResponse;
+import GoLogAPI.dto.login.TokenResponse;
+import GoLogAPI.infra.security.TokenService;
+import GoLogAPI.model.User;
+import GoLogAPI.service.AuthLogService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/login")
