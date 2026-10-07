@@ -72,4 +72,20 @@ public class RouteStop extends Audit{
     @NotFound(action = NotFoundAction.IGNORE)
     @JsonIgnoreProperties({"routeStop", "transport"})
     private Shipment shipment;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private GoLogAPI.model.enums.RouteStopStatus status = GoLogAPI.model.enums.RouteStopStatus.PENDENTE;
+
+    @Column(name = "arrived_at")
+    private java.time.LocalDateTime arrivedAt;
+
+    @Column(name = "departed_at")
+    private java.time.LocalDateTime departedAt;
+
+    @Column(name = "auto_check_in")
+    private Boolean autoCheckIn = false;
+
+    @Column(name = "check_in_distance")
+    private Double checkInDistance;
 }

@@ -35,7 +35,12 @@ public class RouteStopService {
                         routeStop.getCalculatedWait(),
                         routeStop.getRealizedWait(),
                         routeStop.getTransport(),
-                        routeStop.getShipment()
+                        routeStop.getShipment(),
+                        routeStop.getStatus(),
+                        routeStop.getArrivedAt(),
+                        routeStop.getDepartedAt(),
+                        routeStop.getAutoCheckIn(),
+                        routeStop.getCheckInDistance()
                 )).toList();
     }
 }

@@ -10,4 +10,8 @@ public interface RouteStopRepository extends JpaRepository<RouteStop, UUID> {
     void deleteByTransportId(UUID transportId);
 
     List<RouteStop> findByTransportId(UUID transportId);
+
+    List<RouteStop> findByTransportIdOrderBySequenceOrderAsc(UUID transportId);
+
+    List<RouteStop> findByTransportIdAndArrivedAtIsNullOrderBySequenceOrderAsc(UUID transportId);
 }

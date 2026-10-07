@@ -1,7 +1,5 @@
 package GoLogAPI.service.routeOptimization;
 
-import GoLogAPI.dto.dtoRouteOptimization.request.LoadDemand;
-import GoLogAPI.dto.dtoRouteOptimization.request.LoadLimit;
 import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
 import GoLogAPI.model.*;
 import GoLogAPI.model.enums.RoutePriority;
@@ -214,4 +212,12 @@ public class OptimizationConfigResolver {
             int vehicleEndWindowMarginHours,
             int globalHorizonExtraDays
     ) {}
+
+    public record LoadLimit(String maxLoad, String softMaxLoad, Double costPerUnitAboveSoftMax) {
+        public LoadLimit(String maxLoad) {
+            this(maxLoad, null, null);
+        }
+    }
+
+    public record LoadDemand(String amount) {}
 }

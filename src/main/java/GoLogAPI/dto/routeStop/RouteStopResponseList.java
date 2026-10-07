@@ -2,7 +2,9 @@ package GoLogAPI.dto.routeStop;
 
 import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Transport;
+import GoLogAPI.model.enums.RouteStopStatus;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record RouteStopResponseList(
@@ -19,5 +21,10 @@ public record RouteStopResponseList(
         Integer calculatedWait,
         Integer realizedWait,
         Transport transport,
-        Shipment shipment
+        Shipment shipment,
+        RouteStopStatus status,
+        LocalDateTime arrivedAt,
+        LocalDateTime departedAt,
+        Boolean autoCheckIn,
+        Double checkInDistance
 ) { }

@@ -4,7 +4,10 @@ import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
+import GoLogAPI.dto.telemetry.TelemetryBatchRequest;
+import GoLogAPI.dto.telemetry.TelemetryBatchResponse;
 import GoLogAPI.dto.telemetry.TelemetryResponseList;
+import GoLogAPI.service.telemetry.TelemetryBatchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -18,22 +21,33 @@ import GoLogAPI.service.TelemetryService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/telemetry")
-@Tag(name = "Telemetria")
+@RequestMapping({"/api/v1/telemetry", "/telemetry"})
+@Tag(name = "Telemetria & Ingestion Gateway", description = "Serviços de ingestão de telemetria de alta performance e geofencing de rotas")
 public class TelemetryController {
 
     private final TelemetryService telemetryService;
+    private final TelemetryBatchService telemetryBatchService;
 
-    public TelemetryController( TelemetryService telemetryService){
+    public TelemetryController(TelemetryService telemetryService,
+                               TelemetryBatchService telemetryBatchService) {
         this.telemetryService = telemetryService;
+        this.telemetryBatchService = telemetryBatchService;
+    }
+
+    @Operation(summary = "Ingestão de Telemetria em Lote (Batch Gateway)",
+               description = "Endpoint de alta performance para frotistas e rastreadores IoT. Resolução de placas em memória e detecção automática de chegada via Geofencing.")
+    @PostMapping("/batch")
+    public ResponseEntity<TelemetryBatchResponse> processBatch(@RequestBody @Valid TelemetryBatchRequest batchRequest) {
+        TelemetryBatchResponse response = telemetryBatchService.processBatch(batchRequest.items());
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Cadastrar Telemetria", description = "Cadastra uma nova leitura de telemetria no sistema")
     @PostMapping
     public ResponseEntity<TelemetryReponse> save(@RequestBody @Valid TelemetryCreateRequest telemetryCreateRequest){
         TelemetryReponse telemetryReponse = telemetryService.save(telemetryCreateRequest);
-           URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("{id}")
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
                 .buildAndExpand(telemetryReponse.id())
                 .toUri();
         return ResponseEntity.created(uri).body(telemetryReponse);
