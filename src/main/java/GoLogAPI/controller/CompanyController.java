@@ -68,4 +68,28 @@ public class CompanyController {
         CompanyCreateResponse companyCreateResponse = companyService.updatePartial(id, companyUpdateRequest);
         return ResponseEntity.ok().body(companyCreateResponse);
     }
+
+    @Operation(summary = "Configurar Webhook de Integração", description = "Define ou atualiza a URL de callback e chave secreta para envio de eventos de entrega para o ERP")
+    @PatchMapping("/{id}/webhook")
+    public ResponseEntity<CompanyResponse> updateWebhook(
+            @PathVariable("id") UUID id,
+            @Valid @RequestBody GoLogAPI.dto.webhook.WebhookConfigRequest request) {
+        CompanyResponse response = companyService.updateWebhook(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Testar Webhook da Empresa", description = "Envia um evento de teste TEST_PING para a URL configurada da empresa")
+    @PostMapping("/{id}/webhook/test")
+    public ResponseEntity<GoLogAPI.dto.webhook.WebhookTestResponse> testWebhook(@PathVariable("id") UUID id) {
+        GoLogAPI.dto.webhook.WebhookTestResponse response = companyService.testWebhook(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Testar URL de Webhook", description = "Testa conectividade com qualquer URL de webhook")
+    @PostMapping("/webhook/test-url")
+    public ResponseEntity<GoLogAPI.dto.webhook.WebhookTestResponse> testWebhookUrl(
+            @Valid @RequestBody GoLogAPI.dto.webhook.WebhookConfigRequest request) {
+        GoLogAPI.dto.webhook.WebhookTestResponse response = companyService.testWebhookUrl(request.webhookUrl(), request.webhookSecret());
+        return ResponseEntity.ok(response);
+    }
 }

@@ -35,6 +35,9 @@ class GeofencingServiceTest {
     @Mock
     private ShipmentRepository shipmentRepository;
 
+    @Mock
+    private GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService;
+
     @InjectMocks
     private GeofencingService geofencingService;
 

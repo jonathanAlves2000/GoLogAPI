@@ -15,5 +15,8 @@ public record CompanyResponse(
         AddressResponse address,
         CompanyType companyType,
         Boolean isMaster,
-        UUID parentCompanyId
+        UUID parentCompanyId,
+        String webhookUrl,
+        String webhookSecret,
+        Boolean webhookActive
 ) { }

@@ -23,12 +23,18 @@ public class CompanyService {
     private final AddressRepository addressRepository;
     private final CompanyMapper companyMapper;
     private final CompanyValidate companyValidate;
+    private final GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService;
 
-    public CompanyService(CompanyRepository companyRepository, AddressRepository addressRepository, CompanyMapper companyMapper, CompanyValidate companyValidate){
+    public CompanyService(CompanyRepository companyRepository,
+                          AddressRepository addressRepository,
+                          CompanyMapper companyMapper,
+                          CompanyValidate companyValidate,
+                          GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService){
         this.companyRepository = companyRepository;
         this.addressRepository = addressRepository;
         this.companyMapper = companyMapper;
         this.companyValidate = companyValidate;
+        this.webhookDispatcherService = webhookDispatcherService;
     }
 
     @Transactional
@@ -108,5 +114,35 @@ public class CompanyService {
         }
         companyRepository.save(company);
         return companyMapper.toCreateResponse(company);
+    }
+
+    @Transactional
+    public GoLogAPI.dto.company.CompanyResponse updateWebhook(UUID id, GoLogAPI.dto.webhook.WebhookConfigRequest request) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+
+        company.setWebhookUrl(request.webhookUrl());
+        company.setWebhookSecret(request.webhookSecret());
+        company.setWebhookActive(request.webhookActive() != null ? request.webhookActive() : true);
+
+        companyRepository.save(company);
+        return companyMapper.toResponse(company);
+    }
+
+    public GoLogAPI.dto.webhook.WebhookTestResponse testWebhook(UUID id) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+
+        if (company.getWebhookUrl() == null || company.getWebhookUrl().isBlank()) {
+            return new GoLogAPI.dto.webhook.WebhookTestResponse(
+                    false, 0, null, 0L, "Empresa não possui URL de webhook configurada."
+            );
+        }
+
+        return webhookDispatcherService.testWebhook(company.getWebhookUrl(), company.getWebhookSecret());
+    }
+
+    public GoLogAPI.dto.webhook.WebhookTestResponse testWebhookUrl(String url, String secret) {
+        return webhookDispatcherService.testWebhook(url, secret);
     }
 }

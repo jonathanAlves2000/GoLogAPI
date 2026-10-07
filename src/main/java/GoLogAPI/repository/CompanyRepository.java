@@ -22,4 +22,6 @@ public interface CompanyRepository extends JpaRepository<Company, UUID> {
     List<Company> findByParentCompanyId(UUID parentCompanyId);
     List<Company> findByIsMasterTrue();
     Optional<Company> findFirstByIsMasterTrue();
+    Optional<Company> findByCnpjCpf(String cnpjCpf);
+    Optional<Company> findFirstByCnpjCpf(String cnpjCpf);
 }

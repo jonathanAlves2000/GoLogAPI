@@ -2,6 +2,7 @@ package GoLogAPI.service.telemetry;
 
 import GoLogAPI.dto.telemetry.GeofenceEventResponse;
 import GoLogAPI.model.Address;
+import GoLogAPI.model.Company;
 import GoLogAPI.model.Equipament;
 import GoLogAPI.model.RouteStop;
 import GoLogAPI.model.Shipment;
@@ -32,13 +33,16 @@ public class GeofencingService {
     private final TransportRepository transportRepository;
     private final RouteStopRepository routeStopRepository;
     private final ShipmentRepository shipmentRepository;
+    private final GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService;
 
     public GeofencingService(TransportRepository transportRepository,
                              RouteStopRepository routeStopRepository,
-                             ShipmentRepository shipmentRepository) {
+                             ShipmentRepository shipmentRepository,
+                             GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService) {
         this.transportRepository = transportRepository;
         this.routeStopRepository = routeStopRepository;
         this.shipmentRepository = shipmentRepository;
+        this.webhookDispatcherService = webhookDispatcherService;
     }
 
     /**
@@ -124,6 +128,15 @@ public class GeofencingService {
                         arrivalTime,
                         String.format("Chegada detectada a %.1fm da parada #%d. Check-in automático efetuado.", distance, stop.getSequenceOrder())
                 );
+
+                // Dispara notificação assíncrona para o webhook cadastrado no ERP do cliente/transportador
+                Company notifyingCompany = currentTransport.getTransporter() != null
+                        ? currentTransport.getTransporter()
+                        : (shipment.getCompany() != null ? shipment.getCompany() : null);
+
+                if (notifyingCompany != null && webhookDispatcherService != null) {
+                    webhookDispatcherService.dispatch(notifyingCompany, "CHECK_IN_GEOFENCE", event);
+                }
 
                 return Optional.of(event);
             }

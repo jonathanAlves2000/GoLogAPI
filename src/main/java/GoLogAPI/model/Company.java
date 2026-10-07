@@ -72,4 +72,13 @@ public class Company extends Audit{
     @com.fasterxml.jackson.annotation.JsonIgnore
     @jakarta.persistence.OneToMany(mappedBy = "parentCompany")
     private java.util.List<Company> branches;
+
+    @Column(name = "webhook_url")
+    private String webhookUrl;
+
+    @Column(name = "webhook_secret")
+    private String webhookSecret;
+
+    @Column(name = "webhook_active")
+    private Boolean webhookActive = true;
 }
