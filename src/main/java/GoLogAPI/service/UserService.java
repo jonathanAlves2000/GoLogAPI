@@ -90,8 +90,6 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        userValidate.validate(userUpdateRequest);
-
         if(userUpdateRequest.name() != null && !userUpdateRequest.name().isBlank())
             user.setName(userUpdateRequest.name());
         if(userUpdateRequest.userProfile() != null)

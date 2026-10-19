@@ -83,7 +83,6 @@ public class AddressService {
     public AddressResponse updatePartial(UUID id, AddressUpdateRequest addressUpdateRequest){
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        addressValidate.validate(addressUpdateRequest);
 
         if(addressUpdateRequest.cep() != null && !addressUpdateRequest.cep().isBlank())
             address.setCep(addressUpdateRequest.cep());
