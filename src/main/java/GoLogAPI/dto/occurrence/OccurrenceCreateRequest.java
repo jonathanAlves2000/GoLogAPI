@@ -14,11 +14,8 @@ public record OccurrenceCreateRequest(
     @NotNull(message = "Data de criação é obrigatoria")
     LocalDateTime dateTime,
 
-    @Size(min = 5, max = 500, message = "Descrição deve ter entre 5 e 500 caracteres.")
+    @Size(max = 500, message = "Descrição deve ter entre 5 e 500 caracteres.")
     String description,
-
-    @Size(min = 5, max = 1000)
-    String attachment,
 
     @NotNull(message = "O Id da entrega deve ser informado.")
     UUID shipmentId,
