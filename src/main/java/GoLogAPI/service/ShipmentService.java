@@ -194,9 +194,9 @@ public class ShipmentService {
                 )).toList();
     }
 
-    public List<ShipmentResponseListPersonalized> getAllWithQuery(UUID driverId) {
+    public List<ShipmentResponseListPersonalized> getAllWithQuery(UUID userId) {
         UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<Object[]> results = shipmentRepository.findAllShipmentsWithRoutesAndTransportMandatoryByCompanyId(currentTenant, driverId);
+        List<Object[]> results = shipmentRepository.findAllShipmentsWithRoutesAndTransportMandatoryByCompanyId(currentTenant, userId);
 
         return results.stream()
                 .map(result -> {

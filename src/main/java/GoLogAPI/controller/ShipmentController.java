@@ -59,8 +59,8 @@ public class ShipmentController {
 
     @Operation(summary = "Listar Cargas Personalizado", description = "Retorna uma lista personalizada de cargas/remessas com filtros de consulta")
     @GetMapping("/list-personalized")
-    public ResponseEntity<List<ShipmentResponseListPersonalized>> getAllWithQuery(@RequestParam(required = false) UUID driverId){
-        List<ShipmentResponseListPersonalized> shipmentResponseListQueryList = shipmentService.getAllWithQuery(driverId);
+    public ResponseEntity<List<ShipmentResponseListPersonalized>> getAllWithQuery(@RequestParam(required = false) UUID userId){
+        List<ShipmentResponseListPersonalized> shipmentResponseListQueryList = shipmentService.getAllWithQuery(userId);
         return ResponseEntity.ok(shipmentResponseListQueryList);
     }
 

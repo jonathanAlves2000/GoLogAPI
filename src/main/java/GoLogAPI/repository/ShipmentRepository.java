@@ -32,9 +32,9 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
             "INNER JOIN RouteStop rs ON rs.shipment = s " +
             "INNER JOIN rs.transport t " +
             "WHERE s.active = true AND (:companyId IS NULL OR s.company.id = :companyId) " +
-            "AND (:driverId IS NULL OR t.driver.id = :driverId)")
+            "AND (:userId IS NULL OR t.driver.user.id = :userId)")
     List<Object[]> findAllShipmentsWithRoutesAndTransportMandatoryByCompanyId(@Param("companyId") UUID companyId,
-                                                                              @Param("driverId") UUID driverId);
+                                                                              @Param("userId") UUID userId);
 
     // Une as 3 tabelas (Shipment + RouteStop + Transport) de forma limpa e rápida
     @Query("SELECT s, rs, t FROM Shipment s " +
