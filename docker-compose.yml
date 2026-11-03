@@ -41,7 +41,7 @@ services:
   frontend:
     build:
       context: ../GoLogWeb
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     container_name: golog-web
     restart: always
     ports:
