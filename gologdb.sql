@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
 -- Dumped by pg_dump version 18.1
 
--- Started on 2026-10-19 16:49:35 UTC
+-- Started on 2026-11-03 20:55:51 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -762,6 +762,12 @@ COPY public.auth_log (id, active, created_at, created_by, updated_at, updated_by
 709b77b5-7c59-42ed-bbd7-12e6ff99814b	t	2026-10-07 23:46:06.427784+00	Admin Master	2026-10-07 23:46:06.427784+00	Admin Master
 228d30c2-bdb2-431a-9b37-1c8082464e75	t	2026-10-12 19:27:45.768034+00	Admin Master	2026-10-12 19:27:45.768034+00	Admin Master
 b8ad2e9a-e02e-4ed7-813e-99f6538ff072	t	2026-10-19 14:46:23.261511+00	Admin Master	2026-10-19 14:46:23.261511+00	Admin Master
+161d36a1-e907-4bd8-88ae-80343a95b25c	t	2026-10-20 01:12:59.759847+00	Admin Master	2026-10-20 01:12:59.759847+00	Admin Master
+2162f3d7-b2db-4813-8625-16cac6cc2dbf	t	2026-10-20 01:56:14.268926+00	Admin Master	2026-10-20 01:56:14.268926+00	Admin Master
+5e3f116a-ac16-47e2-b635-a08655f99219	t	2026-11-01 12:39:02.970456+00	Admin Master	2026-11-01 12:39:02.970456+00	Admin Master
+590fab3a-e986-4d85-a908-172a3446b63e	t	2026-11-03 20:29:49.433209+00	Admin Master	2026-11-03 20:29:49.433209+00	Admin Master
+9245a926-fe11-413a-adf8-9ef708fa7125	t	2026-11-03 20:46:08.035918+00	Admin Master	2026-11-03 20:46:08.035918+00	Admin Master
+43c7a47d-b684-469e-b665-42e8448127f4	t	2026-11-03 20:47:02.664165+00	Admin Master	2026-11-03 20:47:02.664165+00	Admin Master
 \.
 
 
@@ -1083,7 +1089,6 @@ ed322840-eaa3-4483-a866-a548a2e8e970	f	2026-08-30 23:03:01.926361+00	admin@admin
 --
 
 COPY public.user_table (id, active, created_at, created_by, updated_at, updated_by, cpf, email, name, password, user_profile, company_id) FROM stdin;
-c916e36f-4846-41be-9b32-9e0ff8850a29	t	2026-03-15 22:23:57.149323+00	\N	2026-03-15 22:23:57.149323+00	\N	000.000.000-00	admin@admin.com	Admin Master	$2a$10$ArcCT.dC00YRsOFROZOffedZWEJgQpmralIVFz47cAzOz3LBauigi	ADMIN	d9d7b435-c256-405b-877c-848f4a22e22a
 438eca76-a0cf-480b-8c85-f129ec3e9216	t	2026-03-15 23:04:31.316347+00	Admin Master	2026-03-15 23:04:31.316347+00	Admin Master	49018326895	jonathan@admin.com	Jonathan Alves	$2a$10$dSXyVxyZSainREynEB9SD.Lu1VNUkpvAtYukS0sns6JbAS8W7Sa6e	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
 03d49770-0d3a-496f-81c1-367a94250c6d	t	2026-06-10 21:22:58.056493+00	admin@admin.com	2026-06-10 21:22:58.056493+00	admin@admin.com	49018326835	fernando.silva@admin.com	Fernando Silva	$2a$10$ez7j8blJn8QdS2uj51fxWe/aEllRWzyTPdUNcLOZNJ51Qvdq8azMa	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
 8f0f3bb3-3f65-4d6a-9abd-d4edf71e3298	t	2026-06-10 21:23:11.800519+00	admin@admin.com	2026-06-10 21:23:11.800519+00	admin@admin.com	27491835601	mariana.souza@admin.com	Mariana Souza	$2a$10$e.t0ByQCJWjjgGdN4EobGu0y.8SuEHpet4Kn14JJFRvueosufx/lu	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
@@ -1091,6 +1096,7 @@ c916e36f-4846-41be-9b32-9e0ff8850a29	t	2026-03-15 22:23:57.149323+00	\N	2026-03-
 92fb79a3-7d79-4570-b903-9c2b3df6dd13	t	2026-06-10 21:23:31.986691+00	admin@admin.com	2026-06-10 21:23:31.986691+00	admin@admin.com	52140398766	carlos.oliveira@admin.com	Carlos Oliveira	$2a$10$tdLC/Hu8Pbo6tz0HpmlTLOJIdsEgT4EqvHBC15LdOe8ggs4Rkuxv2	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
 2bd3809f-71ed-4092-9e0c-1fba247ff45e	t	2026-06-10 21:23:43.615724+00	admin@admin.com	2026-06-10 21:23:43.615724+00	admin@admin.com	63251409844	aline.costa@admin.com	Aline Costa	$2a$10$Eg2VoA6cj/u.Y6qgGu0XEuz4g8mgJuiNT3W9D/UDQb/RK4nx3SCEi	DRIVER	d9d7b435-c256-405b-877c-848f4a22e22a
 00000000-0000-0000-0000-000000000001	t	2026-10-12 19:23:55.253412+00	system	2026-10-12 19:23:55.253412+00	system	000.000.000-01	master@golog.com	GoLog Super Admin	$2a$10$ArcCT.dC00YRsOFROZOffedZWEJgQpmralIVFz47cAzOz3LBauigi	ADMIN	7f564f96-d90f-42cc-beb2-e37cf63a324d
+c916e36f-4846-41be-9b32-9e0ff8850a29	t	2026-03-15 22:23:57.149323+00	\N	2026-03-15 22:23:57.149323+00	\N	000.000.000-00	admin@admin.com	Admin Master	$2a$10$ArcCT.dC00YRsOFROZOffedZWEJgQpmralIVFz47cAzOz3LBauigi	ADMIN	7f564f96-d90f-42cc-beb2-e37cf63a324d
 \.
 
 
@@ -1793,11 +1799,11 @@ ALTER TABLE ONLY public.tractor_table
     ADD CONSTRAINT fktpyy3ovef9vtfaubofrwkr6w1 FOREIGN KEY (id) REFERENCES public.equipament_table(id);
 
 
--- Completed on 2026-10-19 16:49:35 UTC
+-- Completed on 2026-11-03 20:55:51 UTC
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict vbLVue3EbTR7Zdvsyr63tOKTNO2anhuV0twtc4k8IKlnXwXbVeVJs1EPhxvinaB
+\unrestrict k0IEaLxPARiDlnHbfpdUxsFKcnp0irbYRjPhlMNIcwHK37cJoiajfgQk48UbiM9
 
