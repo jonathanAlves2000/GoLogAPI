@@ -27,7 +27,8 @@ public class ShipementValidate {
         if(shipmentCollect == null)
             throw new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentRequest.operationOrigemId());
 
-        if(shipmentRequest.schedulind().plusHours(2).isBefore(shipmentCollect.getSchedulind())) {
+        if(shipmentRequest.schedulind() != null && shipmentCollect.getSchedulind() != null &&
+           shipmentRequest.schedulind().isBefore(shipmentCollect.getSchedulind().plusHours(2))) {
             throw new IllegalArgumentException("Data de agendamento da entrega deve ser no mínimo 2 horas após a data de agendamento da coleta");
         }
     }

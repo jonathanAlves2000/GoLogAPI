@@ -1,29 +1,28 @@
 package GoLogAPI.dto.user;
 
 import GoLogAPI.model.UserProfile;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.*;
-import org.hibernate.validator.constraints.br.CPF;
 import java.util.UUID;
 
 public record UserUpdateRequest(
 
-        @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Nome invalido, use somente letras ou letras com acentos")
-        @Size(min = 10, max = 100, message = "Nome deve ter de 10 a 100 letras")
+        @Pattern(regexp = "^$|^[A-Za-z0-9À-ÿ '’\\-.]+$", message = "Nome inválido")
+        @Size(max = 100, message = "Nome deve ter até 100 letras")
         String name,
 
-        @Email(message = "Email invalido")
+        @Email(message = "Email inválido")
         String email,
 
-        @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Senha invalida, use pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial")
+        @Pattern(regexp = "^$|^.{4,100}$", message = "A senha deve ter no mínimo 4 caracteres")
         String password,
 
-        @CPF
+        @Pattern(regexp = "^$|^(\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})$", message = "CPF inválido, deve conter 11 dígitos")
         String cpf,
 
-        @NotNull(message = "Perfil de usuario vazio")
+        @JsonAlias({"User Profile", "userProfile"})
         UserProfile userProfile,
 
-        @NotNull(message = "CompanyId nulo")
         UUID companyId
 
 ) implements UserRequest{ }

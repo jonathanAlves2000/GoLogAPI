@@ -36,7 +36,6 @@ public class AddressService {
 
     @Transactional
     public AddressResponse save(AddressCreateRequest addressCreateRequest){
-        addressValidate.validate(addressCreateRequest);
         Address address = addressMapper.toEntity(addressCreateRequest);
         UUID currentTenant = TenantContext.getCurrentTenantId();
         if (currentTenant != null) {
@@ -54,11 +53,7 @@ public class AddressService {
     }
 
     public List<AddressResponse> getAll(){
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<Address> adddressList = (currentTenant != null)
-                ? addressRepository.findByCompanyId(currentTenant)
-                : addressRepository.findAll();
-        return addressMapper.toResponses(adddressList);
+        return addressMapper.toResponses(addressRepository.findAll());
     }
 
     @Transactional
@@ -70,7 +65,6 @@ public class AddressService {
 
     @Transactional
     public AddressResponse update(UUID id, AddressCreateRequest addressCreateRequest){
-        addressValidate.validate(addressCreateRequest);
         addressRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         Address address = addressMapper.toEntity(addressCreateRequest);

@@ -16,6 +16,22 @@ public interface TransportRepository extends JpaRepository<Transport, UUID> {
 
     List<Transport> findByTransporterId(UUID transporterId);
 
+    @Query("SELECT DISTINCT t FROM Transport t " +
+            "LEFT JOIN t.transporter tp " +
+            "LEFT JOIN t.equipamentGroup eg " +
+            "LEFT JOIN eg.company egc " +
+            "LEFT JOIN RouteStop rs ON rs.transport = t " +
+            "LEFT JOIN rs.shipment s " +
+            "LEFT JOIN s.customer sc " +
+            "LEFT JOIN s.company sco " +
+            "WHERE :companyId IS NULL " +
+            "   OR tp.id = :companyId " +
+            "   OR egc.id = :companyId " +
+            "   OR sc.id = :companyId " +
+            "   OR sco.id = :companyId " +
+            "ORDER BY t.createdAt DESC")
+    List<Transport> findVisibleForTenant(@Param("companyId") UUID companyId);
+
     @Query("SELECT t FROM Transport t WHERE t.equipamentGroup.equipament1.id = :equipamentId ORDER BY t.createdAt DESC")
     List<Transport> findByEquipament1IdOrderByCreatedAtDesc(@Param("equipamentId") UUID equipamentId);
 

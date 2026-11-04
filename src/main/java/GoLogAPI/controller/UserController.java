@@ -71,8 +71,8 @@ public class UserController {
 
         @Operation(summary = "Atualizar Usuário", description = "Atualiza todos os dados de um usuário existente")
         @PutMapping("{id}")
-        public ResponseEntity<UserResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody UserCreateRequest userCreateRequest){
-            UserResponse userResponse = userService.update(id, userCreateRequest);
+        public ResponseEntity<UserResponse> update(@PathVariable("id") UUID id, @Valid @RequestBody UserUpdateRequest userUpdateRequest){
+            UserResponse userResponse = userService.update(id, userUpdateRequest);
             return ResponseEntity.ok().body(userResponse);
         }
 

@@ -15,7 +15,7 @@ public interface DemandTypeRepository extends JpaRepository<DemandType, UUID> {
 
     Optional<DemandType> findByCode(String code);
 
-    @Query("SELECT d FROM DemandType d WHERE d.isSystemDefault = true OR d.company.id = :companyId")
+    @Query("SELECT d FROM DemandType d LEFT JOIN d.company c WHERE d.isSystemDefault = true OR c.id IS NULL OR (:companyId IS NOT NULL AND c.id = :companyId)")
     List<DemandType> findAvailableByCompanyId(@Param("companyId") UUID companyId);
 
     List<DemandType> findByIsSystemDefaultTrue();

@@ -150,7 +150,7 @@ public class ShipmentService {
     public List<ShipmentResponseList> getAll(){
         UUID currentTenant = TenantContext.getCurrentTenantId();
         List<Shipment> shipments = (currentTenant != null)
-                ? shipmentRepository.findByCompanyId(currentTenant)
+                ? shipmentRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
                 : shipmentRepository.findAll();
 
         return shipments.stream()
@@ -174,7 +174,7 @@ public class ShipmentService {
     public List<ShipmentResponseList> getByStatus(ShipmentStatus status){
         UUID currentTenant = TenantContext.getCurrentTenantId();
         List<Shipment> shipments = (currentTenant != null)
-                ? shipmentRepository.findByCompanyIdAndStatus(currentTenant, status)
+                ? shipmentRepository.findByCompanyIdOrCompanyIsNullAndStatus(currentTenant, status)
                 : shipmentRepository.findByStatus(status);
 
         return shipments.stream()

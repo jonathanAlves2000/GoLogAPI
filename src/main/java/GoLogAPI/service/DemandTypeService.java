@@ -62,9 +62,6 @@ public class DemandTypeService {
     }
 
     public List<DemandTypeResponse> getAvailableForCompany(UUID companyId) {
-        if (companyId == null) {
-            return demandTypeMapper.toResponses(demandTypeRepository.findByIsSystemDefaultTrue());
-        }
         return demandTypeMapper.toResponses(demandTypeRepository.findAvailableByCompanyId(companyId));
     }
 

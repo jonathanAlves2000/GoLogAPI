@@ -61,6 +61,10 @@ public class OptimizationProfileService {
         return optimizationProfileMapper.toResponse(profile);
     }
 
+    public List<OptimizationProfileResponse> getAll() {
+        return optimizationProfileMapper.toResponses(optimizationProfileRepository.findAll());
+    }
+
     public List<OptimizationProfileResponse> getByCompany(UUID companyId) {
         return optimizationProfileMapper.toResponses(optimizationProfileRepository.findByCompanyId(companyId));
     }

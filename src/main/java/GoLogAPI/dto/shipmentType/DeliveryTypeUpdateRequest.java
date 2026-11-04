@@ -3,12 +3,12 @@ package GoLogAPI.dto.shipmentType;
 import jakarta.validation.constraints.Size;
 
 public record DeliveryTypeUpdateRequest(
-        @Size(min = 5, max = 255, message = "O nome deve ter entre 5 e 50 caracteres.")
+        @Size(max = 255, message = "O nome deve ter até 255 caracteres.")
         String name,
 
-        @Size(min = 5, max = 500, message = "A descrição deve ter entre 5 e 500 caracteres.")
+        @Size(max = 500, message = "A descrição deve ter até 500 caracteres.")
         String description,
 
-        @Size(min = 5, max = 250, message = "Cuidados deve ter entre 5 e 250 caracteres.")
+        @Size(max = 250, message = "Cuidados deve ter até 250 caracteres.")
         String care
 ) implements DeliveryTypeRequest { }

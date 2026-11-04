@@ -65,7 +65,7 @@ public class EquipamentGroup extends Audit{
     private EquipamentGroupStatus status;
 
     @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
+    @JoinColumn(name = "company_id", nullable = true)
     @NotFound(action = NotFoundAction.IGNORE)
     private Company company;
 

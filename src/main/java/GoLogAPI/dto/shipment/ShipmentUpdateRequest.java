@@ -5,17 +5,15 @@ import java.util.UUID;
 
 import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.model.enums.TypeOperation;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 public record ShipmentUpdateRequest(
 
         TypeOperation typeOperation,
-        @Positive(message = "O peso deve ser positivo.")
+        @PositiveOrZero(message = "O peso deve ser positivo ou zero.")
         Double weight,
-        @Positive(message = "O volume deve ser positivo.")
+        @PositiveOrZero(message = "O volume deve ser positivo ou zero.")
         Double volume,
-        @FutureOrPresent(message = "A data de agendamento da remessa deve ser no futuro ou presente")
         LocalDateTime schedulind,
         ShipmentStatus status,
         Integer shippingSequence,

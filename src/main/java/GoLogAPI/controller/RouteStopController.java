@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("route-stops")
+@RequestMapping({"/route-stops", "route-stops"})
 @Tag(name = "Paradas de Rota")
 public class RouteStopController {
 

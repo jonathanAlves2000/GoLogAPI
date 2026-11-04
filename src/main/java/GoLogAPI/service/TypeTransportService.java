@@ -69,6 +69,7 @@ public class TypeTransportService {
         typeTransportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         TypeTransport typeTransport = typeTransportMapper.toEntity(typeTransportCreateRequest);
+        typeTransport.setId(id);
         typeTransportRepository.save(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
@@ -78,7 +79,7 @@ public class TypeTransportService {
         TypeTransport typeTransport = typeTransportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
 
-        if(typeTransportUpdateRequest.name() != null && typeTransportUpdateRequest.name().isBlank())
+        if(typeTransportUpdateRequest.name() != null && !typeTransportUpdateRequest.name().isBlank())
             typeTransport.setName(typeTransportUpdateRequest.name());
         if(typeTransportUpdateRequest.description() != null)
             typeTransport.setDescription(typeTransportUpdateRequest.description());

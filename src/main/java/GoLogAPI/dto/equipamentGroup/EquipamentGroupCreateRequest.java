@@ -12,5 +12,7 @@ public record EquipamentGroupCreateRequest(
 
         UUID equipament2Id,
 
-        UUID equipament3Id
+        UUID equipament3Id,
+
+        UUID companyId
 ){}

@@ -4,8 +4,8 @@ import jakarta.validation.constraints.Pattern;
 
 public record TypeTransportUpdateRequest(
         @Pattern(
-                regexp = "^[A-Z ]+$",
-                message = "O nome deve conter apenas letras maiúsculas de A-Z (sem acentos) e espaços"
+                regexp = "^$|^[A-Za-z0-9À-ÿ _-]+$",
+                message = "O nome deve conter apenas letras, números, espaços, hífen ou underline"
         )
         String name,
         String description,

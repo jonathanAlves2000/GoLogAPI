@@ -29,14 +29,14 @@ public class WorkSheduleValidate {
     }
 
     public void driver(UUID driverId, List<String> errors){
-        boolean exists = workScheduleRepository.existsByDriverId(driverId);
+        boolean exists = workScheduleRepository.existsActiveByDriverId(driverId);
 
         if(exists)
             errors.add("Já existe uma escala ativa para esse motorista.");
     }
 
     public void equipamentGroup(UUID equipamentGroupId, List<String> errors){
-        boolean exists = workScheduleRepository.existsByEquipamentGroupId(equipamentGroupId);
+        boolean exists = workScheduleRepository.existsActiveByEquipamentGroupId(equipamentGroupId);
 
         if(exists)
             errors.add("Conjunto de equipamento já está sendo utilizado por um motorista");

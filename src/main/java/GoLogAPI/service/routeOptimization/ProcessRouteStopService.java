@@ -66,11 +66,25 @@ public class ProcessRouteStopService {
             // 1. Coleta antecipada de todos os IDs de Shipment para busca em lote (evita N+1 findById)
             List<UUID> targetIds = new ArrayList<>();
             for (ShipmentRoute.Visit visit : visits) {
-                String[] ids = visit.getShipmentLabel().split("/");
-                UUID collectId = UUID.fromString(ids[0]);
-                UUID deliveryId = UUID.fromString(ids[1]);
-                UUID targetId = (visit.getVisitLabel() != null && visit.getVisitLabel().contains("pickup")) || visit.getIsPickup()
-                        ? collectId : deliveryId;
+                String label = visit.getShipmentLabel();
+                UUID targetId;
+                if (label.contains("/")) {
+                    String[] ids = label.split("/");
+                    if (ids[0].equalsIgnoreCase("standalone") || ids[0].equalsIgnoreCase("delivery")) {
+                        targetId = UUID.fromString(ids[1]);
+                    } else if (ids[0].equalsIgnoreCase("pickup")) {
+                        targetId = UUID.fromString(ids[1]);
+                    } else if (ids.length > 1 && ids[1].equalsIgnoreCase("pickup")) {
+                        targetId = UUID.fromString(ids[0]);
+                    } else {
+                        UUID collectId = UUID.fromString(ids[0]);
+                        UUID deliveryId = UUID.fromString(ids[1]);
+                        targetId = ((visit.getVisitLabel() != null && visit.getVisitLabel().contains("pickup")) || visit.getIsPickup())
+                                ? collectId : deliveryId;
+                    }
+                } else {
+                    targetId = UUID.fromString(label);
+                }
                 targetIds.add(targetId);
             }
 

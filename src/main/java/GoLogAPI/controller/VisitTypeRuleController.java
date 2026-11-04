@@ -37,6 +37,13 @@ public class VisitTypeRuleController {
         return ResponseEntity.created(uri).body(response);
     }
 
+    @Operation(summary = "Listar Regras de Morfologia", description = "Retorna todas as regras de morfologia para o tenant ativo ou todas se master")
+    @GetMapping
+    public ResponseEntity<List<VisitTypeRuleResponse>> getAll() {
+        UUID currentTenant = GoLogAPI.infra.tenant.TenantContext.getCurrentTenantId();
+        return ResponseEntity.ok(visitTypeRuleService.getByCompany(currentTenant));
+    }
+
     @Operation(summary = "Listar Regras por Empresa", description = "Retorna todas as regras de morfologia cadastradas para a empresa")
     @GetMapping("/company/{companyId}")
     public ResponseEntity<List<VisitTypeRuleResponse>> getByCompany(@PathVariable("companyId") UUID companyId) {

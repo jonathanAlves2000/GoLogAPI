@@ -8,5 +8,6 @@ FROM eclipse-temurin:25-jdk
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
+COPY ApiRouteOptimization.json ApiRouteOptimization.json
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]

@@ -58,7 +58,7 @@ public class DriverService {
     public List<DriverResponseList> getAll(){
         UUID currentTenant = TenantContext.getCurrentTenantId();
         List<Driver> drivers = (currentTenant != null)
-                ? driverRepository.findByCompanyId(currentTenant)
+                ? driverRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
                 : driverRepository.findAll();
         return driverMapper.toResponses(drivers);
     }

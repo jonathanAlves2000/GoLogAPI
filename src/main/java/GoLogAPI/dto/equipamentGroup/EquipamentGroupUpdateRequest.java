@@ -10,5 +10,6 @@ public record EquipamentGroupUpdateRequest(
         @NotNull
         UUID equipament1Id,
         UUID equipament2Id,
-        UUID equipament3Id
+        UUID equipament3Id,
+        UUID companyId
 ) { }

@@ -32,4 +32,7 @@ public interface EquipamentGroupRepository extends JpaRepository<EquipamentGroup
 
     Optional<EquipamentGroup> findByEquipament1Id(UUID id);
     java.util.List<EquipamentGroup> findByCompanyId(UUID companyId);
+
+    @Query("SELECT eg FROM EquipamentGroup eg LEFT JOIN eg.company c WHERE c.id = :companyId OR c.id IS NULL")
+    java.util.List<EquipamentGroup> findByCompanyIdOrCompanyIsNull(@Param("companyId") UUID companyId);
 }

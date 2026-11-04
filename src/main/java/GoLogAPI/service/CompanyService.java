@@ -44,6 +44,11 @@ public class CompanyService {
         Address address = addressRepository.findById(companyCreateRequest.addressId())
                         .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, companyCreateRequest.addressId()));
         company.setAddress(address);
+        if (company.getCompanyType() == null) {
+            company.setCompanyType(Boolean.TRUE.equals(companyCreateRequest.isCliente())
+                    ? GoLogAPI.model.enums.CompanyType.CLIENT
+                    : GoLogAPI.model.enums.CompanyType.TENANT_BRANCH);
+        }
         companyRepository.save(company);
         return companyMapper.toCreateResponse(company);
     }
@@ -60,12 +65,14 @@ public class CompanyService {
         if (TenantContext.isMaster() && currentTenant == null) {
             companies = companyRepository.findAll();
         } else {
-            // Retorna parceiros comerciais (CLIENT / SUPPLIER) e as empresas do grupo
+            // Retorna parceiros comerciais (CLIENT / SUPPLIER) e empresas habilitadas
             companies = companyRepository.findAll().stream()
                     .filter(c -> c.getCompanyType() == GoLogAPI.model.enums.CompanyType.CLIENT
+                            || Boolean.TRUE.equals(c.getIsCliente())
                             || c.getCompanyType() == GoLogAPI.model.enums.CompanyType.SUPPLIER
                             || (currentTenant != null && (c.getId().equals(currentTenant)
-                                || (c.getParentCompany() != null && c.getParentCompany().getId().equals(currentTenant)))))
+                                || (c.getParentCompany() != null && c.getParentCompany().getId().equals(currentTenant))))
+                            || !Boolean.TRUE.equals(c.getIsCliente()))
                     .toList();
         }
         return companyMapper.toResponses(companies);

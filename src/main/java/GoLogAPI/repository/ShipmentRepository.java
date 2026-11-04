@@ -28,11 +28,28 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     List<Shipment> findByCompanyId(UUID companyId);
     List<Shipment> findByCompanyIdAndStatus(UUID companyId, ShipmentStatus status);
 
+    @Query("SELECT s FROM Shipment s LEFT JOIN s.company c LEFT JOIN s.customer cust WHERE :companyId IS NULL OR c.id = :companyId OR cust.id = :companyId OR c.id IS NULL")
+    List<Shipment> findByCompanyIdOrCompanyIsNull(@Param("companyId") UUID companyId);
+
+    @Query("SELECT s FROM Shipment s LEFT JOIN s.company c LEFT JOIN s.customer cust WHERE (:companyId IS NULL OR c.id = :companyId OR cust.id = :companyId OR c.id IS NULL) AND s.status = :status")
+    List<Shipment> findByCompanyIdOrCompanyIsNullAndStatus(@Param("companyId") UUID companyId, @Param("status") ShipmentStatus status);
+
     @Query("SELECT s, rs, t FROM Shipment s " +
             "INNER JOIN RouteStop rs ON rs.shipment = s " +
             "INNER JOIN rs.transport t " +
-            "WHERE s.active = true AND (:companyId IS NULL OR s.company.id = :companyId) " +
-            "AND (:userId IS NULL OR t.driver.user.id = :userId)")
+            "LEFT JOIN s.company sco " +
+            "LEFT JOIN s.customer scust " +
+            "LEFT JOIN t.transporter tp " +
+            "LEFT JOIN t.equipamentGroup eg " +
+            "LEFT JOIN eg.company egc " +
+            "LEFT JOIN t.driver d " +
+            "LEFT JOIN d.user du " +
+            "WHERE s.active = true AND (:companyId IS NULL " +
+            "   OR sco.id = :companyId " +
+            "   OR scust.id = :companyId " +
+            "   OR tp.id = :companyId " +
+            "   OR egc.id = :companyId) " +
+            "AND (:userId IS NULL OR du.id = :userId)")
     List<Object[]> findAllShipmentsWithRoutesAndTransportMandatoryByCompanyId(@Param("companyId") UUID companyId,
                                                                               @Param("userId") UUID userId);
 

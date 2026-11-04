@@ -15,7 +15,7 @@ public interface VisitTypeRepository extends JpaRepository<VisitType, UUID> {
 
     Optional<VisitType> findByCode(String code);
 
-    @Query("SELECT v FROM VisitType v WHERE v.company IS NULL OR v.company.id = :companyId")
+    @Query("SELECT v FROM VisitType v LEFT JOIN v.company c WHERE :companyId IS NULL OR c.id IS NULL OR c.id = :companyId")
     List<VisitType> findAvailableByCompanyId(@Param("companyId") UUID companyId);
 
     List<VisitType> findByCompanyId(UUID companyId);

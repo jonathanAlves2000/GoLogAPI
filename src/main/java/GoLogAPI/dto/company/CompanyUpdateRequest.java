@@ -5,19 +5,19 @@ import java.util.UUID;
 
 public record CompanyUpdateRequest(
 
-        @Pattern(regexp = "^[A-Za-zÀ-ÿ ]+$", message = "Nome invalido, use somente letras ou letras com acentos")
-        @Size(min = 10, max = 100, message = "Nome deve ter de 10 a 100 letras")
+        @Pattern(regexp = "^$|^[A-Za-z0-9À-ÿ\\s.,/\\-&'’()#@+]+$", message = "Nome inválido")
+        @Size(max = 150, message = "Nome deve ter até 150 caracteres")
         String legalName,
 
         Boolean isCliente,
 
-        @Pattern(regexp = "^\\([1-9]{2}\\)[0-9]{9}$", message = "Telefone inválido, formato esperado: (11)999999999")
+        @Pattern(regexp = "^$|^\\+?[0-9()\\s\\-.]{8,20}$", message = "Telefone inválido")
         String phoneNumber,
 
-        @Email
+        @Email(message = "Email inválido")
         String email,
 
-        @Pattern(regexp = "(^\\d{11}$)|(^\\d{14}$)", message = "CPF ou CNPJ inválido, deve ter 11 ou 14 digitos")
+        @Pattern(regexp = "^$|^(\\d{11}|\\d{14}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}|\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2})$", message = "CPF ou CNPJ inválido")
         String cnpjCpf,
 
         UUID addressId

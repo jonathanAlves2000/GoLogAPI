@@ -52,7 +52,9 @@ public class UserValidate {
     }
 
     public void cpf(String userCpf, List<String> errorList){
-        boolean exists = userRepository.existsByCpf(userCpf);
+        String clean = userCpf.replaceAll("\\D", "");
+        boolean exists = userRepository.existsByCpf(userCpf)
+                || (!clean.isBlank() && userRepository.existsByCpf(clean));
         if(exists) errorList.add("CPF já cadastrado!");
     }
 }

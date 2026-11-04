@@ -74,9 +74,14 @@ public class TransportService {
 
     public List<TransportResponse> getAll(){
         UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<Transport> transports = (currentTenant != null)
-                ? transportRepository.findByTransporterId(currentTenant)
-                : transportRepository.findAll();
+        List<Transport> transports;
+        if (TenantContext.isMaster() && currentTenant == null) {
+            transports = transportRepository.findAll();
+        } else if (currentTenant != null) {
+            transports = transportRepository.findVisibleForTenant(currentTenant);
+        } else {
+            transports = transportRepository.findAll();
+        }
         return transportMapper.toResponses(transports);
     }
 

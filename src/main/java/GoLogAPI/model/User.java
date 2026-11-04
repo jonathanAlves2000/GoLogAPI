@@ -34,7 +34,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@SQLDelete(sql = "UPDATE user_table SET active = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE user_table SET active = false WHERE id = ?")
 @SQLRestriction("active = true")
 public class User extends Audit implements UserDetails {
 	

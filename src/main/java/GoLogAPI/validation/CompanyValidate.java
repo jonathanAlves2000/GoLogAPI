@@ -20,14 +20,6 @@ public class CompanyValidate {
 
     public void validate(CompanyRequest companyRequest){
         List<String> errors = new ArrayList<>();
-        if(companyRequest.legalName() != null && !companyRequest.legalName().isBlank())
-            legalName(companyRequest.legalName(), errors);
-
-        if(companyRequest.phoneNumber() != null && !companyRequest.phoneNumber().isBlank())
-            phoneNumber(companyRequest.phoneNumber(), errors);
-
-        if(companyRequest.email() != null && !companyRequest.email().isBlank())
-            email(companyRequest.email(), errors);
 
         if(companyRequest.cnpjCpf() != null && !companyRequest.cnpjCpf().isBlank())
             cnpjCpf(companyRequest.cnpjCpf(), errors);
@@ -36,25 +28,10 @@ public class CompanyValidate {
             throw new ConflictException(errors);
     }
 
-    public void legalName(String legalName, List<String> errors){
-        boolean exists = companyRepository.existsByLegalName(legalName);
-        if(exists) errors.add("Nome Legal já registrado!");
-    }
-
-    public void phoneNumber(String phoneNumber, List<String> errors){
-        boolean exists = companyRepository.existsByPhoneNumber(phoneNumber);
-        if(exists) errors.add("Numero de Telefone já registrado!");
-    }
-
-    public void email(String email, List<String> errors){
-        boolean exists = companyRepository.existsByEmail(email);
-        if(exists) errors.add("Email já registrado!");
-    }
-
     public void cnpjCpf(String cnpjCpf, List<String> errors){
-        boolean exists = companyRepository.existsByCnpjCpf(cnpjCpf);
+        String clean = cnpjCpf.replaceAll("\\D", "");
+        boolean exists = companyRepository.existsByCnpjCpf(cnpjCpf)
+                || (!clean.isBlank() && companyRepository.existsByCnpjCpf(clean));
         if(exists) errors.add("CNPJ ou CPF já registrado!");
     }
-
-
 }

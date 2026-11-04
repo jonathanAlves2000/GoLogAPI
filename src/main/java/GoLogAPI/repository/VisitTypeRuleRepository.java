@@ -14,6 +14,6 @@ public interface VisitTypeRuleRepository extends JpaRepository<VisitTypeRule, UU
 
     List<VisitTypeRule> findByCompanyId(UUID companyId);
 
-    @Query("SELECT r FROM VisitTypeRule r WHERE r.company IS NULL OR r.company.id = :companyId")
+    @Query("SELECT r FROM VisitTypeRule r LEFT JOIN r.company c WHERE :companyId IS NULL OR c.id IS NULL OR c.id = :companyId")
     List<VisitTypeRule> findAvailableByCompanyId(@Param("companyId") UUID companyId);
 }

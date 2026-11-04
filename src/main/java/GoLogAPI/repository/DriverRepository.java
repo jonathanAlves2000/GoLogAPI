@@ -12,4 +12,7 @@ public interface DriverRepository extends JpaRepository<Driver, UUID> {
 
     boolean existsByCnhNumber(String cnhNumber);
     List<Driver> findByCompanyId(UUID companyId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT d FROM Driver d LEFT JOIN d.company c WHERE c.id = :companyId OR c.id IS NULL")
+    List<Driver> findByCompanyIdOrCompanyIsNull(@org.springframework.data.repository.query.Param("companyId") UUID companyId);
 }

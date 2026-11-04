@@ -37,6 +37,16 @@ public class OptimizationProfileController {
         return ResponseEntity.created(uri).body(response);
     }
 
+    @Operation(summary = "Listar Perfis de Otimização", description = "Retorna todos os perfis cadastrados para o tenant ativo ou todos se master")
+    @GetMapping
+    public ResponseEntity<List<OptimizationProfileResponse>> getAll() {
+        UUID currentTenant = GoLogAPI.infra.tenant.TenantContext.getCurrentTenantId();
+        if (currentTenant != null) {
+            return ResponseEntity.ok(optimizationProfileService.getByCompany(currentTenant));
+        }
+        return ResponseEntity.ok(optimizationProfileService.getAll());
+    }
+
     @Operation(summary = "Exibir Perfil de Otimização", description = "Exibe os detalhes de um perfil pelo ID")
     @GetMapping("/{id}")
     public ResponseEntity<OptimizationProfileResponse> get(@PathVariable("id") UUID id) {

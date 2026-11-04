@@ -10,6 +10,6 @@ import java.util.UUID;
 
 public interface TypeTransportRepository extends JpaRepository<TypeTransport, UUID> {
 
-    @Query("SELECT t FROM TypeTransport t WHERE :companyId IS NULL OR t.company IS NULL OR t.company.id = :companyId")
+    @Query("SELECT t FROM TypeTransport t LEFT JOIN t.company c WHERE :companyId IS NULL OR c.id IS NULL OR c.id = :companyId")
     List<TypeTransport> findAvailableForCompany(@Param("companyId") UUID companyId);
 }

@@ -29,9 +29,28 @@ public class RouteOptimizationClient {
 
     private synchronized com.google.maps.routeoptimization.v1.RouteOptimizationClient getClient() {
         if (this.googleClient == null) {
-            try (FileInputStream credentialsStream = new FileInputStream("ApiRouteOptimization.json")) {
-                GoogleCredentials credentials = GoogleCredentials.fromStream(credentialsStream)
-                        .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
+            java.io.InputStream credentialsStream = null;
+            try {
+                java.io.File localFile = new java.io.File("ApiRouteOptimization.json");
+                if (localFile.exists()) {
+                    credentialsStream = new java.io.FileInputStream(localFile);
+                } else {
+                    java.io.File appFile = new java.io.File("/app/ApiRouteOptimization.json");
+                    if (appFile.exists()) {
+                        credentialsStream = new java.io.FileInputStream(appFile);
+                    } else {
+                        credentialsStream = getClass().getClassLoader().getResourceAsStream("ApiRouteOptimization.json");
+                    }
+                }
+
+                GoogleCredentials credentials;
+                if (credentialsStream != null) {
+                    credentials = GoogleCredentials.fromStream(credentialsStream)
+                            .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
+                } else {
+                    credentials = GoogleCredentials.getApplicationDefault()
+                            .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
+                }
 
                 RouteOptimizationSettings settings = RouteOptimizationSettings.newBuilder()
                         .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
@@ -40,6 +59,12 @@ public class RouteOptimizationClient {
                 this.googleClient = com.google.maps.routeoptimization.v1.RouteOptimizationClient.create(settings);
             } catch (IOException e) {
                 throw new RuntimeException("Erro ao inicializar Google RouteOptimizationClient: " + e.getMessage(), e);
+            } finally {
+                if (credentialsStream != null) {
+                    try {
+                        credentialsStream.close();
+                    } catch (IOException ignored) {}
+                }
             }
         }
         return this.googleClient;

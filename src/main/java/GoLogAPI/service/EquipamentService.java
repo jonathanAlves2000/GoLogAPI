@@ -33,7 +33,7 @@ public class EquipamentService {
     public List<EquipamentResponse> getAll(){
         UUID currentTenant = TenantContext.getCurrentTenantId();
         List<Equipament> equipaments = (currentTenant != null)
-                ? equipamentRepository.findByCompanyId(currentTenant)
+                ? equipamentRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
                 : equipamentRepository.findAll();
         return equipamentMapper.toResponseList(equipaments);
     }

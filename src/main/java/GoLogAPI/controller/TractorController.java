@@ -53,9 +53,18 @@ public class TractorController {
     }
 
     @Operation(summary = "Excluir Trator", description = "Exclui um trator específico pelo ID")
-    @DeleteMapping
-    public ResponseEntity<Void> delete(UUID id){
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") UUID id){
         tractorService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Excluir Trator por Query Param", description = "Exclui um trator pelo parâmetro id")
+    @DeleteMapping
+    public ResponseEntity<Void> deleteByParam(@RequestParam(value = "id", required = false) UUID id){
+        if (id != null) {
+            tractorService.delete(id);
+        }
         return ResponseEntity.noContent().build();
     }
 

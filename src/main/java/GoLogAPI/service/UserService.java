@@ -66,21 +66,46 @@ public class UserService {
     public List<UserResponseList> getAll(){
         UUID currentTenant = TenantContext.getCurrentTenantId();
         List<User> users = (currentTenant != null)
-                ? userRepository.findByCompanyId(currentTenant)
+                ? userRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
                 : userRepository.findAll();
         return userMapper.toResponses(users);
     }
 
     @Transactional
+    public UserResponse update(UUID id, UserUpdateRequest userUpdateRequest){
+        return updatePartial(id, userUpdateRequest);
+    }
+
+    @Transactional
     public UserResponse update(UUID id, UserCreateRequest userCreateRequest){
-      userRepository.findById(id)
+      User existing = userRepository.findById(id)
               .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-      userValidate.validate(userCreateRequest);
+
+      if (userCreateRequest.email() != null && !userCreateRequest.email().isBlank()) {
+          userRepository.findByEmail(userCreateRequest.email())
+                  .filter(u -> !u.getId().equals(id))
+                  .ifPresent(u -> {
+                      throw new GoLogAPI.exception.ConflictException(List.of("Email já cadastrado!"));
+                  });
+      }
+      if (userCreateRequest.cpf() != null && !userCreateRequest.cpf().isBlank()) {
+          userRepository.findByCpf(userCreateRequest.cpf())
+                  .filter(u -> !u.getId().equals(id))
+                  .ifPresent(u -> {
+                      throw new GoLogAPI.exception.ConflictException(List.of("CPF já cadastrado!"));
+                  });
+      }
+
       User user = userMapper.toEntity(userCreateRequest);
       Company company = companyRepository.findById(userCreateRequest.companyId())
               .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userCreateRequest.companyId()));
       user.setCompany(company);
       user.setId(id);
+      if (userCreateRequest.password() != null && !userCreateRequest.password().isBlank()) {
+          user.setPassword(passwordEncoder.encode(userCreateRequest.password()));
+      } else {
+          user.setPassword(existing.getPassword());
+      }
       userRepository.save(user);
       return userMapper.toResponse(user);
     }
@@ -94,12 +119,24 @@ public class UserService {
             user.setName(userUpdateRequest.name());
         if(userUpdateRequest.userProfile() != null)
             user.setUserProfile(userUpdateRequest.userProfile());
-        if(userUpdateRequest.cpf() != null && !userUpdateRequest.cpf().isBlank())
+        if(userUpdateRequest.cpf() != null && !userUpdateRequest.cpf().isBlank()) {
+            userRepository.findByCpf(userUpdateRequest.cpf())
+                    .filter(u -> !u.getId().equals(id))
+                    .ifPresent(u -> {
+                        throw new GoLogAPI.exception.ConflictException(List.of("CPF já cadastrado!"));
+                    });
             user.setCpf(userUpdateRequest.cpf());
-        if(userUpdateRequest.email() != null && !userUpdateRequest.email().isBlank())
+        }
+        if(userUpdateRequest.email() != null && !userUpdateRequest.email().isBlank()) {
+            userRepository.findByEmail(userUpdateRequest.email())
+                    .filter(u -> !u.getId().equals(id))
+                    .ifPresent(u -> {
+                        throw new GoLogAPI.exception.ConflictException(List.of("Email já cadastrado!"));
+                    });
             user.setEmail(userUpdateRequest.email());
+        }
         if(userUpdateRequest.password() != null && !userUpdateRequest.password().isBlank())
-            user.setPassword(userUpdateRequest.password());
+            user.setPassword(passwordEncoder.encode(userUpdateRequest.password()));
         if(userUpdateRequest.companyId() != null){
             Company company = companyRepository.findById(userUpdateRequest.companyId())
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userUpdateRequest.companyId()));

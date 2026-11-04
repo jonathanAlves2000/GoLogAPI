@@ -31,18 +31,21 @@ public class WorkScheduleService {
     private final DriverRepository driverRepository;
     private final WorkShiftTemplateRepository workShiftTemplateRepository;
     private final WorkSheduleValidate workSheduleValidate;
+    private final GoLogAPI.repository.CompanyRepository companyRepository;
 
     public WorkScheduleService(WorkScheduleRepository workScheduleRepository,
                                EquipamentGroupRepository equipamentGroupRepository,
                                DriverRepository driverRepository,
                                WorkShiftTemplateRepository workShiftTemplateRepository,
-                               WorkSheduleValidate workSheduleValidate)
+                               WorkSheduleValidate workSheduleValidate,
+                               GoLogAPI.repository.CompanyRepository companyRepository)
     {
         this.workScheduleRepository = workScheduleRepository;
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.driverRepository = driverRepository;
         this.workShiftTemplateRepository = workShiftTemplateRepository;
         this.workSheduleValidate = workSheduleValidate;
+        this.companyRepository = companyRepository;
     }
 
     @Transactional
@@ -55,9 +58,20 @@ public class WorkScheduleService {
         Driver driver = driverRepository.findById(request.driverId())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.driverId()));
 
-        Company company = equipamentGroup.getCompany() != null
-                ? equipamentGroup.getCompany()
-                : (driver.getUser() != null ? driver.getUser().getCompany() : null);
+        Company company = null;
+        if (equipamentGroup.getCompany() != null) {
+            company = equipamentGroup.getCompany();
+        } else if (driver.getUser() != null && driver.getUser().getCompany() != null) {
+            company = driver.getUser().getCompany();
+        } else {
+            UUID currentTenant = TenantContext.getCurrentTenantId();
+            if (currentTenant != null) {
+                company = companyRepository.findById(currentTenant).orElse(null);
+            }
+        }
+        if (company == null) {
+            company = companyRepository.findAll().stream().findFirst().orElse(null);
+        }
 
         WorkShiftTemplate template = null;
         if (request.shiftTemplateId() != null) {
@@ -106,7 +120,7 @@ public class WorkScheduleService {
     public List<WorkSheduleResponses> getAll() {
         UUID currentTenant = TenantContext.getCurrentTenantId();
         List<WorkSchedule> workSchedules = (currentTenant != null)
-                ? workScheduleRepository.findByCompanyId(currentTenant)
+                ? workScheduleRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
                 : workScheduleRepository.findAll();
 
         return workSchedules.stream().map(this::toResponse).toList();

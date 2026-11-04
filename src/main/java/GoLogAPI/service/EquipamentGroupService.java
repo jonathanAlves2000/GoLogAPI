@@ -32,18 +32,21 @@ public class EquipamentGroupService {
     private final EquipamentGroupValidate equipamentGroupValidate;
     private final TypeTransportRepository typeTransportRepository;
     private final SupportedTypeMapper supportedTypeMapper;
+    private final GoLogAPI.repository.CompanyRepository companyRepository;
 
 
     public EquipamentGroupService(EquipamentGroupRepository equipamentGroupRepository,
                                   EquipamentGroupMapper equipamentGroupMapper, EquipamentRepository equipamentRepository,
                                   EquipamentGroupValidate equipamentGroupValidate, TypeTransportRepository typeTransportRepository,
-                                  SupportedTypeMapper supportedTypeMapper){
+                                  SupportedTypeMapper supportedTypeMapper,
+                                  GoLogAPI.repository.CompanyRepository companyRepository){
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.equipamentGroupMapper = equipamentGroupMapper;
         this.equipamentRepository = equipamentRepository;
         this.equipamentGroupValidate = equipamentGroupValidate;
         this.typeTransportRepository = typeTransportRepository;
         this.supportedTypeMapper = supportedTypeMapper;
+        this.companyRepository = companyRepository;
     }
 
     @Transactional
@@ -56,7 +59,21 @@ public class EquipamentGroupService {
         Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament1Id()));
         equipamentGroup.setEquipament1(equipament1);
-        equipamentGroup.setCompany(equipament1.getCompany());
+
+        GoLogAPI.model.Company company = null;
+        if (equipamentGroupCreateRequest.companyId() != null) {
+            company = companyRepository.findById(equipamentGroupCreateRequest.companyId()).orElse(null);
+        }
+        if (company == null && equipament1.getCompany() != null) {
+            company = equipament1.getCompany();
+        }
+        if (company == null) {
+            UUID currentTenant = TenantContext.getCurrentTenantId();
+            if (currentTenant != null) {
+                company = companyRepository.findById(currentTenant).orElse(null);
+            }
+        }
+        equipamentGroup.setCompany(company);
 
         if(equipamentGroupCreateRequest.equipament2Id() != null) {
             Equipament equipament2 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament2Id())
@@ -82,7 +99,7 @@ public class EquipamentGroupService {
     public List<EquipamentGroupResponse> getAll() {
         UUID currentTenant = TenantContext.getCurrentTenantId();
         List<EquipamentGroup> equipamentGroups = (currentTenant != null)
-                ? equipamentGroupRepository.findByCompanyId(currentTenant)
+                ? equipamentGroupRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
                 : equipamentGroupRepository.findAll();
         return equipamentGroupMapper.toResponses(equipamentGroups);
     }
@@ -105,7 +122,21 @@ public class EquipamentGroupService {
         Equipament equipament1 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament1Id())
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentGroupCreateRequest.equipament1Id()));
         equipamentGroup.setEquipament1(equipament1);
-        equipamentGroup.setCompany(equipament1.getCompany());
+
+        GoLogAPI.model.Company company = null;
+        if (equipamentGroupCreateRequest.companyId() != null) {
+            company = companyRepository.findById(equipamentGroupCreateRequest.companyId()).orElse(null);
+        }
+        if (company == null && equipament1.getCompany() != null) {
+            company = equipament1.getCompany();
+        }
+        if (company == null) {
+            UUID currentTenant = TenantContext.getCurrentTenantId();
+            if (currentTenant != null) {
+                company = companyRepository.findById(currentTenant).orElse(null);
+            }
+        }
+        equipamentGroup.setCompany(company);
 
         if(equipamentGroupCreateRequest.equipament2Id() != null) {
             Equipament equipament2 = equipamentRepository.findById(equipamentGroupCreateRequest.equipament2Id())
