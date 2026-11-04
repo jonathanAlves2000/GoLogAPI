@@ -9,11 +9,11 @@ import GoLogAPI.model.enums.TypeOperation;
 import GoLogAPI.model.enums.VisitTypeRuleType;
 import GoLogAPI.repository.*;
 import GoLogAPI.service.MessageException;
-import com.google.cloud.optimization.v1.BreakRule;
-import com.google.cloud.optimization.v1.OptimizeToursRequest;
-import com.google.cloud.optimization.v1.OptimizeToursResponse;
-import com.google.cloud.optimization.v1.ShipmentModel;
-import com.google.cloud.optimization.v1.TimeWindow;
+import com.google.maps.routeoptimization.v1.BreakRule;
+import com.google.maps.routeoptimization.v1.OptimizeToursRequest;
+import com.google.maps.routeoptimization.v1.OptimizeToursResponse;
+import com.google.maps.routeoptimization.v1.ShipmentModel;
+import com.google.maps.routeoptimization.v1.TimeWindow;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.type.LatLng;
@@ -98,7 +98,7 @@ public class RouteRequestService {
                     .setLongitude(Double.parseDouble(lngStr))
                     .build();
 
-            com.google.cloud.optimization.v1.Vehicle.Builder vehicleBuilder = com.google.cloud.optimization.v1.Vehicle.newBuilder()
+            com.google.maps.routeoptimization.v1.Vehicle.Builder vehicleBuilder = com.google.maps.routeoptimization.v1.Vehicle.newBuilder()
                     .setLabel(equipament.getEquipament1().getPlate())
                     .setStartLocation(startLocation)
                     .setCostPerKilometer(tractor.getCostPerKilometer() * settings.kmCostMultiplier())
@@ -140,7 +140,7 @@ public class RouteRequestService {
             var vehicleLimits = configResolver.resolveVehicleLoadLimits(equipament);
             for (var entry : vehicleLimits.entrySet()) {
                 long max = entry.getValue().maxLoad() != null ? Long.parseLong(entry.getValue().maxLoad()) : 0L;
-                vehicleBuilder.putLoadLimits(entry.getKey(), com.google.cloud.optimization.v1.Vehicle.LoadLimit.newBuilder()
+                vehicleBuilder.putLoadLimits(entry.getKey(), com.google.maps.routeoptimization.v1.Vehicle.LoadLimit.newBuilder()
                         .setMaxLoad(max)
                         .build());
             }
@@ -254,15 +254,15 @@ public class RouteRequestService {
                         .build();
 
                 var deliveryDemands = configResolver.resolveShipmentLoadDemands(delivery);
-                Map<String, com.google.cloud.optimization.v1.Shipment.Load> protoDemands = new HashMap<>();
+                Map<String, com.google.maps.routeoptimization.v1.Shipment.Load> protoDemands = new HashMap<>();
                 for (var demandEntry : deliveryDemands.entrySet()) {
                     long amount = demandEntry.getValue().amount() != null ? Long.parseLong(demandEntry.getValue().amount()) : 0L;
-                    protoDemands.put(demandEntry.getKey(), com.google.cloud.optimization.v1.Shipment.Load.newBuilder()
+                    protoDemands.put(demandEntry.getKey(), com.google.maps.routeoptimization.v1.Shipment.Load.newBuilder()
                             .setAmount(amount)
                             .build());
                 }
 
-                com.google.cloud.optimization.v1.Shipment.VisitRequest.Builder pickupReqBuilder = com.google.cloud.optimization.v1.Shipment.VisitRequest.newBuilder()
+                com.google.maps.routeoptimization.v1.Shipment.VisitRequest.Builder pickupReqBuilder = com.google.maps.routeoptimization.v1.Shipment.VisitRequest.newBuilder()
                         .setArrivalLocation(pickupLocation)
                         .setDuration(stopDuration)
                         .addTimeWindows(pickupWindow)
@@ -271,7 +271,7 @@ public class RouteRequestService {
                     pickupReqBuilder.addAllVisitTypes(collectVisitTypes);
                 }
 
-                com.google.cloud.optimization.v1.Shipment.VisitRequest.Builder deliveryReqBuilder = com.google.cloud.optimization.v1.Shipment.VisitRequest.newBuilder()
+                com.google.maps.routeoptimization.v1.Shipment.VisitRequest.Builder deliveryReqBuilder = com.google.maps.routeoptimization.v1.Shipment.VisitRequest.newBuilder()
                         .setArrivalLocation(deliveryLocation)
                         .setDuration(stopDuration)
                         .addTimeWindows(deliveryWindow)
@@ -280,7 +280,7 @@ public class RouteRequestService {
                     deliveryReqBuilder.addAllVisitTypes(deliveryVisitTypes);
                 }
 
-                com.google.cloud.optimization.v1.Shipment protoShipment = com.google.cloud.optimization.v1.Shipment.newBuilder()
+                com.google.maps.routeoptimization.v1.Shipment protoShipment = com.google.maps.routeoptimization.v1.Shipment.newBuilder()
                         .setLabel(collect.getId().toString() + "/" + delivery.getId().toString())
                         .addPickups(pickupReqBuilder.build())
                         .addDeliveries(deliveryReqBuilder.build())
@@ -314,10 +314,10 @@ public class RouteRequestService {
             List<VisitTypeRule> rules = visitTypeRuleRepository.findAvailableByCompanyId(company.getId());
             for (VisitTypeRule rule : rules) {
                 if (rule.getRuleType() == VisitTypeRuleType.INCOMPATIBLE_ON_SAME_VEHICLE) {
-                    shipmentModelBuilder.addShipmentTypeIncompatibilities(com.google.cloud.optimization.v1.ShipmentTypeIncompatibility.newBuilder()
+                    shipmentModelBuilder.addShipmentTypeIncompatibilities(com.google.maps.routeoptimization.v1.ShipmentTypeIncompatibility.newBuilder()
                             .addTypes(rule.getVisitType1().getCode())
                             .addTypes(rule.getVisitType2().getCode())
-                            .setIncompatibilityMode(com.google.cloud.optimization.v1.ShipmentTypeIncompatibility.IncompatibilityMode.NOT_PERFORMED_BY_SAME_VEHICLE)
+                            .setIncompatibilityMode(com.google.maps.routeoptimization.v1.ShipmentTypeIncompatibility.IncompatibilityMode.NOT_PERFORMED_BY_SAME_VEHICLE)
                             .build());
                 }
             }

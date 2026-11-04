@@ -7,7 +7,7 @@ import GoLogAPI.model.enums.RoutePriority;
 import GoLogAPI.model.enums.WorkScheduleStatus;
 import GoLogAPI.repository.*;
 import GoLogAPI.service.MessageException;
-import com.google.cloud.optimization.v1.ShipmentRoute;
+import com.google.maps.routeoptimization.v1.ShipmentRoute;
 import com.google.maps.model.LatLng;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +84,7 @@ public class ProcessTransportService {
         OptimizationConfigResolver.ResolvedOptimizationSettings settings = configResolver.resolveSettings(optimizeRouteRequest, company);
         double kmMultiplier = settings.kmCostMultiplier() > 0 ? settings.kmCostMultiplier() : 1.0;
 
-        Map<String, Double> routeCosts = metrics.getCostsMap();
+        Map<String, Double> routeCosts = vehicleRoute.getRouteCostsMap();
         Double costKmMultiplied = routeCosts.get("model.vehicles.cost_per_kilometer");
         Double costKmCalculated = costKmMultiplied != null ? costKmMultiplied / kmMultiplier : 0.0;
         Double costHourCalculated = operationDurationHour * driver.getCostPerHour();

@@ -3,7 +3,7 @@ package GoLogAPI.controller;
 import GoLogAPI.dto.optimizeRoute.OptimizeRouteRequest;
 import GoLogAPI.service.routeOptimization.ProcessRouteService;
 import GoLogAPI.service.routeOptimization.RouteRequestService;
-import com.google.cloud.optimization.v1.OptimizeToursResponse;
+import com.google.maps.routeoptimization.v1.OptimizeToursResponse;
 import com.google.protobuf.util.JsonFormat;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

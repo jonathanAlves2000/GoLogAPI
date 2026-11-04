@@ -6,9 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum UserProfile {
-    ADMIN("ADMIN"),
-    DRIVER("DRIVER"),
-    OPERATOR("OPERATOR"),
+    ADMIN("Administrador"),
+    DRIVER("Motorista"),
+    OPERATOR("Operador"),
     POWERBI("POWER BI");
 
     private final String profile;

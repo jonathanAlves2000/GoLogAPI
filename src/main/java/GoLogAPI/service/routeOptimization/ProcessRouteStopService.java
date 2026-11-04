@@ -10,7 +10,7 @@ import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.ShipmentRepository;
 import GoLogAPI.service.MessageException;
-import com.google.cloud.optimization.v1.ShipmentRoute;
+import com.google.maps.routeoptimization.v1.ShipmentRoute;
 import com.google.maps.model.LatLng;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
