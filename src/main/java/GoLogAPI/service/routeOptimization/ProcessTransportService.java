@@ -57,12 +57,49 @@ public class ProcessTransportService {
         }
 
         String vehicleLabel = vehicleRoute.getVehicleLabel();
+        Equipament equipament = null;
+        EquipamentGroup equipamentGroup = null;
+        WorkSchedule workSchedule = null;
 
-        Equipament equipament = equipamentRepository.findByPlate(vehicleLabel)
-                .orElseThrow(() -> new RuntimeException("Placa: " + vehicleLabel + " não encontrada"));
+        // Suporte a formato composto único: placa/equipamentGroupId/workScheduleId
+        if (vehicleLabel != null && vehicleLabel.contains("/")) {
+            String[] parts = vehicleLabel.split("/");
+            if (parts.length >= 2) {
+                try {
+                    UUID eqGroupId = UUID.fromString(parts[1]);
+                    equipamentGroup = equipamentGroupRepository.findById(eqGroupId).orElse(null);
+                } catch (Exception ignored) {}
+            }
+            if (parts.length >= 3) {
+                try {
+                    UUID wsId = UUID.fromString(parts[2]);
+                    workSchedule = workScheduleRepository.findById(wsId).orElse(null);
+                } catch (Exception ignored) {}
+            }
+            if (equipamentGroup != null && equipamentGroup.getEquipament1() != null) {
+                equipament = equipamentGroup.getEquipament1();
+            }
+        }
 
-        EquipamentGroup equipamentGroup = equipamentGroupRepository.findByEquipament1Id(equipament.getId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getId()));
+        // Fallback para placa simples (compatibilidade com chamadas diretas / legado)
+        if (equipament == null) {
+            String plate = vehicleLabel != null && vehicleLabel.contains("/") ? vehicleLabel.split("/")[0] : vehicleLabel;
+            UUID reqTenant = TenantContext.getCurrentTenantId();
+            if (reqTenant != null) {
+                equipament = equipamentRepository.findFirstByPlateAndCompanyIdOrderByCreatedAtDesc(plate, reqTenant)
+                        .orElse(null);
+            }
+            if (equipament == null) {
+                equipament = equipamentRepository.findFirstByPlateOrderByCreatedAtDesc(plate)
+                        .orElseThrow(() -> new RuntimeException("Placa: " + vehicleLabel + " não encontrada"));
+            }
+        }
+
+        final UUID equipamentId = equipament.getId();
+        if (equipamentGroup == null) {
+            equipamentGroup = equipamentGroupRepository.findFirstByEquipament1IdOrderByCreatedAtDesc(equipamentId)
+                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentId));
+        }
 
         Company company = null;
         // 1. Empresa dona do conjunto de equipamentos (se for transportadora/tenant habilitado)
@@ -107,10 +144,14 @@ public class ProcessTransportService {
                     .orElseGet(() -> companyRepository.findAll().stream().findFirst().orElse(null));
         }
 
-        Transport transport = transportRepository.findByEquipamentGroup(equipamentGroup)
+        Transport transport = transportRepository.findFirstByEquipamentGroupOrderByCreatedAtDesc(equipamentGroup)
+                .filter(t -> t.getDistanceTraveled() == null)
                 .orElse(new Transport());
 
-        WorkSchedule workSchedule = workScheduleRepository.findByEquipamentGroupId(equipamentGroup.getId());
+        if (workSchedule == null) {
+            workSchedule = workScheduleRepository.findFirstByEquipamentGroupIdOrderByCreatedAtDesc(equipamentGroup.getId())
+                    .orElse(null);
+        }
         Driver driver = workSchedule != null ? workSchedule.getDriver() : null;
         if (workSchedule != null) {
             workSchedule.setStatus(WorkScheduleStatus.EM_OPERACAO);

@@ -65,8 +65,8 @@ public class VehiclePlateCacheService {
             }
 
             // Cache miss: busca no banco por placa com hífen ou sem hífen
-            return equipamentRepository.findByPlate(plate.trim())
-                    .or(() -> equipamentRepository.findByPlate(cleanPlate))
+            return equipamentRepository.findFirstByPlateOrderByCreatedAtDesc(plate.trim())
+                    .or(() -> equipamentRepository.findFirstByPlateOrderByCreatedAtDesc(cleanPlate))
                     .map(this::cacheEquipament)
                     .orElse(null);
         }

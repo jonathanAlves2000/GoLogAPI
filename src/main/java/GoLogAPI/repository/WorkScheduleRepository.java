@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface WorkScheduleRepository extends JpaRepository<WorkSchedule, UUID> {
@@ -21,7 +22,11 @@ public interface WorkScheduleRepository extends JpaRepository<WorkSchedule, UUID
     @Query("SELECT CASE WHEN COUNT(w) > 0 THEN true ELSE false END FROM WorkSchedule w WHERE w.equipamentGroup.id = :equipamentGroupId AND w.status IN (GoLogAPI.model.enums.WorkScheduleStatus.ATIVO, GoLogAPI.model.enums.WorkScheduleStatus.EM_OPERACAO)")
     Boolean existsActiveByEquipamentGroupId(@Param("equipamentGroupId") UUID equipamentGroupId);
 
-    WorkSchedule findByEquipamentGroupId(UUID equipamentGroupId);
+    Optional<WorkSchedule> findFirstByEquipamentGroupIdOrderByCreatedAtDesc(UUID equipamentGroupId);
+
+    default WorkSchedule findByEquipamentGroupId(UUID equipamentGroupId) {
+        return findFirstByEquipamentGroupIdOrderByCreatedAtDesc(equipamentGroupId).orElse(null);
+    }
 
     @Query("SELECT w " +
           "FROM WorkSchedule w " +

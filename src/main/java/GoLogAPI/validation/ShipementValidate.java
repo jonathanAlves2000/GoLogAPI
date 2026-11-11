@@ -22,7 +22,7 @@ public class ShipementValidate {
         if(shipmentRequest.operationOrigemId() == null)
             return;
 
-        Shipment shipmentCollect = shipmentRepository.findByOperationOrigemId(shipmentRequest.operationOrigemId());
+        Shipment shipmentCollect = shipmentRepository.findById(shipmentRequest.operationOrigemId()).orElse(null);
 
         if(shipmentCollect == null)
             throw new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentRequest.operationOrigemId());

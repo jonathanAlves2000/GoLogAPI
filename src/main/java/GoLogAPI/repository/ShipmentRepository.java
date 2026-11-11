@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
@@ -69,6 +70,10 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
 
     @Query("SELECT s " +
            "FROM Shipment s " +
-            "WHERE id = :collectId")
-    Shipment findByOperationOrigemId(UUID collectId);
+            "WHERE s.id = :collectId")
+    Optional<Shipment> findFirstByOperationOrigemIdOrderByCreatedAtDesc(@Param("collectId") UUID collectId);
+
+    default Shipment findByOperationOrigemId(UUID collectId) {
+        return findById(collectId).orElse(null);
+    }
 }

@@ -116,7 +116,7 @@ public class RouteRequestService {
                     .build();
 
             com.google.maps.routeoptimization.v1.Vehicle.Builder vehicleBuilder = com.google.maps.routeoptimization.v1.Vehicle.newBuilder()
-                    .setLabel(equipament.getEquipament1().getPlate())
+                    .setLabel(equipament.getEquipament1().getPlate() + "/" + equipament.getId() + "/" + workSchedule.getId())
                     .setStartLocation(startLocation)
                     .setCostPerKilometer(tractor.getCostPerKilometer() * settings.kmCostMultiplier())
                     .setCostPerHour(driver.getCostPerHour() * settings.hourCostMultiplier());

@@ -12,7 +12,11 @@ import java.util.UUID;
 
 public interface TransportRepository extends JpaRepository<Transport, UUID> {
 
-    Optional<Transport> findByEquipamentGroup(EquipamentGroup equipamentGroup);
+    Optional<Transport> findFirstByEquipamentGroupOrderByCreatedAtDesc(EquipamentGroup equipamentGroup);
+
+    default Optional<Transport> findByEquipamentGroup(EquipamentGroup equipamentGroup) {
+        return findFirstByEquipamentGroupOrderByCreatedAtDesc(equipamentGroup);
+    }
 
     List<Transport> findByTransporterId(UUID transporterId);
 
