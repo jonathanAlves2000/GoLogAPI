@@ -34,6 +34,13 @@ public class TransportService {
     private final GoLogAPI.repository.RouteStopRepository routeStopRepository;
     private final GoLogAPI.repository.ShipmentRepository shipmentRepository;
 
+    private GoLogAPI.service.webhook.ShipmentEventPublisher shipmentEventPublisher;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setShipmentEventPublisher(GoLogAPI.service.webhook.ShipmentEventPublisher shipmentEventPublisher) {
+        this.shipmentEventPublisher = shipmentEventPublisher;
+    }
+
     public TransportService(
             TransportRepository transportRepository, TransportMapper transportMapper,
             DriverRepository driverRepository, CompanyRepository companyRepository,
@@ -93,6 +100,7 @@ public class TransportService {
             if (shipment != null && shipment.getStatus() == GoLogAPI.model.enums.ShipmentStatus.AGUARDANDO_INICIO) {
                 shipment.setStatus(GoLogAPI.model.enums.ShipmentStatus.PENDENTE);
                 shipmentRepository.save(shipment);
+                shipmentEventPublisher.publish("SHIPMENT_UNPLANNED", shipment);
             }
         }
         routeStopRepository.deleteByTransportId(id);

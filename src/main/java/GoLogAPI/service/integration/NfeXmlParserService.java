@@ -169,7 +169,10 @@ public class NfeXmlParserService {
                 state,
                 cep,
                 null, // Latitude resolvida no importador
-                null  // Longitude resolvida no importador
+                null, // Longitude resolvida no importador
+                null,
+                null,
+                null
         );
     }
 

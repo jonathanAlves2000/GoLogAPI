@@ -1,5 +1,7 @@
 package GoLogAPI.dto.tractor;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.UUID;
 
 import jakarta.validation.constraints.Pattern;
@@ -16,6 +18,15 @@ public record TractorUpdateRequest(
         Integer numberAxles,
         Double maximumCapacity,
         Double costPerKilometer,
-        UUID companyId
+        UUID companyId,
+
+        @Schema(description = "Categoria do veículo. Omitido = CAVALO_MECANICO (compatibilidade).")
+        GoLogAPI.model.enums.VehicleType vehicleType,
+
+        @Schema(description = "Volume útil da carroceria em m³ (veículos rígidos)")
+        Double cargoVolume,
+
+        @Schema(description = "Emissão em kg CO2/km. Omitido = referência da categoria (0 para elétricos).")
+        Double co2PerKilometer
 
 ) implements TractorRequest { }

@@ -41,6 +41,13 @@ public class ProcessRouteStopService {
     private final RouteStopRepository routeStopRepository;
     private final TransportRepository transportRepository;
 
+    private GoLogAPI.service.webhook.ShipmentEventPublisher shipmentEventPublisher;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setShipmentEventPublisher(GoLogAPI.service.webhook.ShipmentEventPublisher shipmentEventPublisher) {
+        this.shipmentEventPublisher = shipmentEventPublisher;
+    }
+
     public ProcessRouteStopService(
             ShipmentRepository shipmentRepository,
             ProcessTransportService processTransportService,
@@ -122,6 +129,9 @@ public class ProcessRouteStopService {
             }
             if (!updatedShipments.isEmpty()) {
                 shipmentRepository.saveAll(updatedShipments.values());
+            }
+            for (RouteStop stop : newStops) {
+                shipmentEventPublisher.publish("SHIPMENT_PLANNED", stop.getShipment(), stop, null);
             }
         }
         return created;

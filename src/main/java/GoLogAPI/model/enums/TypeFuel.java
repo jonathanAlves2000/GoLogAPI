@@ -8,6 +8,9 @@ import lombok.Getter;
 public enum TypeFuel {
     DIESEL("DIESEL"),
     ETANOL("ETANOL"),
-    GASOLINA("GASOLINA");
+    GASOLINA("GASOLINA"),
+    FLEX("FLEX"),
+    GNV("GNV"),
+    ELETRICO("ELETRICO");
     private final String fuel;
 }

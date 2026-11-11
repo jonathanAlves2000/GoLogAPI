@@ -1,5 +1,9 @@
 package GoLogAPI.service.integration;
 
+import java.util.Map;
+
+import java.util.HashMap;
+
 import GoLogAPI.dto.integration.InvoiceImportItem;
 import GoLogAPI.dto.integration.InvoiceImportResponse;
 import GoLogAPI.infra.tenant.TenantContext;
@@ -31,6 +35,15 @@ public class InvoiceImportService {
     private final TypeTransportRepository typeTransportRepository;
     private final UserRepository userRepository;
     private final WebhookDispatcherService webhookDispatcherService;
+    private GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+    private GoLogAPI.service.webhook.ShipmentEventPublisher shipmentEventPublisher;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setCollaborators(GoLogAPI.infra.tenant.TenantGuard tenantGuard,
+                          GoLogAPI.service.webhook.ShipmentEventPublisher shipmentEventPublisher) {
+        this.tenantGuard = tenantGuard;
+        this.shipmentEventPublisher = shipmentEventPublisher;
+    }
 
     public InvoiceImportService(ShipmentRepository shipmentRepository,
                                 CompanyRepository companyRepository,
@@ -56,43 +69,42 @@ public class InvoiceImportService {
             return new InvoiceImportResponse(0, 0, 0, List.of(), List.of(), 0L);
         }
 
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        Company currentCompany = currentTenant != null
-                ? companyRepository.findById(currentTenant).orElse(null)
-                : (TenantContext.getUserCompanyId() != null
-                    ? companyRepository.findById(TenantContext.getUserCompanyId()).orElse(null)
-                    : companyRepository.findFirstByIsMasterTrue().orElse(null));
+        // Tenant que importa: ativo na requisição; na Visão Global do Master, a empresa do próprio usuário
+        Company currentCompany = tenantGuard.ownerForWrite(null);
+        UUID tenantId = currentCompany.getId();
 
-        // Fallbacks de configuração
-        ShipmentType defaultShipmentType = shipmentTypeRepository.findAll().stream().findFirst().orElse(null);
-        TypeTransport defaultTypeTransport = typeTransportRepository.findAll().stream().findFirst().orElse(null);
-        User defaultUser = userRepository.findAll().stream().findFirst().orElse(null);
+        // Catálogos e responsável sempre do tenant (antes: o primeiro registro do banco inteiro)
+        List<TypeTransport> transportTypes = typeTransportRepository.findAvailableForCompany(tenantId);
+        List<ShipmentType> shipmentTypes = shipmentTypeRepository.findAvailableForCompany(tenantId);
+        User responsible = TenantContext.getCurrentUserId() != null
+                ? userRepository.findById(TenantContext.getCurrentUserId()).orElse(null) : null;
+        if (responsible == null) {
+            responsible = userRepository.findByCompanyId(tenantId).stream().findFirst().orElse(null);
+        }
+        if (transportTypes.isEmpty() || shipmentTypes.isEmpty() || responsible == null) {
+            throw new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY,
+                    "O tenant precisa ter ao menos um tipo de transporte, um tipo de carga e um usuário antes de importar remessas.");
+        }
 
         List<Shipment> shipmentsToSave = new ArrayList<>();
-        List<UUID> createdIds = new ArrayList<>();
+        Map<String, Shipment> byInvoice = new HashMap<>();
         List<String> errors = new ArrayList<>();
-        int successCount = 0;
         int errorCount = 0;
 
         for (int i = 0; i < items.size(); i++) {
             InvoiceImportItem item = items.get(i);
+            String invoiceId = item.invoiceNumber() != null && !item.invoiceNumber().isBlank() ? item.invoiceNumber() : ("Item #" + i);
             try {
-                // 1. Resolve ou cadastra o Cliente destinatário da carga
                 Company customer = resolveOrCreateCustomer(item, currentCompany);
+                // Endereço da operação vem do próprio item (coleta no produtor, entrega no varejista...)
+                Address operationAddress = resolveOperationAddress(item, customer, currentCompany);
 
-                // 2. Resolve endereço da entrega
-                Address deliveryAddress = customer.getAddress();
-
-                // 3. Monta a Remessa
                 Double weight = (item.weight() != null && item.weight() > 0) ? item.weight() : 1.0;
                 Double volume = (item.volume() != null && item.volume() > 0) ? item.volume() : 0.1;
                 LocalDateTime scheduledDate = item.scheduledDate() != null
                         ? item.scheduledDate()
-                        : LocalDateTime.now().plusDays(1).withHour(8).withMinute(0);
-
-                TypeOperation typeOperation = item.typeOperation() != null
-                        ? item.typeOperation()
-                        : TypeOperation.ENTREGA;
+                        : LocalDateTime.now().plusDays(1).withHour(8).withMinute(0).withSecond(0).withNano(0);
+                TypeOperation typeOperation = item.typeOperation() != null ? item.typeOperation() : TypeOperation.ENTREGA;
 
                 Shipment shipment = Shipment.builder()
                         .weight(weight)
@@ -101,49 +113,88 @@ public class InvoiceImportService {
                         .typeOperation(typeOperation)
                         .status(ShipmentStatus.PENDENTE)
                         .customer(customer)
-                        .address(deliveryAddress)
-                        .shipmentType(defaultShipmentType)
-                        .typeTransport(defaultTypeTransport)
+                        .address(operationAddress)
+                        .shipmentType(pickByName(shipmentTypes, item.shipmentTypeName(), ShipmentType::getName))
+                        .typeTransport(pickByName(transportTypes, item.typeTransportName(), TypeTransport::getName))
                         .company(currentCompany)
-                        .user(defaultUser)
+                        .user(responsible)
                         .build();
 
                 shipmentsToSave.add(shipment);
-                successCount++;
-
+                if (item.invoiceNumber() != null) byInvoice.put(item.invoiceNumber().trim(), shipment);
             } catch (Exception e) {
                 errorCount++;
-                String invoiceId = item.invoiceNumber() != null ? item.invoiceNumber() : ("Item #" + i);
                 errors.add("Erro ao processar fatura " + invoiceId + ": " + e.getMessage());
                 log.warn("Erro ao importar fatura {}: {}", invoiceId, e.getMessage());
             }
         }
 
-        // 4. Salvamento em lote no banco
-        if (!shipmentsToSave.isEmpty()) {
-            List<Shipment> savedList = shipmentRepository.saveAll(shipmentsToSave);
-            for (Shipment saved : savedList) {
-                createdIds.add(saved.getId());
+        // Vincula ENTREGA -> COLETA de origem do mesmo lote (precedência coleta antes da entrega no otimizador)
+        for (int i = 0; i < items.size(); i++) {
+            InvoiceImportItem item = items.get(i);
+            Shipment shipment = item.invoiceNumber() != null ? byInvoice.get(item.invoiceNumber().trim()) : null;
+            if (shipment == null || shipment.getTypeOperation() != TypeOperation.ENTREGA) continue;
+            String originKey = item.originInvoiceNumber();
+            if ((originKey == null || originKey.isBlank()) && item.invoiceNumber().trim().toUpperCase().endsWith("-ENT")) {
+                String inv = item.invoiceNumber().trim();
+                originKey = inv.substring(0, inv.length() - 4) + "-COL";
+            }
+            Shipment origin = originKey != null ? byInvoice.get(originKey.trim()) : null;
+            if (origin != null && origin.getTypeOperation() == TypeOperation.COLETA) {
+                shipment.setOperationOrigem(origin);
+            }
+        }
 
-                // 5. Dispara webhook SHIPMENT_CREATED para o ERP da empresa
-                if (currentCompany != null) {
-                    webhookDispatcherService.dispatch(currentCompany, "SHIPMENT_CREATED", saved);
-                }
+        List<UUID> createdIds = new ArrayList<>();
+        if (!shipmentsToSave.isEmpty()) {
+            for (Shipment saved : shipmentRepository.saveAll(shipmentsToSave)) {
+                createdIds.add(saved.getId());
+                shipmentEventPublisher.publish("SHIPMENT_CREATED", saved);
             }
         }
 
         long duration = System.currentTimeMillis() - startTime;
-        log.info("Lote de faturas/NF-e importado: total={}, sucesso={}, erros={}, tempo={}ms",
-                items.size(), successCount, errorCount, duration);
+        return new InvoiceImportResponse(items.size(), createdIds.size(), errorCount, createdIds, errors, duration);
+    }
 
-        return new InvoiceImportResponse(
-                items.size(),
-                successCount,
-                errorCount,
-                createdIds,
-                errors,
-                duration
-        );
+    private static <T> T pickByName(List<T> options, String name, java.util.function.Function<T, String> nameOf) {
+        if (name != null && !name.isBlank()) {
+            String wanted = name.trim();
+            for (T option : options) {
+                String n = nameOf.apply(option);
+                if (n != null && n.trim().equalsIgnoreCase(wanted)) return option;
+            }
+        }
+        return options.get(0);
+    }
+
+    /** Reaproveita um endereço do tenant com as mesmas coordenadas ou rua/número/cidade; senão cria. */
+    private Address resolveOperationAddress(InvoiceImportItem item, Company customer, Company tenant) {
+        boolean hasStreet = item.street() != null && !item.street().isBlank();
+        boolean hasCoords = item.latitude() != null && !item.latitude().isBlank()
+                && item.longitude() != null && !item.longitude().isBlank();
+        if (!hasStreet && !hasCoords) {
+            return customer.getAddress();
+        }
+        for (Address a : addressRepository.findByCompanyId(tenant.getId())) {
+            boolean sameCoords = hasCoords && item.latitude().trim().equals(a.getLatitude()) && item.longitude().trim().equals(a.getLongitude());
+            boolean samePlace = hasStreet && item.street().trim().equalsIgnoreCase(a.getStreet())
+                    && String.valueOf(item.number()).trim().equalsIgnoreCase(a.getNumber())
+                    && item.city() != null && item.city().trim().equalsIgnoreCase(a.getCity());
+            if (sameCoords && (!hasStreet || samePlace) || (!hasCoords && samePlace)) return a;
+        }
+        Address address = new Address();
+        address.setStreet(hasStreet ? item.street().trim() : customer.getAddress().getStreet());
+        address.setNumber(item.number() != null && !item.number().isBlank() ? item.number().trim() : "S/N");
+        address.setDistrict(item.district() != null && !item.district().isBlank() ? item.district().trim() : "Centro");
+        address.setCity(item.city() != null && !item.city().isBlank() ? item.city().trim() : customer.getAddress().getCity());
+        address.setState(item.state() != null && !item.state().isBlank() ? item.state().trim().toUpperCase() : customer.getAddress().getState());
+        address.setCountry("Brasil");
+        address.setCep(item.cep() != null && !item.cep().isBlank() ? item.cep().trim() : "00000000");
+        address.setLatitude(hasCoords ? item.latitude().trim() : customer.getAddress().getLatitude());
+        address.setLongitude(hasCoords ? item.longitude().trim() : customer.getAddress().getLongitude());
+        address.setCompany(tenant);
+        return addressRepository.save(address);
     }
 
     private Company resolveOrCreateCustomer(InvoiceImportItem item, Company currentCompany) {

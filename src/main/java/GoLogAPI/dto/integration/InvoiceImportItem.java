@@ -12,6 +12,7 @@ public record InvoiceImportItem(
         Double weight,
         Double volume,
         Double value,
+        @com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = GoLogAPI.infra.json.FlexibleLocalDateTimeDeserializer.class)
         LocalDateTime scheduledDate,
         String notes,
         String senderName,
@@ -27,5 +28,14 @@ public record InvoiceImportItem(
         String state,
         String cep,
         String latitude,
-        String longitude
+        String longitude,
+        /** Opcional: nome do tipo de transporte do tenant (ex.: "REFRIGERADO"). */
+        String typeTransportName,
+        /** Opcional: nome do tipo de carga do tenant (ex.: "Frutas"). */
+        String shipmentTypeName,
+        /**
+         * Opcional (só ENTREGA): invoiceNumber da COLETA de origem enviada no mesmo lote. Sem ele, pares no
+         * padrão "PREFIXO-COL" / "PREFIXO-ENT" são vinculados automaticamente.
+         */
+        String originInvoiceNumber
 ) { }

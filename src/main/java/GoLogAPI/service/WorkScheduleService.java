@@ -52,7 +52,7 @@ public class WorkScheduleService {
     }
 
     @Transactional
-    public void save(WorkSheduleCreateRequest request) {
+    public WorkSheduleResponses save(WorkSheduleCreateRequest request) {
         workSheduleValidate.validate(request);
 
         EquipamentGroup equipamentGroup = findGroup(request.equipamentGroupId());
@@ -99,6 +99,7 @@ public class WorkScheduleService {
                 .build();
 
         workScheduleRepository.save(workSchedule);
+        return toResponse(workSchedule);
     }
 
     public List<WorkSheduleResponses> getAll() {

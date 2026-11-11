@@ -26,9 +26,8 @@ public class WorkScheduleController {
 
     @Operation(summary = "Cadastrar Escala de Trabalho", description = "Cadastra uma nova escala de trabalho")
     @PostMapping
-    public ResponseEntity<Void> save(@Valid @RequestBody WorkSheduleCreateRequest workSheduleCreateRequest){
-        workScheduleService.save(workSheduleCreateRequest);
-        return ResponseEntity.status(201).build();
+    public ResponseEntity<GoLogAPI.dto.workSchedule.WorkSheduleResponses> save(@Valid @RequestBody WorkSheduleCreateRequest workSheduleCreateRequest){
+        return ResponseEntity.status(201).body(workScheduleService.save(workSheduleCreateRequest));
     }
 
     @Operation(summary = "Lista Escala de Trabalho", description = "Retorna uma lista de todas as escala de trabalho")

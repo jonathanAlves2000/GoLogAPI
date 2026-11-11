@@ -39,6 +39,15 @@ public record TractorCreateRequest(
         EquipamentStatus status,
 
         @NotNull(message = "Empresa do equipamento deve ser informada.")
-        UUID companyId
+        UUID companyId,
+
+        @Schema(description = "Categoria do veículo. Omitido = CAVALO_MECANICO (compatibilidade).")
+        GoLogAPI.model.enums.VehicleType vehicleType,
+
+        @Schema(description = "Volume útil da carroceria em m³ (veículos rígidos)")
+        Double cargoVolume,
+
+        @Schema(description = "Emissão em kg CO2/km. Omitido = referência da categoria (0 para elétricos).")
+        Double co2PerKilometer
 
 ) implements TractorRequest{ }

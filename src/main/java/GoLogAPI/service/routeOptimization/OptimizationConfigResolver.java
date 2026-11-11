@@ -146,7 +146,14 @@ public class OptimizationConfigResolver {
             limits.put("weight", new LoadLimit(String.valueOf(equipamentGroup.getEquipament1().getMaximumCapacity().longValue())));
         }
 
-        // 4. Fallback para VOLUME (volume): se não configurado dinamicamente, busca maximumVolume do trailer
+        // 4a. Veículo rígido (van, VUC, truck...): volume útil da própria carroceria
+        if (!limits.containsKey("volume") && equipamentGroup.getEquipament2() == null
+                && equipamentGroup.getEquipament1() instanceof GoLogAPI.model.Tractor tractor
+                && tractor.getCargoVolume() != null && tractor.getCargoVolume() > 0) {
+            limits.put("volume", new LoadLimit(String.valueOf(Math.max(1L, tractor.getCargoVolume().longValue()))));
+        }
+
+        // 4b. Fallback para VOLUME (volume): se não configurado dinamicamente, busca maximumVolume do trailer
         if (!limits.containsKey("volume") && equipamentGroup.getEquipament2() != null) {
             trailerRepository.findById(equipamentGroup.getEquipament2().getId()).ifPresent(trailer -> {
                 if (trailer.getMaximumVolume() != null) {

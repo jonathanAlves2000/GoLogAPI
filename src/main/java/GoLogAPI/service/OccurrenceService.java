@@ -27,6 +27,13 @@ public class OccurrenceService {
     private final OccurrenceMapper occurrenceMapper;
     private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
+    private GoLogAPI.service.webhook.ShipmentEventPublisher shipmentEventPublisher;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setShipmentEventPublisher(GoLogAPI.service.webhook.ShipmentEventPublisher shipmentEventPublisher) {
+        this.shipmentEventPublisher = shipmentEventPublisher;
+    }
+
     public OccurrenceService(
             OccurrenceRepository occurrenceRepository, OccurrenceMapper occurrenceMapper,
             ShipmentRepository shipmentRepository, UserRepository userRepository,
@@ -50,10 +57,15 @@ public class OccurrenceService {
         Occurrence occurrence = occurrenceMapper.toEntity(occurrenceCreateRequest);
 
         String type = occurrenceCreateRequest.type().trim();
-        if(type.equalsIgnoreCase("Inicio") || type.equalsIgnoreCase("Início"))
+        String event = "SHIPMENT_OCCURRENCE";
+        if(type.equalsIgnoreCase("Inicio") || type.equalsIgnoreCase("Início")) {
              shipment.setStatus(ShipmentStatus.INICIADO);
-        if(type.equalsIgnoreCase("Fim"))
+             event = "SHIPMENT_STARTED";
+        }
+        if(type.equalsIgnoreCase("Fim")) {
             shipment.setStatus(ShipmentStatus.FINALIZADO);
+            event = "SHIPMENT_DELIVERED";
+        }
         shipmentRepository.save(shipment);
 
         occurrence.setShipment(shipment);
@@ -66,6 +78,14 @@ public class OccurrenceService {
         occurrence.setCompany(company);
 
         occurrenceRepository.save(occurrence);
+
+        java.util.Map<String, Object> extra = new java.util.LinkedHashMap<>();
+        extra.put("occurrenceId", occurrence.getId());
+        extra.put("occurrenceType", type);
+        extra.put("description", occurrence.getDescription());
+        extra.put("transportId", transport.getId());
+        extra.put("occurredAt", occurrence.getDateTime());
+        shipmentEventPublisher.publish(event, shipment, null, extra);
 
         return occurrenceMapper.toCreateResponse(occurrence);
     }
