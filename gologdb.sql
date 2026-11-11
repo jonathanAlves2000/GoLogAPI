@@ -1,13 +1,13 @@
 --
 -- PostgreSQL database dump
-
+--
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Dumped from database version 18.0 (Debian 18.0-1.pgdg13+3)
 -- Dumped by pg_dump version 18.1
 
--- Started on 2026-11-03 20:55:51 UTC
+-- Started on 2026-11-11 14:09:32 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -30,7 +30,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 
 
 --
--- TOC entry 3712 (class 0 OID 0)
+-- TOC entry 3713 (class 0 OID 0)
 -- Dependencies: 2
 -- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
 --
@@ -135,6 +135,7 @@ CREATE TABLE public.company_table (
     webhook_secret character varying(255),
     webhook_url character varying(255),
     parent_company_id uuid,
+    owner_tenant_id uuid,
     CONSTRAINT company_table_company_type_check CHECK (((company_type)::text = ANY ((ARRAY['TENANT_MASTER'::character varying, 'TENANT_HEADQUARTER'::character varying, 'TENANT_BRANCH'::character varying, 'CLIENT'::character varying, 'SUPPLIER'::character varying])::text[])))
 );
 
@@ -733,7 +734,7 @@ CREATE TABLE public.work_shift_template_table (
 ALTER TABLE public.work_shift_template_table OWNER TO admin;
 
 --
--- TOC entry 3677 (class 0 OID 16385)
+-- TOC entry 3678 (class 0 OID 16385)
 -- Dependencies: 220
 -- Data for Name: address_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -741,17 +742,17 @@ ALTER TABLE public.work_shift_template_table OWNER TO admin;
 COPY public.address_table (id, active, created_at, created_by, updated_at, updated_by, cep, city, complement, country, district, number, state, street, latitude, longitude, company_id) FROM stdin;
 ace29b92-0e59-437a-b7f6-de8c2fa772c5	t	2026-05-24 16:18:44.409603+00	admin@admin.com	2026-05-31 17:07:50.407819+00	admin@admin.com	13609390	Araras	Lactales	Brasil	Bosque dos Versalles	655	SP	Av Ângelo Franzini	-22.377172828853702	-47.3824185135542	af29a1ab-407a-497d-b721-f3b93450d9eb
 550e8400-e29b-41d4-a716-446655440000	t	\N	\N	2026-06-01 12:29:30.647343+00	admin@admin.com	13601020	Araras	Fabrica de Cafe	Brasil	Jardim Belvedere	929	SP	Av Zurita	-22.365958873162253	-47.38092631046195	d9d7b435-c256-405b-877c-848f4a22e22a
-6e51b327-bec5-48eb-b881-76daf766ea1e	t	2026-05-03 15:38:33.274998+00	admin@admin.com	2026-06-01 12:31:35.619095+00	admin@admin.com	13607300	Araras	Mercado Faveta	Brasil	Do Campinho	1830	SP	Av Melvin Jones	-22.368117059390062	-47.36234857027745	a92a50c7-b904-4637-b7ca-0f794ad50eaa
-1f2f0764-3e1c-4665-aefa-daa1da658564	t	2026-06-01 12:33:47.862716+00	admin@admin.com	2026-06-01 12:33:47.862716+00	admin@admin.com	13606831	Araras	Mercado Copacabana	Brasil	Parque Dom Pedro	243	SP	R Leopoldo Mazon Neto	-22.348362944866246	-47.3271826510571	ab393f44-c83b-485e-b152-d6403e41163e
-1e58d64a-16bc-421d-b671-e0a52cb440a4	t	2026-06-01 12:36:04.828732+00	admin@admin.com	2026-06-01 12:36:04.828732+00	admin@admin.com	13606831	Araras	Mercado Pague Menos	Brasil	Vila Michelin	1075	SP	Av Dona Renata	-22.34759560971791	-47.38447581831087	eb97a8b5-a5ae-4985-a4d7-dbf30eefe347
 dee697ea-e4d0-412b-84fc-c18cf79cbd3f	t	2026-06-01 13:39:04.887988+00	admin@admin.com	2026-06-01 13:39:04.887988+00	admin@admin.com	13607355	Araras	Transportador	Brasil	Jardim Ouro Verde	437	SP	Rua Maria Pascuotte Moraes	-22.379374549904945	-47.3635780333836	7f564f96-d90f-42cc-beb2-e37cf63a324d
-cb277df2-e4fc-4d9d-8948-7eccc7a3d556	t	2026-06-06 15:48:01.974693+00	admin@admin.com	2026-06-06 15:48:01.974693+00	admin@admin.com	13846150	Araras	Mercado Spani	Brasil	Jardim Santa Efigenia	3	SP	Av Pref Milton Severino	-22.354658131284378	-47.370722610747144	ca7dee83-4beb-4e06-ae2b-b45b509e2720
-ff6ead7c-ceb6-4ffd-bef9-9e3782bed510	t	2026-06-06 15:57:22.627025+00	admin@admin.com	2026-06-06 15:57:22.627025+00	admin@admin.com	13607205	Araras	Mercado Tonin	Brasil	ardim das Flores	651	SP	Av Horácio Krepischi	-22.358687876787442	-47.36796568142011	754fcc36-c7be-4b0d-9a96-a504675ebb7e
+6e51b327-bec5-48eb-b881-76daf766ea1e	t	2026-05-03 15:38:33.274998+00	admin@admin.com	2026-06-01 12:31:35.619095+00	admin@admin.com	13607300	Araras	Mercado Faveta	Brasil	Do Campinho	1830	SP	Av Melvin Jones	-22.368117059390062	-47.36234857027745	d9d7b435-c256-405b-877c-848f4a22e22a
+1f2f0764-3e1c-4665-aefa-daa1da658564	t	2026-06-01 12:33:47.862716+00	admin@admin.com	2026-06-01 12:33:47.862716+00	admin@admin.com	13606831	Araras	Mercado Copacabana	Brasil	Parque Dom Pedro	243	SP	R Leopoldo Mazon Neto	-22.348362944866246	-47.3271826510571	d9d7b435-c256-405b-877c-848f4a22e22a
+1e58d64a-16bc-421d-b671-e0a52cb440a4	t	2026-06-01 12:36:04.828732+00	admin@admin.com	2026-06-01 12:36:04.828732+00	admin@admin.com	13606831	Araras	Mercado Pague Menos	Brasil	Vila Michelin	1075	SP	Av Dona Renata	-22.34759560971791	-47.38447581831087	d9d7b435-c256-405b-877c-848f4a22e22a
+cb277df2-e4fc-4d9d-8948-7eccc7a3d556	t	2026-06-06 15:48:01.974693+00	admin@admin.com	2026-06-06 15:48:01.974693+00	admin@admin.com	13846150	Araras	Mercado Spani	Brasil	Jardim Santa Efigenia	3	SP	Av Pref Milton Severino	-22.354658131284378	-47.370722610747144	d9d7b435-c256-405b-877c-848f4a22e22a
+ff6ead7c-ceb6-4ffd-bef9-9e3782bed510	t	2026-06-06 15:57:22.627025+00	admin@admin.com	2026-06-06 15:57:22.627025+00	admin@admin.com	13607205	Araras	Mercado Tonin	Brasil	ardim das Flores	651	SP	Av Horácio Krepischi	-22.358687876787442	-47.36796568142011	d9d7b435-c256-405b-877c-848f4a22e22a
 \.
 
 
 --
--- TOC entry 3697 (class 0 OID 17562)
+-- TOC entry 3698 (class 0 OID 17562)
 -- Dependencies: 240
 -- Data for Name: auth_log; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -772,7 +773,7 @@ b8ad2e9a-e02e-4ed7-813e-99f6538ff072	t	2026-10-19 14:46:23.261511+00	Admin Maste
 
 
 --
--- TOC entry 3689 (class 0 OID 16809)
+-- TOC entry 3690 (class 0 OID 16809)
 -- Dependencies: 232
 -- Data for Name: collect_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -783,25 +784,25 @@ COPY public.collect_table (id, active, created_at, created_by, updated_at, updat
 
 
 --
--- TOC entry 3678 (class 0 OID 16394)
+-- TOC entry 3679 (class 0 OID 16394)
 -- Dependencies: 221
 -- Data for Name: company_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
 
-COPY public.company_table (id, active, created_at, created_by, updated_at, updated_by, cnpj_cpf, email, is_cliente, legal_name, phone_number, address_id, company_type, is_master, webhook_active, webhook_secret, webhook_url, parent_company_id) FROM stdin;
-7f564f96-d90f-42cc-beb2-e37cf63a324d	t	2026-06-01 13:39:36.345923+00	admin@admin.com	2026-06-01 13:39:36.345923+00	admin@admin.com	49018326895	golog@gmail.com	f	GoLogTransportes	(19)983282551	dee697ea-e4d0-412b-84fc-c18cf79cbd3f	TENANT_MASTER	t	\N	\N	\N	\N
-af29a1ab-407a-497d-b721-f3b93450d9eb	t	2026-05-24 16:30:51.682444+00	admin@admin.com	2026-05-24 16:30:51.682444+00	admin@admin.com	05300331003267	lactalis@lactalis.com.br	f	Lactalis Brasil	(19)35434500	ace29b92-0e59-437a-b7f6-de8c2fa772c5	TENANT_HEADQUARTER	f	\N	\N	\N	\N
-d9d7b435-c256-405b-877c-848f4a22e22a	t	2026-03-14 23:30:52.035627+00	\N	2026-06-01 13:24:48.009591+00	admin@admin.com	60409075000667	nestle@gmail.com	f	Nestlé Brasil	(19)35431100	550e8400-e29b-41d4-a716-446655440000	TENANT_HEADQUARTER	f	\N	\N	\N	\N
-a92a50c7-b904-4637-b7ca-0f794ad50eaa	t	2026-05-03 15:59:55.55528+00	admin@admin.com	2026-06-01 13:28:17.346877+00	admin@admin.com	44809564000145	faveta@gmail.com	t	Faveta Brasil	(19)35442999	6e51b327-bec5-48eb-b881-76daf766ea1e	CLIENT	f	\N	\N	\N	\N
-ab393f44-c83b-485e-b152-d6403e41163e	t	2026-06-01 13:31:12.420737+00	admin@admin.com	2026-06-01 13:31:12.420737+00	admin@admin.com	54420625000131	copacaba@lactalis.com.br	t	Copacabana Supermercados	(19)35432870	1f2f0764-3e1c-4665-aefa-daa1da658564	CLIENT	f	\N	\N	\N	\N
-eb97a8b5-a5ae-4985-a4d7-dbf30eefe347	t	2026-06-01 13:34:13.943188+00	admin@admin.com	2026-06-01 13:34:13.943188+00	admin@admin.com	60494416002502	pague@lactalis.com.br	t	Supermercado Pague Menos	(19)35080360	1e58d64a-16bc-421d-b671-e0a52cb440a4	CLIENT	f	\N	\N	\N	\N
-ca7dee83-4beb-4e06-ae2b-b45b509e2720	t	2026-06-06 15:51:55.292648+00	admin@admin.com	2026-06-06 15:51:55.292648+00	admin@admin.com	05868574004278	spani@gmail.com	t	Spani Atacadista	(19)35435296	cb277df2-e4fc-4d9d-8948-7eccc7a3d556	CLIENT	f	\N	\N	\N	\N
-754fcc36-c7be-4b0d-9a96-a504675ebb7e	t	2026-06-06 15:58:28.357548+00	admin@admin.com	2026-06-06 15:58:28.357548+00	admin@admin.com	24896425002990	tonin@gmail.com	t	Tonin Atacadista	(19)35455298	ff6ead7c-ceb6-4ffd-bef9-9e3782bed510	CLIENT	f	\N	\N	\N	\N
+COPY public.company_table (id, active, created_at, created_by, updated_at, updated_by, cnpj_cpf, email, is_cliente, legal_name, phone_number, address_id, company_type, is_master, webhook_active, webhook_secret, webhook_url, parent_company_id, owner_tenant_id) FROM stdin;
+7f564f96-d90f-42cc-beb2-e37cf63a324d	t	2026-06-01 13:39:36.345923+00	admin@admin.com	2026-06-01 13:39:36.345923+00	admin@admin.com	49018326895	golog@gmail.com	f	GoLogTransportes	(19)983282551	dee697ea-e4d0-412b-84fc-c18cf79cbd3f	TENANT_MASTER	t	\N	\N	\N	\N	\N
+af29a1ab-407a-497d-b721-f3b93450d9eb	t	2026-05-24 16:30:51.682444+00	admin@admin.com	2026-05-24 16:30:51.682444+00	admin@admin.com	05300331003267	lactalis@lactalis.com.br	f	Lactalis Brasil	(19)35434500	ace29b92-0e59-437a-b7f6-de8c2fa772c5	TENANT_HEADQUARTER	f	\N	\N	\N	\N	\N
+d9d7b435-c256-405b-877c-848f4a22e22a	t	2026-03-14 23:30:52.035627+00	\N	2026-06-01 13:24:48.009591+00	admin@admin.com	60409075000667	nestle@gmail.com	f	Nestlé Brasil	(19)35431100	550e8400-e29b-41d4-a716-446655440000	TENANT_HEADQUARTER	f	\N	\N	\N	\N	\N
+754fcc36-c7be-4b0d-9a96-a504675ebb7e	t	2026-06-06 15:58:28.357548+00	admin@admin.com	2026-06-06 15:58:28.357548+00	admin@admin.com	24896425002990	tonin@gmail.com	t	Tonin Atacadista	(19)35455298	ff6ead7c-ceb6-4ffd-bef9-9e3782bed510	CLIENT	f	\N	\N	\N	\N	d9d7b435-c256-405b-877c-848f4a22e22a
+a92a50c7-b904-4637-b7ca-0f794ad50eaa	t	2026-05-03 15:59:55.55528+00	admin@admin.com	2026-06-01 13:28:17.346877+00	admin@admin.com	44809564000145	faveta@gmail.com	t	Faveta Brasil	(19)35442999	6e51b327-bec5-48eb-b881-76daf766ea1e	CLIENT	f	\N	\N	\N	\N	d9d7b435-c256-405b-877c-848f4a22e22a
+ab393f44-c83b-485e-b152-d6403e41163e	t	2026-06-01 13:31:12.420737+00	admin@admin.com	2026-06-01 13:31:12.420737+00	admin@admin.com	54420625000131	copacaba@lactalis.com.br	t	Copacabana Supermercados	(19)35432870	1f2f0764-3e1c-4665-aefa-daa1da658564	CLIENT	f	\N	\N	\N	\N	d9d7b435-c256-405b-877c-848f4a22e22a
+ca7dee83-4beb-4e06-ae2b-b45b509e2720	t	2026-06-06 15:51:55.292648+00	admin@admin.com	2026-06-06 15:51:55.292648+00	admin@admin.com	05868574004278	spani@gmail.com	t	Spani Atacadista	(19)35435296	cb277df2-e4fc-4d9d-8948-7eccc7a3d556	CLIENT	f	\N	\N	\N	\N	d9d7b435-c256-405b-877c-848f4a22e22a
+eb97a8b5-a5ae-4985-a4d7-dbf30eefe347	t	2026-06-01 13:34:13.943188+00	admin@admin.com	2026-06-01 13:34:13.943188+00	admin@admin.com	60494416002502	pague@lactalis.com.br	t	Supermercado Pague Menos	(19)35080360	1e58d64a-16bc-421d-b671-e0a52cb440a4	CLIENT	f	\N	\N	\N	\N	d9d7b435-c256-405b-877c-848f4a22e22a
 \.
 
 
 --
--- TOC entry 3698 (class 0 OID 42330)
+-- TOC entry 3699 (class 0 OID 42330)
 -- Dependencies: 241
 -- Data for Name: demand_type_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -814,7 +815,7 @@ e72e6d2f-e8b2-440d-a335-c6a889c64b37	t	2026-10-12 19:23:21.576553+00	System	2026
 
 
 --
--- TOC entry 3679 (class 0 OID 16403)
+-- TOC entry 3680 (class 0 OID 16403)
 -- Dependencies: 222
 -- Data for Name: driver_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -830,7 +831,7 @@ ac949c17-ffc7-4869-adac-76a96cff9f0c	t	2026-06-10 21:26:08.350364+00	admin@admin
 
 
 --
--- TOC entry 3699 (class 0 OID 42343)
+-- TOC entry 3700 (class 0 OID 42343)
 -- Dependencies: 242
 -- Data for Name: equipament_capacity_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -840,7 +841,7 @@ COPY public.equipament_capacity_table (id, active, created_at, created_by, updat
 
 
 --
--- TOC entry 3680 (class 0 OID 16412)
+-- TOC entry 3681 (class 0 OID 16412)
 -- Dependencies: 223
 -- Data for Name: equipament_group_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -856,7 +857,7 @@ e56df2ca-a445-4e1e-ab3b-d1ba5bb9192b	t	2026-06-04 12:22:44.086062+00	admin@admin
 
 
 --
--- TOC entry 3700 (class 0 OID 42356)
+-- TOC entry 3701 (class 0 OID 42356)
 -- Dependencies: 243
 -- Data for Name: equipament_group_visit_type_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -866,7 +867,7 @@ COPY public.equipament_group_visit_type_table (equipament_group_id, visit_type_i
 
 
 --
--- TOC entry 3681 (class 0 OID 16422)
+-- TOC entry 3682 (class 0 OID 16422)
 -- Dependencies: 224
 -- Data for Name: equipament_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -886,7 +887,7 @@ dec0b3c8-4302-4aa7-a78b-3281e6337602	t	2026-04-08 20:27:37.074362+00	Admin Maste
 
 
 --
--- TOC entry 3685 (class 0 OID 16561)
+-- TOC entry 3686 (class 0 OID 16561)
 -- Dependencies: 228
 -- Data for Name: group_transport_type_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -896,7 +897,7 @@ COPY public.group_transport_type_table (equipament_group_id, type_transport_id) 
 
 
 --
--- TOC entry 3690 (class 0 OID 16933)
+-- TOC entry 3691 (class 0 OID 16933)
 -- Dependencies: 233
 -- Data for Name: occurrence_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -906,7 +907,7 @@ COPY public.occurrence_table (id, active, created_at, created_by, updated_at, up
 
 
 --
--- TOC entry 3701 (class 0 OID 42363)
+-- TOC entry 3702 (class 0 OID 42363)
 -- Dependencies: 244
 -- Data for Name: optimization_profile_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -917,7 +918,7 @@ dc9564b5-3fc2-4780-97c8-b883fb387298	t	2026-10-12 21:16:38.60819+00	admin@admin.
 
 
 --
--- TOC entry 3696 (class 0 OID 17452)
+-- TOC entry 3697 (class 0 OID 17452)
 -- Dependencies: 239
 -- Data for Name: powerbi_token; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -928,7 +929,7 @@ COPY public.powerbi_token (id, jwt_id, active, created_at) FROM stdin;
 
 
 --
--- TOC entry 3694 (class 0 OID 17153)
+-- TOC entry 3695 (class 0 OID 17153)
 -- Dependencies: 237
 -- Data for Name: route_stop_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -952,7 +953,7 @@ fdd4120e-f26d-4993-bfcf-64e0886f28d2	t	2026-09-14 21:51:22.187598+00	admin@admin
 
 
 --
--- TOC entry 3702 (class 0 OID 42387)
+-- TOC entry 3703 (class 0 OID 42387)
 -- Dependencies: 245
 -- Data for Name: shipment_demand_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -962,7 +963,7 @@ COPY public.shipment_demand_table (id, active, created_at, created_by, updated_a
 
 
 --
--- TOC entry 3691 (class 0 OID 16946)
+-- TOC entry 3692 (class 0 OID 16946)
 -- Dependencies: 234
 -- Data for Name: shipment_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -982,7 +983,7 @@ a380d58f-d17b-4ef1-9058-17ba76a6c848	t	2026-06-06 15:32:18.129253+00	admin@admin
 
 
 --
--- TOC entry 3687 (class 0 OID 16685)
+-- TOC entry 3688 (class 0 OID 16685)
 -- Dependencies: 230
 -- Data for Name: shipment_type; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -996,7 +997,7 @@ ab2bbdbc-823f-48a3-a48f-f6e9cb7de590	t	2026-05-01 15:43:52.785258+00	admin@admin
 
 
 --
--- TOC entry 3703 (class 0 OID 42399)
+-- TOC entry 3704 (class 0 OID 42399)
 -- Dependencies: 246
 -- Data for Name: shipment_visit_type_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1006,7 +1007,7 @@ COPY public.shipment_visit_type_table (shipment_id, visit_type_id) FROM stdin;
 
 
 --
--- TOC entry 3688 (class 0 OID 16790)
+-- TOC entry 3689 (class 0 OID 16790)
 -- Dependencies: 231
 -- Data for Name: telemetry_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1022,7 +1023,7 @@ ea668745-3e96-4eab-8628-bde1ea96eae9	t	2026-06-09 02:32:17.233066+00	admin@admin
 
 
 --
--- TOC entry 3682 (class 0 OID 16431)
+-- TOC entry 3683 (class 0 OID 16431)
 -- Dependencies: 225
 -- Data for Name: tractor_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1040,7 +1041,7 @@ GASOLINA	9351b9a4-f2d0-4769-b53d-88fb9944d23f	9	\N
 
 
 --
--- TOC entry 3683 (class 0 OID 16437)
+-- TOC entry 3684 (class 0 OID 16437)
 -- Dependencies: 226
 -- Data for Name: trailer_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1052,7 +1053,7 @@ COPY public.trailer_table (maximum_volume, id) FROM stdin;
 
 
 --
--- TOC entry 3692 (class 0 OID 16965)
+-- TOC entry 3693 (class 0 OID 16965)
 -- Dependencies: 235
 -- Data for Name: transport_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1067,7 +1068,7 @@ beb05b5a-c98d-4466-b966-0ece8a884253	t	2026-09-14 21:51:22.170142+00	admin@admin
 
 
 --
--- TOC entry 3686 (class 0 OID 16568)
+-- TOC entry 3687 (class 0 OID 16568)
 -- Dependencies: 229
 -- Data for Name: type_transport_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1083,7 +1084,7 @@ ed322840-eaa3-4483-a866-a548a2e8e970	f	2026-08-30 23:03:01.926361+00	admin@admin
 
 
 --
--- TOC entry 3684 (class 0 OID 16443)
+-- TOC entry 3685 (class 0 OID 16443)
 -- Dependencies: 227
 -- Data for Name: user_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1101,7 +1102,7 @@ c916e36f-4846-41be-9b32-9e0ff8850a29	t	2026-03-15 22:23:57.149323+00	\N	2026-03-
 
 
 --
--- TOC entry 3704 (class 0 OID 42406)
+-- TOC entry 3705 (class 0 OID 42406)
 -- Dependencies: 247
 -- Data for Name: visit_type_rule_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1111,7 +1112,7 @@ COPY public.visit_type_rule_table (id, active, created_at, created_by, updated_a
 
 
 --
--- TOC entry 3705 (class 0 OID 42420)
+-- TOC entry 3706 (class 0 OID 42420)
 -- Dependencies: 248
 -- Data for Name: visit_type_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1121,7 +1122,7 @@ COPY public.visit_type_table (id, active, created_at, created_by, updated_at, up
 
 
 --
--- TOC entry 3695 (class 0 OID 17233)
+-- TOC entry 3696 (class 0 OID 17233)
 -- Dependencies: 238
 -- Data for Name: work_schedule; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1137,7 +1138,7 @@ cc6e1472-06ed-4969-bd7a-44a02247d01a	t	2026-09-05 16:33:43.713575+00	admin@admin
 
 
 --
--- TOC entry 3706 (class 0 OID 42432)
+-- TOC entry 3707 (class 0 OID 42432)
 -- Dependencies: 249
 -- Data for Name: work_shift_template_table; Type: TABLE DATA; Schema: public; Owner: admin
 --
@@ -1152,7 +1153,7 @@ f6ae0123-49e0-4566-ab95-fbde485036fa	t	2026-10-07 16:59:39.352666+00	System	2026
 
 
 --
--- TOC entry 3713 (class 0 OID 0)
+-- TOC entry 3714 (class 0 OID 0)
 -- Dependencies: 236
 -- Name: transport_table_code_transport_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
 --
@@ -1449,7 +1450,7 @@ ALTER TABLE ONLY public.work_shift_template_table
 
 
 --
--- TOC entry 3502 (class 2606 OID 16580)
+-- TOC entry 3503 (class 2606 OID 16580)
 -- Name: group_transport_type_table fk1bfj2jwykvj40s14xpbit6oek; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1458,7 +1459,7 @@ ALTER TABLE ONLY public.group_transport_type_table
 
 
 --
--- TOC entry 3520 (class 2606 OID 17037)
+-- TOC entry 3521 (class 2606 OID 17037)
 -- Name: transport_table fk1olqh7bbaqv47l0b82b0tao46; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1467,7 +1468,7 @@ ALTER TABLE ONLY public.transport_table
 
 
 --
--- TOC entry 3507 (class 2606 OID 16828)
+-- TOC entry 3508 (class 2606 OID 16828)
 -- Name: collect_table fk1v4kxyoyvnulwlkj2r2319iin; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1476,7 +1477,7 @@ ALTER TABLE ONLY public.collect_table
 
 
 --
--- TOC entry 3526 (class 2606 OID 42455)
+-- TOC entry 3527 (class 2606 OID 42455)
 -- Name: equipament_group_visit_type_table fk2bqqmm0ggyqujyxwv8q3mdju2; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1494,7 +1495,7 @@ ALTER TABLE ONLY public.company_table
 
 
 --
--- TOC entry 3528 (class 2606 OID 42465)
+-- TOC entry 3529 (class 2606 OID 42465)
 -- Name: shipment_visit_type_table fk451saubfmvhhx3oji9y1q8nua; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1503,7 +1504,7 @@ ALTER TABLE ONLY public.shipment_visit_type_table
 
 
 --
--- TOC entry 3509 (class 2606 OID 16982)
+-- TOC entry 3510 (class 2606 OID 16982)
 -- Name: occurrence_table fk7q3cx7bp1dxpx2boxw9jv2ew9; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1512,7 +1513,7 @@ ALTER TABLE ONLY public.occurrence_table
 
 
 --
--- TOC entry 3498 (class 2606 OID 16858)
+-- TOC entry 3499 (class 2606 OID 16858)
 -- Name: equipament_table fk84lg3hccqka845mvuf1kdmsdp; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1521,7 +1522,7 @@ ALTER TABLE ONLY public.equipament_table
 
 
 --
--- TOC entry 3506 (class 2606 OID 16804)
+-- TOC entry 3507 (class 2606 OID 16804)
 -- Name: telemetry_table fk8agm95f2i43eipl5gct1cooys; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1530,7 +1531,7 @@ ALTER TABLE ONLY public.telemetry_table
 
 
 --
--- TOC entry 3501 (class 2606 OID 16492)
+-- TOC entry 3502 (class 2606 OID 16492)
 -- Name: user_table fk8fosf57y9aqnb15l1sp7v6hx9; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1539,7 +1540,7 @@ ALTER TABLE ONLY public.user_table
 
 
 --
--- TOC entry 3508 (class 2606 OID 16823)
+-- TOC entry 3509 (class 2606 OID 16823)
 -- Name: collect_table fk98bdo785jud8dhdkq401vwlfi; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1548,7 +1549,16 @@ ALTER TABLE ONLY public.collect_table
 
 
 --
--- TOC entry 3492 (class 2606 OID 42525)
+-- TOC entry 3492 (class 2606 OID 51074)
+-- Name: company_table fk_company_owner_tenant; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.company_table
+    ADD CONSTRAINT fk_company_owner_tenant FOREIGN KEY (owner_tenant_id) REFERENCES public.company_table(id);
+
+
+--
+-- TOC entry 3493 (class 2606 OID 42525)
 -- Name: company_table fk_company_parent; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1557,7 +1567,7 @@ ALTER TABLE ONLY public.company_table
 
 
 --
--- TOC entry 3494 (class 2606 OID 42530)
+-- TOC entry 3495 (class 2606 OID 42530)
 -- Name: equipament_group_table fk_equipament_group_company; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1566,7 +1576,7 @@ ALTER TABLE ONLY public.equipament_group_table
 
 
 --
--- TOC entry 3510 (class 2606 OID 42545)
+-- TOC entry 3511 (class 2606 OID 42545)
 -- Name: occurrence_table fk_occurrence_company; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1575,7 +1585,7 @@ ALTER TABLE ONLY public.occurrence_table
 
 
 --
--- TOC entry 3513 (class 2606 OID 42540)
+-- TOC entry 3514 (class 2606 OID 42540)
 -- Name: shipment_table fk_shipment_company; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1584,7 +1594,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3505 (class 2606 OID 42555)
+-- TOC entry 3506 (class 2606 OID 42555)
 -- Name: shipment_type fk_shipment_type_company; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1593,7 +1603,7 @@ ALTER TABLE ONLY public.shipment_type
 
 
 --
--- TOC entry 3504 (class 2606 OID 42550)
+-- TOC entry 3505 (class 2606 OID 42550)
 -- Name: type_transport_table fk_type_transport_company; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1602,7 +1612,7 @@ ALTER TABLE ONLY public.type_transport_table
 
 
 --
--- TOC entry 3523 (class 2606 OID 42535)
+-- TOC entry 3524 (class 2606 OID 42535)
 -- Name: work_schedule fk_work_schedule_company; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1611,7 +1621,7 @@ ALTER TABLE ONLY public.work_schedule
 
 
 --
--- TOC entry 3524 (class 2606 OID 17252)
+-- TOC entry 3525 (class 2606 OID 17252)
 -- Name: work_schedule fkb4c733vxlwsaqokpii1o0gahe; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1620,7 +1630,7 @@ ALTER TABLE ONLY public.work_schedule
 
 
 --
--- TOC entry 3527 (class 2606 OID 42450)
+-- TOC entry 3528 (class 2606 OID 42450)
 -- Name: equipament_group_visit_type_table fkbvgb882s0p67ll8bqjkw4uuve; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1629,7 +1639,7 @@ ALTER TABLE ONLY public.equipament_group_visit_type_table
 
 
 --
--- TOC entry 3514 (class 2606 OID 17002)
+-- TOC entry 3515 (class 2606 OID 17002)
 -- Name: shipment_table fkcgv9usnlrjtyy6jqi2swc8bt4; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1638,7 +1648,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3515 (class 2606 OID 16997)
+-- TOC entry 3516 (class 2606 OID 16997)
 -- Name: shipment_table fkglufum5fu0woe8l5sgvv2caqy; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1647,7 +1657,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3516 (class 2606 OID 17007)
+-- TOC entry 3517 (class 2606 OID 17007)
 -- Name: shipment_table fkgt551brhr2yun1k0e8jta9gok; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1656,7 +1666,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3495 (class 2606 OID 16467)
+-- TOC entry 3496 (class 2606 OID 16467)
 -- Name: equipament_group_table fkh75qjn0g3oegn5ah11dkjswtp; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1665,7 +1675,7 @@ ALTER TABLE ONLY public.equipament_group_table
 
 
 --
--- TOC entry 3517 (class 2606 OID 17027)
+-- TOC entry 3518 (class 2606 OID 17027)
 -- Name: shipment_table fkj4lv0k7r84uy4a21y9b1osq9q; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1674,7 +1684,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3525 (class 2606 OID 17247)
+-- TOC entry 3526 (class 2606 OID 17247)
 -- Name: work_schedule fkjddd0allq2gq2sm26jen4a9cr; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1683,7 +1693,7 @@ ALTER TABLE ONLY public.work_schedule
 
 
 --
--- TOC entry 3496 (class 2606 OID 16477)
+-- TOC entry 3497 (class 2606 OID 16477)
 -- Name: equipament_group_table fkjrnonengpn01rsb9hgvsfufwn; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1692,7 +1702,7 @@ ALTER TABLE ONLY public.equipament_group_table
 
 
 --
--- TOC entry 3511 (class 2606 OID 16992)
+-- TOC entry 3512 (class 2606 OID 16992)
 -- Name: occurrence_table fkk9by0f888xgeaf06iayekcc1t; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1701,7 +1711,7 @@ ALTER TABLE ONLY public.occurrence_table
 
 
 --
--- TOC entry 3518 (class 2606 OID 17022)
+-- TOC entry 3519 (class 2606 OID 17022)
 -- Name: shipment_table fklwth0k8ilxqqgqm4w2b74ui38; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1710,7 +1720,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3497 (class 2606 OID 16472)
+-- TOC entry 3498 (class 2606 OID 16472)
 -- Name: equipament_group_table fkmnl5l7kynnf1te95f6qdmf7y5; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1719,7 +1729,7 @@ ALTER TABLE ONLY public.equipament_group_table
 
 
 --
--- TOC entry 3519 (class 2606 OID 17012)
+-- TOC entry 3520 (class 2606 OID 17012)
 -- Name: shipment_table fkmqb3pgh812dxho5rxniyv576i; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1728,7 +1738,7 @@ ALTER TABLE ONLY public.shipment_table
 
 
 --
--- TOC entry 3521 (class 2606 OID 17042)
+-- TOC entry 3522 (class 2606 OID 17042)
 -- Name: transport_table fknec9ddum3gpddey2lbnm9fsea; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1737,7 +1747,7 @@ ALTER TABLE ONLY public.transport_table
 
 
 --
--- TOC entry 3522 (class 2606 OID 17032)
+-- TOC entry 3523 (class 2606 OID 17032)
 -- Name: transport_table fknxy4bqqoludqmoryh5wdefbmh; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1746,7 +1756,7 @@ ALTER TABLE ONLY public.transport_table
 
 
 --
--- TOC entry 3529 (class 2606 OID 42460)
+-- TOC entry 3530 (class 2606 OID 42460)
 -- Name: shipment_visit_type_table fkonklcux3lwl6ax4084wvmspdt; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1755,7 +1765,7 @@ ALTER TABLE ONLY public.shipment_visit_type_table
 
 
 --
--- TOC entry 3503 (class 2606 OID 16585)
+-- TOC entry 3504 (class 2606 OID 16585)
 -- Name: group_transport_type_table fkp4vpw3inbalv3b3hw184r9i37; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1764,7 +1774,7 @@ ALTER TABLE ONLY public.group_transport_type_table
 
 
 --
--- TOC entry 3493 (class 2606 OID 16462)
+-- TOC entry 3494 (class 2606 OID 16462)
 -- Name: driver_table fkq31c4b12e6xftex24003i1qqd; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1773,7 +1783,7 @@ ALTER TABLE ONLY public.driver_table
 
 
 --
--- TOC entry 3512 (class 2606 OID 16987)
+-- TOC entry 3513 (class 2606 OID 16987)
 -- Name: occurrence_table fkq8hvp7bmro6xsr237qy6yha1q; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1782,7 +1792,7 @@ ALTER TABLE ONLY public.occurrence_table
 
 
 --
--- TOC entry 3500 (class 2606 OID 16487)
+-- TOC entry 3501 (class 2606 OID 16487)
 -- Name: trailer_table fkte47awk3lga1d0faeec89bhye; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1791,7 +1801,7 @@ ALTER TABLE ONLY public.trailer_table
 
 
 --
--- TOC entry 3499 (class 2606 OID 16482)
+-- TOC entry 3500 (class 2606 OID 16482)
 -- Name: tractor_table fktpyy3ovef9vtfaubofrwkr6w1; Type: FK CONSTRAINT; Schema: public; Owner: admin
 --
 
@@ -1799,11 +1809,11 @@ ALTER TABLE ONLY public.tractor_table
     ADD CONSTRAINT fktpyy3ovef9vtfaubofrwkr6w1 FOREIGN KEY (id) REFERENCES public.equipament_table(id);
 
 
--- Completed on 2026-11-03 20:55:51 UTC
+-- Completed on 2026-11-11 14:09:32 UTC
 
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict k0IEaLxPARiDlnHbfpdUxsFKcnp0irbYRjPhlMNIcwHK37cJoiajfgQk48UbiM9
+\unrestrict W6ewyLcTqSe2AMw9QKODw24fSQdzqKqpU20fvqD3C71B9ORK5STCAPNPcfdBHqh
 
