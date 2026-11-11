@@ -35,6 +35,12 @@ public interface WorkScheduleRepository extends JpaRepository<WorkSchedule, UUID
 
     List<WorkSchedule> findByCompanyId(UUID companyId);
 
+    /** Escalas do motorista ou do conjunto numa janela de datas (validação de sobreposição). */
+    @Query("SELECT w FROM WorkSchedule w WHERE (w.driver.id = :driverId OR w.equipamentGroup.id = :groupId) "
+            + "AND w.scheduleDate BETWEEN :from AND :to")
+    List<WorkSchedule> findForOverlapCheck(@Param("driverId") UUID driverId, @Param("groupId") UUID groupId,
+                                           @Param("from") java.time.LocalDate from, @Param("to") java.time.LocalDate to);
+
     @Query("SELECT w FROM WorkSchedule w LEFT JOIN w.company c WHERE c.id = :companyId OR c.id IS NULL")
     List<WorkSchedule> findByCompanyIdOrCompanyIsNull(@Param("companyId") UUID companyId);
 }

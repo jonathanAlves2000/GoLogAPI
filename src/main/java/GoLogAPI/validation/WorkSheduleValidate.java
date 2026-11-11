@@ -43,7 +43,10 @@ public class WorkSheduleValidate {
             errors.add("O início e o fim do turno não podem ser iguais.");
         }
 
-        List<WorkSchedule> active = workScheduleRepository.findAll().stream()
+        // Turnos noturnos podem invadir o dia seguinte/anterior: consulta só a vizinhança da data
+        LocalDate day = request.scheduleDate() != null ? request.scheduleDate() : LocalDate.now();
+        List<WorkSchedule> active = workScheduleRepository
+                .findForOverlapCheck(request.driverId(), request.equipamentGroupId(), day.minusDays(1), day.plusDays(1)).stream()
                 .filter(w -> !Objects.equals(w.getId(), selfId))
                 .filter(w -> w.getStatus() == WorkScheduleStatus.ATIVO || w.getStatus() == WorkScheduleStatus.EM_OPERACAO)
                 .filter(w -> overlaps(w, request.scheduleDate(), request.startWorkday(), request.endWorkday()))

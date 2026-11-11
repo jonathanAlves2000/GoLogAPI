@@ -47,7 +47,10 @@ public record TractorCreateRequest(
         @Schema(description = "Volume útil da carroceria em m³ (veículos rígidos)")
         Double cargoVolume,
 
-        @Schema(description = "Emissão em kg CO2/km. Omitido = referência da categoria (0 para elétricos).")
+        @Schema(description = "Consumo médio em km/L. Com o combustível, define a emissão de CO2 por km.")
+        Double kmPerLiter,
+
+        @Schema(description = "Emissão em kg CO2/km medida pela operação. Se informada, prevalece sobre o cálculo por consumo.")
         Double co2PerKilometer
 
 ) implements TractorRequest{ }

@@ -83,6 +83,7 @@ public class TractorService {
         tractor.setCompany(tenantGuard.ownerForWrite(request.companyId()));
         if (request.vehicleType() != null) tractor.setVehicleType(request.vehicleType());
         tractor.setCargoVolume(request.cargoVolume());
+        tractor.setKmPerLiter(request.kmPerLiter());
         tractor.setCo2PerKilometer(request.co2PerKilometer());
         applyDefaults(tractor);
         tractorRepository.save(tractor);
@@ -113,6 +114,8 @@ public class TractorService {
             tractor.setVehicleType(request.vehicleType());
         if(request.cargoVolume() != null)
             tractor.setCargoVolume(request.cargoVolume());
+        if(request.kmPerLiter() != null)
+            tractor.setKmPerLiter(request.kmPerLiter());
         if(request.co2PerKilometer() != null)
             tractor.setCo2PerKilometer(request.co2PerKilometer());
 
@@ -122,11 +125,11 @@ public class TractorService {
         return tractorMapper.toResponse(tractor);
     }
 
-    /** Emissão de referência da categoria quando não informada (zero para elétricos). */
+    /** Sem valores presumidos: a emissão vem do cadastro ou do consumo informado (ver EmissionFactors). */
     private static void applyDefaults(Tractor tractor) {
-        if (tractor.getCo2PerKilometer() == null) {
-            tractor.setCo2PerKilometer(tractor.getTypeFuel() == GoLogAPI.model.enums.TypeFuel.ELETRICO
-                    ? 0.0 : tractor.effectiveVehicleType().getCo2KgPerKm());
+        if (tractor.getKmPerLiter() != null && tractor.getKmPerLiter() <= 0) {
+            throw new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "O consumo médio (km/L) deve ser maior que zero.");
         }
     }
 

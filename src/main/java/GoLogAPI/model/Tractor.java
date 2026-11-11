@@ -27,6 +27,10 @@ public class Tractor extends Equipament{
     @Column(name = "vehicle_type")
     private GoLogAPI.model.enums.VehicleType vehicleType;
 
+    /** Consumo médio informado pela operação (km por litro); base do cálculo de CO₂. */
+    @Column(name = "km_per_liter")
+    private Double kmPerLiter;
+
     /** Volume útil do baú/carroceria (m³) para veículos rígidos; cavalos usam o volume das carretas. */
     @Column(name = "cargo_volume")
     private Double cargoVolume;

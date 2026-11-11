@@ -19,6 +19,7 @@ public class TractorResponse extends EquipamentResponse {
     private GoLogAPI.model.enums.VehicleType vehicleType;
     private Double cargoVolume;
     private Double co2PerKilometer;
+    private Double kmPerLiter;
     private GoLogAPI.dto.company.CompanyResponse company;
 
     public TractorResponse(UUID id, String plate, String renavam, String model,
