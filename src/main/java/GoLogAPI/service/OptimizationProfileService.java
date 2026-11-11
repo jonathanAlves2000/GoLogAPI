@@ -1,5 +1,7 @@
 package GoLogAPI.service;
 
+import GoLogAPI.service.routeOptimization.OptimizationDefaults;
+
 import GoLogAPI.dto.optimizationProfile.OptimizationProfileCreateRequest;
 import GoLogAPI.dto.optimizationProfile.OptimizationProfileResponse;
 import GoLogAPI.dto.optimizationProfile.OptimizationProfileUpdateRequest;
@@ -40,6 +42,7 @@ public class OptimizationProfileService {
 
         OptimizationProfile profile = optimizationProfileMapper.toEntity(request);
         profile.setCompany(company);
+        applyDefaults(profile);
 
         // Se for marcado como default, remove o default dos outros perfis da empresa
         if (Boolean.TRUE.equals(request.isDefault())) {
@@ -102,6 +105,22 @@ public class OptimizationProfileService {
         optimizationProfileMapper.updateFromDto(request, profile);
         optimizationProfileRepository.save(profile);
         return optimizationProfileMapper.toResponse(profile);
+    }
+
+    /** Campos opcionais omitidos no cadastro recebem os padrões do motor (o mapper copiaria null). */
+    private static void applyDefaults(OptimizationProfile p) {
+        if (p.getIsDefault() == null) p.setIsDefault(false);
+        if (p.getKmCostMultiplier() == null) p.setKmCostMultiplier(OptimizationDefaults.DEFAULT_KM_COST_MULTIPLIER);
+        if (p.getHourCostMultiplier() == null) p.setHourCostMultiplier(OptimizationDefaults.DEFAULT_HOUR_COST_MULTIPLIER);
+        if (p.getFixedCostPerVehicle() == null) p.setFixedCostPerVehicle(OptimizationDefaults.DEFAULT_FIXED_COST_PER_VEHICLE);
+        if (p.getCostPerTraveledHour() == null) p.setCostPerTraveledHour(OptimizationDefaults.DEFAULT_COST_PER_TRAVELED_HOUR);
+        if (p.getPenaltyCostUnserved() == null) p.setPenaltyCostUnserved(OptimizationDefaults.DEFAULT_PENALTY_COST_UNSERVED);
+        if (p.getLateArrivalCostPerHour() == null) p.setLateArrivalCostPerHour(0.0);
+        if (p.getDefaultServiceDurationSeconds() == null) p.setDefaultServiceDurationSeconds(OptimizationDefaults.DEFAULT_SERVICE_DURATION_SECONDS);
+        if (p.getTimeWindowLeadMinutes() == null) p.setTimeWindowLeadMinutes(OptimizationDefaults.DEFAULT_TIME_WINDOW_LEAD_MINUTES);
+        if (p.getVehicleStartWindowLeadHours() == null) p.setVehicleStartWindowLeadHours(OptimizationDefaults.DEFAULT_VEHICLE_START_WINDOW_LEAD_HOURS);
+        if (p.getVehicleEndWindowMarginHours() == null) p.setVehicleEndWindowMarginHours(OptimizationDefaults.DEFAULT_VEHICLE_END_WINDOW_MARGIN_HOURS);
+        if (p.getGlobalHorizonExtraDays() == null) p.setGlobalHorizonExtraDays(OptimizationDefaults.DEFAULT_GLOBAL_HORIZON_EXTRA_DAYS);
     }
 
     public OptimizationProfile findVisible(UUID id) {

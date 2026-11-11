@@ -39,6 +39,9 @@ public class TypeTransportService {
     @Transactional
     public TypeTransportResponse save(TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransport typeTransport = typeTransportMapper.toEntity(typeTransportCreateRequest);
+        // descrição e cuidados são opcionais na API, mas NOT NULL no banco
+        if (typeTransport.getDescription() == null) typeTransport.setDescription("");
+        if (typeTransport.getCare() == null) typeTransport.setCare("");
         typeTransport.setCompany(tenantGuard.ownerForCatalog(typeTransportCreateRequest.companyId()));
         typeTransportRepository.save(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
@@ -68,8 +71,8 @@ public class TypeTransportService {
         TypeTransport typeTransport = find(id);
         tenantGuard.checkCatalogWrite(typeTransport.getCompany(), id);
         typeTransport.setName(typeTransportCreateRequest.name());
-        typeTransport.setDescription(typeTransportCreateRequest.description());
-        typeTransport.setCare(typeTransportCreateRequest.care());
+        typeTransport.setDescription(typeTransportCreateRequest.description() != null ? typeTransportCreateRequest.description() : "");
+        typeTransport.setCare(typeTransportCreateRequest.care() != null ? typeTransportCreateRequest.care() : "");
         typeTransportRepository.save(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
