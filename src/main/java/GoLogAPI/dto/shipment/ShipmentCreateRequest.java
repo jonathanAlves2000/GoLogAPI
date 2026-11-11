@@ -20,7 +20,6 @@ public record ShipmentCreateRequest(
     Double volume,
 
     @NotNull(message = "A data de agendamento da remessa não poder nula.")
-    @FutureOrPresent(message = "A data de agendamento da remessa deve ser no futuro ou presente")
     LocalDateTime schedulind,
 
     @NotNull(message = "O Status da remessa não pode ser nulo.")

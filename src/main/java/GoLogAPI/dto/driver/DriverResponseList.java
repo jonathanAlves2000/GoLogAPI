@@ -10,5 +10,6 @@ public record DriverResponseList(
         String cnhNumber,
         String cpf,
         Double costPerHour,
-        LocalDate cnhExpiration
+        LocalDate cnhExpiration,
+        UUID userId
 ) { }

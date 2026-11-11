@@ -16,15 +16,17 @@ public class ProcessRouteService {
         this.processShipment = processShipment;
     }
 
-    public void processRoute(OptimizeToursResponse response, RoutePriority routePriority) {
+    public java.util.List<GoLogAPI.model.Transport> processRoute(OptimizeToursResponse response, RoutePriority routePriority) {
         if (response != null && response.getRoutesCount() > 0) {
-            processShipment.processShipment(response.getRoutesList(), routePriority);
+            return processShipment.processShipment(response.getRoutesList(), routePriority);
         }
+        return java.util.List.of();
     }
 
-    public void processRoute(OptimizeToursResponse response, OptimizeRouteRequest optimizeRouteRequest) {
+    public java.util.List<GoLogAPI.model.Transport> processRoute(OptimizeToursResponse response, OptimizeRouteRequest optimizeRouteRequest) {
         if (response != null && response.getRoutesCount() > 0) {
-            processShipment.processShipment(response.getRoutesList(), optimizeRouteRequest);
+            return processShipment.processShipment(response.getRoutesList(), optimizeRouteRequest);
         }
+        return java.util.List.of();
     }
 }

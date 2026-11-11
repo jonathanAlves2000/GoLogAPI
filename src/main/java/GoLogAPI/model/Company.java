@@ -65,6 +65,7 @@ public class Company extends Audit{
 
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"branches", "parentCompany"})
     @jakarta.persistence.ManyToOne
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SELECT)
     @JoinColumn(name = "parent_company_id")
     @NotFound(action = NotFoundAction.IGNORE)
     private Company parentCompany;
@@ -73,9 +74,21 @@ public class Company extends Audit{
     @jakarta.persistence.OneToMany(mappedBy = "parentCompany")
     private java.util.List<Company> branches;
 
+    /**
+     * Tenant (transportadora) dono do cadastro de clientes e fornecedores. Tenants têm este campo nulo.
+     * Garante que cada operadora enxergue apenas a própria carteira de clientes.
+     */
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @jakarta.persistence.ManyToOne
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SELECT)
+    @JoinColumn(name = "owner_tenant_id")
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Company ownerTenant;
+
     @Column(name = "webhook_url")
     private String webhookUrl;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @Column(name = "webhook_secret")
     private String webhookSecret;
 

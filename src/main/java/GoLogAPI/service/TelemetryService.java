@@ -24,8 +24,12 @@ public class TelemetryService {
     private final TelemetryMapper telemetryMapper;
     private final EquipamentRepository equipamentRepository;
 
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
     public TelemetryService(TelemetryRepository telemetryRepository,
-                            TelemetryMapper telemetryMapper, EquipamentRepository equipamentRepository){
+                            TelemetryMapper telemetryMapper, EquipamentRepository equipamentRepository,
+                            GoLogAPI.infra.tenant.TenantGuard tenantGuard){
+        this.tenantGuard = tenantGuard;
         this.telemetryRepository = telemetryRepository;
         this.telemetryMapper = telemetryMapper;
         this.equipamentRepository = equipamentRepository;
@@ -44,11 +48,14 @@ public class TelemetryService {
     public TelemetryReponse get(UUID id){
         Telemetry telemetry = telemetryRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkAccess(telemetry.getEquipamentId() != null ? telemetry.getEquipamentId().getCompany() : null, id);
         return telemetryMapper.toResponse(telemetry);
     }
 
     public List<TelemetryResponseList> getAll(){
-        List<Telemetry> telemetries = telemetryRepository.findAll();
+        List<Telemetry> telemetries = telemetryRepository.findAll().stream()
+                .filter(t -> t.getEquipamentId() != null && tenantGuard.canSee(t.getEquipamentId().getCompany()))
+                .toList();
         return telemetryMapper.toResponseList(telemetries);
     }
 

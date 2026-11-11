@@ -24,9 +24,13 @@ public class DemandTypeService {
     private final CompanyRepository companyRepository;
     private final DemandTypeMapper demandTypeMapper;
 
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
     public DemandTypeService(DemandTypeRepository demandTypeRepository,
                              CompanyRepository companyRepository,
-                             DemandTypeMapper demandTypeMapper) {
+                             DemandTypeMapper demandTypeMapper,
+            GoLogAPI.infra.tenant.TenantGuard tenantGuard) {
+        this.tenantGuard = tenantGuard;
         this.demandTypeRepository = demandTypeRepository;
         this.companyRepository = companyRepository;
         this.demandTypeMapper = demandTypeMapper;
@@ -34,18 +38,17 @@ public class DemandTypeService {
 
     @Transactional
     public DemandTypeResponse save(DemandTypeCreateRequest request) {
-        if (request.companyId() != null && demandTypeRepository.existsByCodeAndCompanyId(request.code(), request.companyId())) {
-            throw new ConflictException("Já existe um tipo de demanda com este código para esta empresa.");
+        Company owner = tenantGuard.ownerForCatalog(request.companyId());
+        UUID ownerId = owner != null ? owner.getId() : null;
+        boolean duplicated = demandTypeRepository.findAvailableByCompanyId(ownerId).stream()
+                .anyMatch(d -> d.getCode() != null && d.getCode().equalsIgnoreCase(request.code()));
+        if (duplicated) {
+            throw new ConflictException("Já existe um tipo de demanda com o código '" + request.code() + "' disponível para esta empresa.");
         }
 
         DemandType demandType = demandTypeMapper.toEntity(request);
         demandType.setIsSystemDefault(false);
-
-        if (request.companyId() != null) {
-            Company company = companyRepository.findById(request.companyId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.companyId()));
-            demandType.setCompany(company);
-        }
+        demandType.setCompany(owner);
 
         demandTypeRepository.save(demandType);
         return demandTypeMapper.toResponse(demandType);
@@ -54,14 +57,19 @@ public class DemandTypeService {
     public DemandTypeResponse get(UUID id) {
         DemandType demandType = demandTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogRead(demandType.getCompany(), id);
         return demandTypeMapper.toResponse(demandType);
     }
 
     public List<DemandTypeResponse> getAll() {
-        return demandTypeMapper.toResponses(demandTypeRepository.findAll());
+        return demandTypeMapper.toResponses(tenantGuard.isGlobalView()
+                ? demandTypeRepository.findAll()
+                : demandTypeRepository.findAvailableByCompanyId(tenantGuard.scope()));
     }
 
     public List<DemandTypeResponse> getAvailableForCompany(UUID companyId) {
+        // Fora da Visão Global, só é possível consultar o catálogo do próprio tenant
+        if (!tenantGuard.isGlobalView()) companyId = tenantGuard.scope();
         return demandTypeMapper.toResponses(demandTypeRepository.findAvailableByCompanyId(companyId));
     }
 
@@ -69,6 +77,7 @@ public class DemandTypeService {
     public void delete(UUID id) {
         DemandType demandType = demandTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(demandType.getCompany(), id);
 
         if (Boolean.TRUE.equals(demandType.getIsSystemDefault())) {
             throw new ConflictException("Não é permitido excluir tipos de demanda padrão do sistema.");
@@ -81,6 +90,7 @@ public class DemandTypeService {
     public DemandTypeResponse update(UUID id, DemandTypeUpdateRequest request) {
         DemandType demandType = demandTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(demandType.getCompany(), id);
 
         demandTypeMapper.updateFromDto(request, demandType);
         demandTypeRepository.save(demandType);

@@ -32,14 +32,17 @@ public class WorkScheduleService {
     private final WorkShiftTemplateRepository workShiftTemplateRepository;
     private final WorkSheduleValidate workSheduleValidate;
     private final GoLogAPI.repository.CompanyRepository companyRepository;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
     public WorkScheduleService(WorkScheduleRepository workScheduleRepository,
                                EquipamentGroupRepository equipamentGroupRepository,
                                DriverRepository driverRepository,
                                WorkShiftTemplateRepository workShiftTemplateRepository,
                                WorkSheduleValidate workSheduleValidate,
-                               GoLogAPI.repository.CompanyRepository companyRepository)
+                               GoLogAPI.repository.CompanyRepository companyRepository,
+                               GoLogAPI.infra.tenant.TenantGuard tenantGuard)
     {
+        this.tenantGuard = tenantGuard;
         this.workScheduleRepository = workScheduleRepository;
         this.equipamentGroupRepository = equipamentGroupRepository;
         this.driverRepository = driverRepository;
@@ -52,31 +55,12 @@ public class WorkScheduleService {
     public void save(WorkSheduleCreateRequest request) {
         workSheduleValidate.validate(request);
 
-        EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(request.equipamentGroupId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.equipamentGroupId()));
+        EquipamentGroup equipamentGroup = findGroup(request.equipamentGroupId());
+        Driver driver = findDriver(request.driverId());
+        Company company = equipamentGroup.getCompany() != null ? equipamentGroup.getCompany() : tenantGuard.ownerForWrite(null);
+        assertSameTenant(company, driver);
 
-        Driver driver = driverRepository.findById(request.driverId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.driverId()));
-
-        Company company = null;
-        if (equipamentGroup.getCompany() != null) {
-            company = equipamentGroup.getCompany();
-        } else if (driver.getUser() != null && driver.getUser().getCompany() != null) {
-            company = driver.getUser().getCompany();
-        } else {
-            UUID currentTenant = TenantContext.getCurrentTenantId();
-            if (currentTenant != null) {
-                company = companyRepository.findById(currentTenant).orElse(null);
-            }
-        }
-        if (company == null) {
-            company = companyRepository.findAll().stream().findFirst().orElse(null);
-        }
-
-        WorkShiftTemplate template = null;
-        if (request.shiftTemplateId() != null) {
-            template = workShiftTemplateRepository.findById(request.shiftTemplateId()).orElse(null);
-        }
+        WorkShiftTemplate template = findTemplate(request.shiftTemplateId());
 
         Integer breakDuration = request.breakDurationMinutes() != null
                 ? request.breakDurationMinutes()
@@ -118,34 +102,27 @@ public class WorkScheduleService {
     }
 
     public List<WorkSheduleResponses> getAll() {
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<WorkSchedule> workSchedules = (currentTenant != null)
-                ? workScheduleRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
-                : workScheduleRepository.findAll();
+        List<WorkSchedule> workSchedules = tenantGuard.isGlobalView()
+                ? workScheduleRepository.findAll()
+                : workScheduleRepository.findByCompanyId(tenantGuard.scope());
 
         return workSchedules.stream().map(this::toResponse).toList();
     }
 
     public List<WorkSheduleResponses> getByStatus(WorkScheduleStatus status) {
-        List<WorkSchedule> workSchedules = workScheduleRepository.findByStatus(status);
-        return workSchedules.stream().map(this::toResponse).toList();
+        return getAll().stream().filter(w -> w.status() == status).toList();
     }
 
     @Transactional
     public void update(UUID id, WorkSheduleCreateRequest request) {
-        WorkSchedule workSchedule = workScheduleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        WorkSchedule workSchedule = findVisible(id);
+        workSheduleValidate.validate(request, id);
 
-        EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(request.equipamentGroupId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.equipamentGroupId()));
-
-        Driver driver = driverRepository.findById(request.driverId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.driverId()));
-
-        WorkShiftTemplate template = null;
-        if (request.shiftTemplateId() != null) {
-            template = workShiftTemplateRepository.findById(request.shiftTemplateId()).orElse(null);
-        }
+        EquipamentGroup equipamentGroup = findGroup(request.equipamentGroupId());
+        Driver driver = findDriver(request.driverId());
+        assertSameTenant(equipamentGroup.getCompany(), driver);
+        WorkShiftTemplate template = findTemplate(request.shiftTemplateId());
+        if (equipamentGroup.getCompany() != null) workSchedule.setCompany(equipamentGroup.getCompany());
 
         workSchedule.setDriver(driver);
         workSchedule.setEquipamentGroup(equipamentGroup);
@@ -190,10 +167,45 @@ public class WorkScheduleService {
 
     @Transactional
     public void delete(UUID id) {
-        WorkSchedule workSchedule = workScheduleRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        WorkSchedule workSchedule = findVisible(id);
 
         workScheduleRepository.delete(workSchedule);
+    }
+
+    public WorkSchedule findVisible(UUID id) {
+        WorkSchedule ws = workScheduleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Escala não encontrada: ", id));
+        tenantGuard.checkAccess(ws.getCompany(), id);
+        return ws;
+    }
+
+    private EquipamentGroup findGroup(UUID id) {
+        EquipamentGroup group = equipamentGroupRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Conjunto não encontrado: ", id));
+        tenantGuard.checkAccess(group.getCompany(), id);
+        return group;
+    }
+
+    private Driver findDriver(UUID id) {
+        Driver driver = driverRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Motorista não encontrado: ", id));
+        tenantGuard.checkAccess(driver.getCompany(), id);
+        return driver;
+    }
+
+    private WorkShiftTemplate findTemplate(UUID id) {
+        if (id == null) return null;
+        WorkShiftTemplate template = workShiftTemplateRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Modelo de jornada não encontrado: ", id));
+        tenantGuard.checkCatalogRead(template.getCompany(), id);
+        return template;
+    }
+
+    private static void assertSameTenant(Company company, Driver driver) {
+        if (company != null && driver.getCompany() != null && !company.getId().equals(driver.getCompany().getId())) {
+            throw new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Motorista e conjunto pertencem a empresas diferentes. Escale um motorista do mesmo tenant do conjunto.");
+        }
     }
 
     private WorkSheduleResponses toResponse(WorkSchedule workSchedule) {

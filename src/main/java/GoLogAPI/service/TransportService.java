@@ -30,11 +30,20 @@ public class TransportService {
     private final DriverRepository driverRepository;
     private final CompanyRepository companyRepository;
     private final EquipamentGroupRepository equipamentGroupRepository;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+    private final GoLogAPI.repository.RouteStopRepository routeStopRepository;
+    private final GoLogAPI.repository.ShipmentRepository shipmentRepository;
 
     public TransportService(
             TransportRepository transportRepository, TransportMapper transportMapper,
             DriverRepository driverRepository, CompanyRepository companyRepository,
-            EquipamentGroupRepository equipamentGroupRepository){
+            EquipamentGroupRepository equipamentGroupRepository,
+            GoLogAPI.infra.tenant.TenantGuard tenantGuard,
+            GoLogAPI.repository.RouteStopRepository routeStopRepository,
+            GoLogAPI.repository.ShipmentRepository shipmentRepository){
+        this.tenantGuard = tenantGuard;
+        this.routeStopRepository = routeStopRepository;
+        this.shipmentRepository = shipmentRepository;
         this.transportRepository = transportRepository;
         this.transportMapper = transportMapper;
         this.driverRepository = driverRepository;
@@ -47,17 +56,14 @@ public class TransportService {
 
         Transport transport = transportMapper.toEntity(transportCreateRequest);
 
-        Driver driver = driverRepository.findById(transportCreateRequest.driverId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.driverId()));
-
-        Company company = companyRepository.findById(transportCreateRequest.transporterId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.transporterId()));
-
-        EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(transportCreateRequest.equipamentGroupId())
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.equipamentGroupId()));
+        Driver driver = findDriver(transportCreateRequest.driverId());
+        Company company = tenantGuard.ownerForWrite(transportCreateRequest.transporterId());
+        EquipamentGroup equipamentGroup = findGroup(transportCreateRequest.equipamentGroupId());
+        if (transport.getRoutePlanned() == null) transport.setRoutePlanned("");
+        if (transport.getShipmentQuantity() == null) transport.setShipmentQuantity(0);
+        if (transport.getCalculedDistance() == null) transport.setCalculedDistance(0);
+        if (transport.getTimeStoppedCalculed() == null) transport.setTimeStoppedCalculed(0);
+        if (transport.getTravelDuration() == null) transport.setTravelDuration(0);
 
         transport.setDriver(driver);
         transport.setTransporter(company);
@@ -67,62 +73,50 @@ public class TransportService {
     }
 
     public TransportResponse get(UUID id){
-        Transport transport = transportRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Transport transport = findVisible(id);
         return transportMapper.toResponse(transport);
     }
 
     public List<TransportResponse> getAll(){
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<Transport> transports;
-        if (TenantContext.isMaster() && currentTenant == null) {
-            transports = transportRepository.findAll();
-        } else if (currentTenant != null) {
-            transports = transportRepository.findVisibleForTenant(currentTenant);
-        } else {
-            transports = transportRepository.findAll();
-        }
+        List<Transport> transports = tenantGuard.isGlobalView()
+                ? transportRepository.findAll()
+                : transportRepository.findByTransporterId(tenantGuard.scope());
         return transportMapper.toResponses(transports);
     }
 
     @Transactional
     public void delete(UUID id){
-        Transport transport = transportRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Transport transport = findVisible(id);
+        // Devolve as remessas planejadas para a fila de pendentes antes de cancelar o transporte
+        for (GoLogAPI.model.RouteStop stop : routeStopRepository.findByTransportId(id)) {
+            GoLogAPI.model.Shipment shipment = stop.getShipment();
+            if (shipment != null && shipment.getStatus() == GoLogAPI.model.enums.ShipmentStatus.AGUARDANDO_INICIO) {
+                shipment.setStatus(GoLogAPI.model.enums.ShipmentStatus.PENDENTE);
+                shipmentRepository.save(shipment);
+            }
+        }
+        routeStopRepository.deleteByTransportId(id);
         transportRepository.delete(transport);
     }
 
     @Transactional
-    public TransportResponse update(UUID id, TransportCreateRequest transportCreateRequest){
-        transportRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-
-        Transport transport = transportMapper.toEntity(transportCreateRequest);
-
-        Driver driver = driverRepository.findById(transportCreateRequest.driverId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.driverId()));
-
-        Company company = companyRepository.findById(transportCreateRequest.transporterId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.transporterId()));
-
-        EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(transportCreateRequest.equipamentGroupId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        MessageException.NOT_FOUND_MESSAGE, transportCreateRequest.equipamentGroupId()));
-
-        transport.setDriver(driver);
-        transport.setEquipamentGroup(equipamentGroup);
-        transport.setTransporter(company);
-        transport.setId(id);
+    public TransportResponse update(UUID id, TransportCreateRequest request){
+        Transport transport = findVisible(id);
+        if (request.routeCompleted() != null) transport.setRouteCompleted(request.routeCompleted());
+        if (request.deliveryQuantity() != null) transport.setShipmentQuantity(request.deliveryQuantity());
+        if (request.distanceTraveled() != null) transport.setDistanceTraveled(request.distanceTraveled());
+        if (request.timeStopped() != null) transport.setTimeStopped(request.timeStopped().intValue());
+        if (request.totalTime() != null) transport.setTotalTime(request.totalTime().intValue());
+        transport.setDriver(findDriver(request.driverId()));
+        transport.setEquipamentGroup(findGroup(request.equipamentGroupId()));
+        transport.setTransporter(tenantGuard.ownerForWrite(request.transporterId()));
         transportRepository.save(transport);
         return transportMapper.toResponse(transport);
     }
 
     @Transactional
     public TransportResponse updatePartial(UUID id, TransportUpdateRequest transportUpdateRequest){
-        Transport transport = transportRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Transport transport = findVisible(id);
 
         if(transportUpdateRequest.routeReturnPlanned() != null && !transportUpdateRequest.routeReturnPlanned().isBlank())
             transport.setRouteReturnPlanned(transportUpdateRequest.routeReturnPlanned());
@@ -137,25 +131,40 @@ public class TransportService {
         if(transportUpdateRequest.totalTime() != null)
             transport.setTotalTime(transportUpdateRequest.totalTime());
         if(transportUpdateRequest.driverId() != null){
-            Driver driver = driverRepository.findById(transportUpdateRequest.driverId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            MessageException.NOT_FOUND_MESSAGE, transportUpdateRequest.driverId()));
+            Driver driver = findDriver(transportUpdateRequest.driverId());
             transport.setDriver(driver);
         }
         if(transportUpdateRequest.transporterId() != null){
-            Company company = companyRepository.findById(transportUpdateRequest.transporterId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            MessageException.NOT_FOUND_MESSAGE, transportUpdateRequest.transporterId()));
+            Company company = tenantGuard.ownerForWrite(transportUpdateRequest.transporterId());
             transport.setTransporter(company);
         }
         if(transportUpdateRequest.equipamentGroupId() != null){
-            EquipamentGroup equipamentGroup = equipamentGroupRepository.findById(transportUpdateRequest.equipamentGroupId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            MessageException.NOT_FOUND_MESSAGE, transportUpdateRequest.equipamentGroupId()));
+            EquipamentGroup equipamentGroup = findGroup(transportUpdateRequest.equipamentGroupId());
             transport.setEquipamentGroup(equipamentGroup);
         }
 
         transportRepository.save(transport);
         return transportMapper.toResponse(transport);
+    }
+
+    public Transport findVisible(UUID id) {
+        Transport transport = transportRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Transporte não encontrado: ", id));
+        tenantGuard.checkAccess(transport.getTransporter(), id);
+        return transport;
+    }
+
+    private Driver findDriver(UUID id) {
+        Driver driver = driverRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Motorista não encontrado: ", id));
+        tenantGuard.checkAccess(driver.getCompany(), id);
+        return driver;
+    }
+
+    private EquipamentGroup findGroup(UUID id) {
+        EquipamentGroup group = equipamentGroupRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Conjunto não encontrado: ", id));
+        tenantGuard.checkAccess(group.getCompany(), id);
+        return group;
     }
 }

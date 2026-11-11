@@ -8,6 +8,8 @@ public class TenantContext {
     private static final ThreadLocal<UUID> userCompanyId = new ThreadLocal<>();
     private static final ThreadLocal<Boolean> isMaster = ThreadLocal.withInitial(() -> Boolean.FALSE);
     private static final ThreadLocal<String> companyType = new ThreadLocal<>();
+    private static final ThreadLocal<UUID> currentUserId = new ThreadLocal<>();
+    private static final ThreadLocal<String> currentRole = new ThreadLocal<>();
 
     private TenantContext() {
     }
@@ -45,7 +47,26 @@ public class TenantContext {
         companyType.set(type);
     }
 
+    public static UUID getCurrentUserId() {
+        return currentUserId.get();
+    }
+
+    public static void setCurrentUserId(UUID userId) {
+        currentUserId.set(userId);
+    }
+
+    /** Perfil do usuário autenticado (ADMIN, OPERATOR, DRIVER, POWERBI). */
+    public static String getCurrentRole() {
+        return currentRole.get();
+    }
+
+    public static void setCurrentRole(String role) {
+        currentRole.set(role);
+    }
+
     public static void clear() {
+        currentUserId.remove();
+        currentRole.remove();
         currentTenantId.remove();
         userCompanyId.remove();
         isMaster.remove();

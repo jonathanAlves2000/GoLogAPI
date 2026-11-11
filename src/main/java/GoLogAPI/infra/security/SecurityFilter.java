@@ -22,9 +22,11 @@ import java.util.UUID;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
+    private final GoLogAPI.repository.CompanyRepository companyRepository;
 
-    public SecurityFilter(TokenService tokenService){
+    public SecurityFilter(TokenService tokenService, GoLogAPI.repository.CompanyRepository companyRepository){
         this.tokenService = tokenService;
+        this.companyRepository = companyRepository;
     }
 
     @Override
@@ -57,6 +59,11 @@ public class SecurityFilter extends OncePerRequestFilter {
                 TenantContext.setUserCompanyId(userCompanyId);
                 TenantContext.setMaster(isMaster);
                 TenantContext.setCompanyType(companyTypeClaim);
+                TenantContext.setCurrentRole(role);
+                String userIdClaim = tokenService.getClaim(token, "userId");
+                if (userIdClaim != null) {
+                    try { TenantContext.setCurrentUserId(UUID.fromString(userIdClaim)); } catch (IllegalArgumentException ignored) { }
+                }
 
                 String headerTenant = request.getHeader("X-Tenant-Id");
                 if (isMaster && headerTenant != null && !headerTenant.isBlank() && !"all".equalsIgnoreCase(headerTenant)) {
@@ -68,7 +75,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 } else if (isMaster) {
                     TenantContext.setCurrentTenantId(null);
                 } else {
-                    TenantContext.setCurrentTenantId(userCompanyId);
+                    TenantContext.setCurrentTenantId(resolveNonMasterScope(userCompanyId, headerTenant));
                 }
 
             } catch (TokenExpiredException exception) {
@@ -87,11 +94,33 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
     }
 
+    /**
+     * Usuário não-master opera na própria empresa. Uma Matriz pode selecionar uma de suas filiais pelo
+     * header {@code X-Tenant-Id}; qualquer outro valor é ignorado (nunca amplia o acesso).
+     */
+    private UUID resolveNonMasterScope(UUID userCompanyId, String headerTenant) {
+        if (userCompanyId == null || headerTenant == null || headerTenant.isBlank() || "all".equalsIgnoreCase(headerTenant)) {
+            return userCompanyId;
+        }
+        try {
+            UUID requested = UUID.fromString(headerTenant.trim());
+            if (requested.equals(userCompanyId)) {
+                return userCompanyId;
+            }
+            boolean isOwnBranch = companyRepository.findById(requested)
+                    .map(c -> c.getParentCompany() != null && userCompanyId.equals(c.getParentCompany().getId()))
+                    .orElse(false);
+            return isOwnBranch ? requested : userCompanyId;
+        } catch (IllegalArgumentException e) {
+            return userCompanyId;
+        }
+    }
+
     private void sendError(HttpServletResponse response, String mensagem) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"erro\": \"" + mensagem + "\"}");
+        response.getWriter().write("{\"status\": 401, \"message\": \"" + mensagem + "\", \"errors\": []}");
     }
 
     private String recoverToken(HttpServletRequest request){

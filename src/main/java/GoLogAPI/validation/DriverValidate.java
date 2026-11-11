@@ -19,15 +19,22 @@ public class DriverValidate {
     }
 
     public void validate(DriverRequest driverRequest){
+        validate(driverRequest, null);
+    }
+
+    /** @param selfId id do próprio motorista em edições (não conflita com a própria CNH). */
+    public void validate(DriverRequest driverRequest, java.util.UUID selfId){
         List<String> errors = new ArrayList<>();
 
-        cnh(driverRequest.cnhNumber(), errors);
+        if (driverRequest.cnhNumber() != null && !driverRequest.cnhNumber().isBlank())
+            cnh(driverRequest.cnhNumber(), selfId, errors);
 
         if(!errors.isEmpty()) throw new ConflictException(errors);
     }
 
-    public void cnh(String cnh, List<String> errors){
-        boolean exists = driverRepository.existsByCnhNumber(cnh);
+    public void cnh(String cnh, java.util.UUID selfId, List<String> errors){
+        boolean exists = driverRepository.findAll().stream()
+                .anyMatch(d -> cnh.equals(d.getCnhNumber()) && !d.getId().equals(selfId));
         if(exists) errors.add("CNH já cadastrada!");
     }
 }

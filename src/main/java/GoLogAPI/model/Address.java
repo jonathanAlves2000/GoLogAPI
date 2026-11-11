@@ -63,6 +63,7 @@ public class Address extends Audit {
 
     @com.fasterxml.jackson.annotation.JsonIgnore
     @jakarta.persistence.ManyToOne
+    @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SELECT)
     @jakarta.persistence.JoinColumn(name = "company_id")
     @org.hibernate.annotations.NotFound(action = org.hibernate.annotations.NotFoundAction.IGNORE)
     private Company company;

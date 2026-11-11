@@ -39,8 +39,10 @@ public class RouteRequestService {
     private final OptimizationConfigResolver configResolver;
     private final VisitTypeRuleRepository visitTypeRuleRepository;
     private final GoLogAPI.repository.CompanyRepository companyRepository;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
     public RouteRequestService(
+            GoLogAPI.infra.tenant.TenantGuard tenantGuard,
             ShipmentRepository shipmentRepository,
             RouteOptimizationClient routeOptimizationClient,
             TelemetryRepository telemetryRepository,
@@ -57,24 +59,92 @@ public class RouteRequestService {
         this.configResolver = configResolver;
         this.visitTypeRuleRepository = visitTypeRuleRepository;
         this.companyRepository = companyRepository;
+        this.tenantGuard = tenantGuard;
+    }
+
+    private static final java.util.Set<GoLogAPI.model.enums.ShipmentStatus> PLANNABLE = java.util.EnumSet.of(
+            GoLogAPI.model.enums.ShipmentStatus.PENDENTE, GoLogAPI.model.enums.ShipmentStatus.AGUARDANDO_INICIO);
+
+    private static GoLogAPI.exception.BusinessException badRequest(String message) {
+        return new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.BAD_REQUEST, message);
+    }
+
+    /**
+     * Carrega e valida escalas e remessas do pedido: precisam existir, estar no escopo do tenant, ser
+     * planejáveis e pertencer todas a um mesmo tenant (uma roteirização nunca mistura operadoras).
+     *
+     * @return tenant dono da roteirização
+     */
+    private Company validateRequest(OptimizeRouteRequest request, List<WorkSchedule> workSchedules, List<Shipment> shipments) {
+        if (request.workScheduleIds() == null || request.workScheduleIds().isEmpty())
+            throw badRequest("Selecione ao menos uma escala de trabalho (veículo + motorista) para roteirizar.");
+        if (request.shipmentIds() == null || request.shipmentIds().isEmpty())
+            throw badRequest("Selecione ao menos uma remessa para roteirizar.");
+
+        Set<UUID> foundSchedules = new HashSet<>();
+        for (WorkSchedule ws : workSchedules) {
+            tenantGuard.checkAccess(ws.getCompany(), ws.getId());
+            foundSchedules.add(ws.getId());
+            if (ws.getStatus() == GoLogAPI.model.enums.WorkScheduleStatus.DESATIVADO)
+                throw badRequest("A escala de " + driverName(ws) + " está desativada.");
+            if (ws.getDriver() == null)
+                throw badRequest("A escala " + ws.getId() + " não possui motorista.");
+            if (ws.getEquipamentGroup() == null || ws.getEquipamentGroup().getEquipament1() == null)
+                throw badRequest("A escala de " + driverName(ws) + " não possui conjunto/veículo válido.");
+            if (ws.getStartWorkday() == null || ws.getEndWorkday() == null)
+                throw badRequest("A escala de " + driverName(ws) + " não possui horário de início/fim do turno.");
+        }
+        for (UUID id : request.workScheduleIds())
+            if (!foundSchedules.contains(id)) throw new ResourceNotFoundException("Escala não encontrada: ", id);
+
+        Set<UUID> foundShipments = new HashSet<>();
+        for (Shipment sh : shipments) {
+            tenantGuard.checkAccess(sh.getCompany(), sh.getId());
+            foundShipments.add(sh.getId());
+            if (!PLANNABLE.contains(sh.getStatus()))
+                throw badRequest("A remessa #" + sh.getId().toString().substring(0, 8) + " está com status " + sh.getStatus()
+                        + " e não pode ser replanejada.");
+            if (sh.getSchedulind() == null)
+                throw badRequest("A remessa #" + sh.getId().toString().substring(0, 8) + " não possui data de agendamento.");
+            if (sh.getAddress() == null)
+                throw badRequest("A remessa #" + sh.getId().toString().substring(0, 8) + " não possui endereço.");
+        }
+        for (UUID id : request.shipmentIds())
+            if (!foundShipments.contains(id)) throw new ResourceNotFoundException("Remessa não encontrada: ", id);
+
+        Set<UUID> tenants = new HashSet<>();
+        workSchedules.forEach(ws -> { if (ws.getCompany() != null) tenants.add(ws.getCompany().getId()); });
+        shipments.forEach(sh -> { if (sh.getCompany() != null) tenants.add(sh.getCompany().getId()); });
+        if (tenants.size() > 1)
+            throw badRequest("Escalas e remessas selecionadas pertencem a empresas diferentes. Roteirize um tenant por vez.");
+
+        Company company = workSchedules.get(0).getCompany();
+        if (company == null) company = shipments.get(0).getCompany();
+        if (company == null) company = tenantGuard.ownerForWrite(null);
+        return company;
+    }
+
+    private static String driverName(WorkSchedule ws) {
+        return ws.getDriver() != null && ws.getDriver().getUser() != null ? ws.getDriver().getUser().getName() : "motorista sem nome";
+    }
+
+    private static double parseCoord(String value, String what) {
+        try {
+            return Double.parseDouble(value.trim().replace(',', '.'));
+        } catch (Exception e) {
+            throw badRequest("Coordenada inválida (" + value + ") em " + what + ". Corrija a latitude/longitude do endereço.");
+        }
     }
 
     @Transactional
     public OptimizeToursResponse optimizeRoutes(OptimizeRouteRequest optimizeRouteRequest) {
 
-        List<WorkSchedule> workSchedules = workScheduleRepository.findAllById(optimizeRouteRequest.workScheduleIds());
-        List<Shipment> requestedShipments = shipmentRepository.findAllById(optimizeRouteRequest.shipmentIds());
+        List<WorkSchedule> workSchedules = optimizeRouteRequest.workScheduleIds() == null ? List.of()
+                : workScheduleRepository.findAllById(optimizeRouteRequest.workScheduleIds());
+        List<Shipment> requestedShipments = optimizeRouteRequest.shipmentIds() == null ? List.of()
+                : shipmentRepository.findAllById(optimizeRouteRequest.shipmentIds());
 
-        Company company = null;
-        if (!workSchedules.isEmpty() && workSchedules.get(0).getEquipamentGroup() != null && workSchedules.get(0).getEquipamentGroup().getEquipament1() != null) {
-            company = workSchedules.get(0).getEquipamentGroup().getEquipament1().getCompany();
-        }
-        if (company == null && !requestedShipments.isEmpty()) {
-            company = requestedShipments.get(0).getCustomer();
-        }
-        if (company == null) {
-            company = companyRepository.findAll().stream().findFirst().orElse(null);
-        }
+        Company company = validateRequest(optimizeRouteRequest, workSchedules, requestedShipments);
 
         OptimizationConfigResolver.ResolvedOptimizationSettings settings = configResolver.resolveSettings(optimizeRouteRequest, company);
         ZoneOffset offset = ZoneOffset.of("-03:00");
@@ -91,7 +161,8 @@ public class RouteRequestService {
                     .orElse(null);
 
             Tractor tractor = tractorRepository.findById(equipament.getEquipament1().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipament.getEquipament1().getId()));
+                    .orElseThrow(() -> badRequest("O veículo principal (" + equipament.getEquipament1().getPlate()
+                            + ") do conjunto escalado para " + driverName(workSchedule) + " não é um cavalo/caminhão (tração)."));
 
             String latStr = "-23.550520";
             String lngStr = "-46.633308";
@@ -111,15 +182,15 @@ public class RouteRequestService {
             }
 
             LatLng startLocation = LatLng.newBuilder()
-                    .setLatitude(Double.parseDouble(latStr))
-                    .setLongitude(Double.parseDouble(lngStr))
+                    .setLatitude(parseCoord(latStr, "posição do veículo " + equipament.getEquipament1().getPlate()))
+                    .setLongitude(parseCoord(lngStr, "posição do veículo " + equipament.getEquipament1().getPlate()))
                     .build();
 
             com.google.maps.routeoptimization.v1.Vehicle.Builder vehicleBuilder = com.google.maps.routeoptimization.v1.Vehicle.newBuilder()
                     .setLabel(equipament.getEquipament1().getPlate() + "/" + equipament.getId() + "/" + workSchedule.getId())
                     .setStartLocation(startLocation)
-                    .setCostPerKilometer(tractor.getCostPerKilometer() * settings.kmCostMultiplier())
-                    .setCostPerHour(driver.getCostPerHour() * settings.hourCostMultiplier());
+                    .setCostPerKilometer((tractor.getCostPerKilometer() != null ? tractor.getCostPerKilometer() : 0.0) * settings.kmCostMultiplier())
+                    .setCostPerHour((driver.getCostPerHour() != null ? driver.getCostPerHour() : 0.0) * settings.hourCostMultiplier());
 
             if (settings.fixedCostPerVehicle() > 0) {
                 vehicleBuilder.setFixedCost(settings.fixedCostPerVehicle());
@@ -254,7 +325,10 @@ public class RouteRequestService {
         java.util.Set<UUID> handledDeliveryIds = new java.util.HashSet<>();
 
         for (Shipment collect : collects) {
-            List<Shipment> deliveries = shipmentRepository.findByOperationOrigem(collect);
+            // Entregas filhas ainda planejáveis (as já iniciadas/finalizadas não voltam para o otimizador)
+            List<Shipment> deliveries = shipmentRepository.findByOperationOrigem(collect).stream()
+                    .filter(d -> PLANNABLE.contains(d.getStatus()) && d.getSchedulind() != null && d.getAddress() != null)
+                    .toList();
 
             List<String> collectVisitTypes = new ArrayList<>();
             if (collect.getTypeTransport() != null && collect.getTypeTransport().getName() != null) {
@@ -270,8 +344,8 @@ public class RouteRequestService {
                     ? collect.getAddress().getLongitude() : "-46.633308";
 
             LatLng pickupLocation = LatLng.newBuilder()
-                    .setLatitude(Double.parseDouble(cLat))
-                    .setLongitude(Double.parseDouble(cLng))
+                    .setLatitude(parseCoord(cLat, "endereço da coleta"))
+                    .setLongitude(parseCoord(cLng, "endereço da coleta"))
                     .build();
 
             Instant collectInstant = collect.getSchedulind().atOffset(offset).toInstant();
@@ -300,8 +374,8 @@ public class RouteRequestService {
                             ? delivery.getAddress().getLongitude() : "-46.633308";
 
                     LatLng deliveryLocation = LatLng.newBuilder()
-                            .setLatitude(Double.parseDouble(dLat))
-                            .setLongitude(Double.parseDouble(dLng))
+                            .setLatitude(parseCoord(dLat, "endereço da entrega"))
+                            .setLongitude(parseCoord(dLng, "endereço da entrega"))
                             .build();
 
                     Instant deliveryInstant = delivery.getSchedulind().atOffset(offset).toInstant();
@@ -398,8 +472,8 @@ public class RouteRequestService {
                     ? delivery.getAddress().getLongitude() : "-46.633308";
 
             LatLng deliveryLocation = LatLng.newBuilder()
-                    .setLatitude(Double.parseDouble(dLat))
-                    .setLongitude(Double.parseDouble(dLng))
+                    .setLatitude(parseCoord(dLat, "endereço da entrega"))
+                    .setLongitude(parseCoord(dLng, "endereço da entrega"))
                     .build();
 
             Instant deliveryInstant = delivery.getSchedulind().atOffset(offset).toInstant();
@@ -440,8 +514,8 @@ public class RouteRequestService {
                         ? origCollect.getAddress().getLongitude() : "-46.633308";
 
                 LatLng ocLocation = LatLng.newBuilder()
-                        .setLatitude(Double.parseDouble(ocLat))
-                        .setLongitude(Double.parseDouble(ocLng))
+                        .setLatitude(parseCoord(ocLat, "endereço da coleta de origem"))
+                        .setLongitude(parseCoord(ocLng, "endereço da coleta de origem"))
                         .build();
 
                 Instant ocInstant = origCollect.getSchedulind().atOffset(offset).toInstant();

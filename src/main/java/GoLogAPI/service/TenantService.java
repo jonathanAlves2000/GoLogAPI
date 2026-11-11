@@ -64,6 +64,12 @@ public class TenantService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "CPF de administrador já em uso: " + request.adminCpf());
         }
 
+        if (request.companyType() == null || request.companyType() == CompanyType.TENANT_MASTER
+                || request.companyType() == CompanyType.CLIENT || request.companyType() == CompanyType.SUPPLIER) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Tipo de tenant inválido. Use TENANT_HEADQUARTER (matriz) ou TENANT_BRANCH (filial).");
+        }
+
         Company parentCompany = null;
         if (request.companyType() == CompanyType.TENANT_BRANCH) {
             if (request.parentCompanyId() == null) {
@@ -71,6 +77,10 @@ public class TenantService {
             }
             parentCompany = companyRepository.findById(request.parentCompanyId())
                     .orElseThrow(() -> new ResourceNotFoundException("Empresa matriz não encontrada: ", request.parentCompanyId()));
+            if (parentCompany.getCompanyType() != CompanyType.TENANT_HEADQUARTER && parentCompany.getCompanyType() != CompanyType.TENANT_MASTER) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "A empresa '" + parentCompany.getLegalName() + "' não é uma matriz. Filiais só podem ser vinculadas a uma matriz.");
+            }
         }
 
         // 1. Criar Endereço
@@ -99,6 +109,9 @@ public class TenantService {
         company.setParentCompany(parentCompany);
         company.setAddress(savedAddress);
         Company savedCompany = companyRepository.save(company);
+        // O endereço da sede pertence ao próprio tenant (senão fica invisível no escopo dele)
+        savedAddress.setCompany(savedCompany);
+        addressRepository.save(savedAddress);
 
         // 3. Criar Usuário Administrador
         User adminUser = new User();
@@ -130,7 +143,7 @@ public class TenantService {
             }
             List<Company> list = new java.util.ArrayList<>();
             list.add(current);
-            list.addAll(companyRepository.findByParentCompanyId(current.getId()));
+            list.addAll(branchesOf(current.getId()));
             return list.stream().map(this::mapToTenantResponse).toList();
         }
     }
@@ -138,17 +151,37 @@ public class TenantService {
     public TenantResponse getTenantById(UUID id) {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tenant não encontrado: ", id));
+        assertTenantVisible(company);
         return mapToTenantResponse(company);
     }
 
     public List<TenantResponse> getBranches(UUID parentCompanyId) {
-        return companyRepository.findByParentCompanyId(parentCompanyId)
+        companyRepository.findById(parentCompanyId).ifPresent(this::assertTenantVisible);
+        return branchesOf(parentCompanyId)
                 .stream()
                 .map(this::mapToTenantResponse)
                 .toList();
     }
 
+    private List<Company> branchesOf(UUID parentId) {
+        return companyRepository.findByParentCompanyId(parentId).stream()
+                .filter(c -> c.getCompanyType() == CompanyType.TENANT_BRANCH)
+                .toList();
+    }
+
+    /** Não-master só enxerga a própria empresa e as próprias filiais. */
+    private void assertTenantVisible(Company company) {
+        if (TenantContext.isMaster()) return;
+        UUID own = TenantContext.getUserCompanyId();
+        boolean visible = company.getId().equals(own)
+                || (company.getParentCompany() != null && company.getParentCompany().getId().equals(own));
+        if (!visible) throw new ResourceNotFoundException("Tenant não encontrado: ", company.getId());
+    }
+
     public TenantSummaryResponse getSummary() {
+        if (!TenantContext.isMaster()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Métricas globais de tenants são exclusivas do GoLog Master.");
+        }
         long totalTenants = companyRepository.findByCompanyType(CompanyType.TENANT_HEADQUARTER).size();
         long totalBranches = companyRepository.findByCompanyType(CompanyType.TENANT_BRANCH).size();
         long totalUsers = userRepository.count();
@@ -163,7 +196,9 @@ public class TenantService {
         UUID parentId = company.getParentCompany() != null ? company.getParentCompany().getId() : null;
         String city = company.getAddress() != null ? company.getAddress().getCity() : null;
         String state = company.getAddress() != null ? company.getAddress().getState() : null;
-        int branchCount = company.getBranches() != null ? company.getBranches().size() : 0;
+        int branchCount = company.getBranches() != null
+                ? (int) company.getBranches().stream().filter(b -> b.getCompanyType() == CompanyType.TENANT_BRANCH && Boolean.TRUE.equals(b.getActive())).count()
+                : 0;
 
         return new TenantResponse(
                 company.getId(),

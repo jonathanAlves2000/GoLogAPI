@@ -1,43 +1,36 @@
 package GoLogAPI.validation;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
 import GoLogAPI.dto.tractor.TractorRequest;
 import GoLogAPI.exception.ConflictException;
-import GoLogAPI.repository.TractorRepository;
+import GoLogAPI.repository.EquipamentRepository;
+import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+/** Placa e RENAVAM são únicos em toda a frota (cavalos e carretas), ignorando o próprio registro em edições. */
 @Component
 public class TractorValidate {
 
-    private final TractorRepository tractorRepository;
+    private final EquipamentRepository equipamentRepository;
 
-    public TractorValidate(TractorRepository tractorRepository){
-        this.tractorRepository = tractorRepository;
+    public TractorValidate(EquipamentRepository equipamentRepository){
+        this.equipamentRepository = equipamentRepository;
     }
 
-    public void validate(TractorRequest tractorRequest){
+    public void validate(TractorRequest request){
+        validate(request, null);
+    }
+
+    public void validate(TractorRequest request, UUID selfId){
         List<String> errors = new ArrayList<>();
-
-        if(tractorRequest.plate() != null && !tractorRequest.plate().isBlank())
-            plate(tractorRequest.plate(), errors);
-
-        if(tractorRequest.renavam() != null && !tractorRequest.renavam().isBlank())
-            renavam(tractorRequest.renavam(), errors);
-
-        if(!errors.isEmpty())throw new ConflictException(errors);
+        if(request.plate() != null && !request.plate().isBlank()
+                && equipamentRepository.findAllByPlate(request.plate()).stream().anyMatch(e -> !e.getId().equals(selfId)))
+            errors.add("Placa já cadastrada na frota!");
+        if(request.renavam() != null && !request.renavam().isBlank()
+                && equipamentRepository.findAllByRenavam(request.renavam()).stream().anyMatch(e -> !e.getId().equals(selfId)))
+            errors.add("RENAVAM já cadastrado na frota!");
+        if(!errors.isEmpty()) throw new ConflictException(errors);
     }
-
-    public void plate(String plate, List<String> errors){
-        boolean exists = tractorRepository.existsByPlate(plate);
-        if(exists) errors.add("Placa de tração já cadastrada!");
-    }
-
-    public void renavam(String renavam, List<String> errors){
-        boolean exists = tractorRepository.existsByRenavam(renavam);
-        if(exists) errors.add("Renavam já cadastrado!");
-    }
-
 }

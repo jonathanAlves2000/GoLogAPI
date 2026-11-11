@@ -24,10 +24,13 @@ public class TypeTransportService {
     private final TypeTransportRepository typeTransportRepository;
     private final TypeTransportMapper typeTransportMapper;
     private final CompanyRepository companyRepository;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
     public TypeTransportService(TypeTransportRepository typeTransportRepository,
                                 TypeTransportMapper typeTransportMapper,
-                                CompanyRepository companyRepository){
+                                CompanyRepository companyRepository,
+                                GoLogAPI.infra.tenant.TenantGuard tenantGuard){
+        this.tenantGuard = tenantGuard;
         this.typeTransportRepository = typeTransportRepository;
         this.typeTransportMapper = typeTransportMapper;
         this.companyRepository = companyRepository;
@@ -36,18 +39,14 @@ public class TypeTransportService {
     @Transactional
     public TypeTransportResponse save(TypeTransportCreateRequest typeTransportCreateRequest){
         TypeTransport typeTransport = typeTransportMapper.toEntity(typeTransportCreateRequest);
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        if (currentTenant != null) {
-            Company company = companyRepository.findById(currentTenant).orElse(null);
-            typeTransport.setCompany(company);
-        }
+        typeTransport.setCompany(tenantGuard.ownerForCatalog(typeTransportCreateRequest.companyId()));
         typeTransportRepository.save(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
 
     public TypeTransportResponse get(UUID id){
-        TypeTransport typeTransport = typeTransportRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        TypeTransport typeTransport = find(id);
+        tenantGuard.checkCatalogRead(typeTransport.getCompany(), id);
         return typeTransportMapper.toResponse(typeTransport);
     }
 
@@ -59,25 +58,26 @@ public class TypeTransportService {
 
     @Transactional
     public void delete(UUID id){
-       TypeTransport typeTransport = typeTransportRepository.findById(id)
-               .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+       TypeTransport typeTransport = find(id);
+       tenantGuard.checkCatalogWrite(typeTransport.getCompany(), id);
        typeTransportRepository.delete(typeTransport);
     }
 
     @Transactional
     public TypeTransportResponse update(UUID id, TypeTransportCreateRequest typeTransportCreateRequest){
-        typeTransportRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        TypeTransport typeTransport = typeTransportMapper.toEntity(typeTransportCreateRequest);
-        typeTransport.setId(id);
+        TypeTransport typeTransport = find(id);
+        tenantGuard.checkCatalogWrite(typeTransport.getCompany(), id);
+        typeTransport.setName(typeTransportCreateRequest.name());
+        typeTransport.setDescription(typeTransportCreateRequest.description());
+        typeTransport.setCare(typeTransportCreateRequest.care());
         typeTransportRepository.save(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
 
     @Transactional
     public TypeTransportResponse updatePartial(UUID id, TypeTransportUpdateRequest typeTransportUpdateRequest){
-        TypeTransport typeTransport = typeTransportRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        TypeTransport typeTransport = find(id);
+        tenantGuard.checkCatalogWrite(typeTransport.getCompany(), id);
 
         if(typeTransportUpdateRequest.name() != null && !typeTransportUpdateRequest.name().isBlank())
             typeTransport.setName(typeTransportUpdateRequest.name());
@@ -90,6 +90,9 @@ public class TypeTransportService {
         return typeTransportMapper.toResponse(typeTransport);
     }
 
+
+    private TypeTransport find(UUID id) {
+        return typeTransportRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de transporte não encontrado: ", id));
+    }
 }
-
-

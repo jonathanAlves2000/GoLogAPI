@@ -25,6 +25,7 @@ public interface DriverMapper {
     @Mapping(target = "name", source = "user.name")
     @Mapping(target = "email", source = "user.email")
     @Mapping(target = "cpf", source = "user.cpf")
+    @Mapping(target = "userId", source = "user.id")
     DriverResponseList toResponseItem(Driver driver);
 
     List<DriverResponseList> toResponses(List<Driver> drivers);

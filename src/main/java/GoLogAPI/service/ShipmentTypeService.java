@@ -23,10 +23,13 @@ public class ShipmentTypeService {
     private final ShipmentTypeRepository shipmentTypeRepository;
     private final DeliveryTypeValidate deliveryTypeValidate;
     private final CompanyRepository companyRepository;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
     public ShipmentTypeService(ShipmentTypeRepository shipmentTypeRepository,
                                DeliveryTypeValidate deliveryTypeValidate,
-                               CompanyRepository companyRepository){
+                               CompanyRepository companyRepository,
+                               GoLogAPI.infra.tenant.TenantGuard tenantGuard){
+        this.tenantGuard = tenantGuard;
         this.deliveryTypeValidate = deliveryTypeValidate;
         this.shipmentTypeRepository = shipmentTypeRepository;
         this.companyRepository = companyRepository;
@@ -37,8 +40,7 @@ public class ShipmentTypeService {
 
         deliveryTypeValidate.validate(deliveryTypeCreateRequest);
 
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        Company company = currentTenant != null ? companyRepository.findById(currentTenant).orElse(null) : null;
+        Company company = tenantGuard.ownerForCatalog(null);
 
         ShipmentType shipmentType = ShipmentType.builder()
                 .name(deliveryTypeCreateRequest.name())
@@ -60,6 +62,7 @@ public class ShipmentTypeService {
     public DeliveryTypeResponse get(UUID id){
         ShipmentType shipmentType = shipmentTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogRead(shipmentType.getCompany(), id);
 
         return new DeliveryTypeResponse(
                 shipmentType.getId(),
@@ -81,6 +84,7 @@ public class ShipmentTypeService {
     public void delete(UUID id){
         ShipmentType shipmentType = shipmentTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(shipmentType.getCompany(), id);
         shipmentTypeRepository.delete(shipmentType);
     }
 
@@ -89,6 +93,7 @@ public class ShipmentTypeService {
 
         ShipmentType shipmentType = shipmentTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(shipmentType.getCompany(), id);
 
         deliveryTypeValidate.validate(deliveryTypeCreateRequest);
 
@@ -110,6 +115,7 @@ public class ShipmentTypeService {
     public DeliveryTypeResponse updatePartial(UUID id, DeliveryTypeUpdateRequest deliveryTypeUpdateRequest){
         ShipmentType shipmentType = shipmentTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(shipmentType.getCompany(), id);
 
         deliveryTypeValidate.validate(deliveryTypeUpdateRequest);
 

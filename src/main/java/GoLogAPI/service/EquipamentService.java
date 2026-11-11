@@ -19,22 +19,26 @@ public class EquipamentService {
     private final EquipamentRepository equipamentRepository;
     private final EquipamentMapper equipamentMapper;
 
-    public EquipamentService(EquipamentRepository equipamentRepository, EquipamentMapper equipamentMapper){
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
+    public EquipamentService(EquipamentRepository equipamentRepository, EquipamentMapper equipamentMapper,
+                             GoLogAPI.infra.tenant.TenantGuard tenantGuard){
         this.equipamentRepository = equipamentRepository;
         this.equipamentMapper = equipamentMapper;
+        this.tenantGuard = tenantGuard;
     }
 
     public EquipamentResponse get(UUID id){
         Equipament equipament = equipamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkAccess(equipament.getCompany(), id);
         return equipamentMapper.toResponse(equipament);
     }
 
     public List<EquipamentResponse> getAll(){
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<Equipament> equipaments = (currentTenant != null)
-                ? equipamentRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
-                : equipamentRepository.findAll();
+        List<Equipament> equipaments = tenantGuard.isGlobalView()
+                ? equipamentRepository.findAll()
+                : equipamentRepository.findByCompanyId(tenantGuard.scope());
         return equipamentMapper.toResponseList(equipaments);
     }
 }

@@ -2,13 +2,25 @@ package GoLogAPI.validation;
 
 import GoLogAPI.dto.workSchedule.WorkScheduleRequest;
 import GoLogAPI.exception.ConflictException;
+import GoLogAPI.model.WorkSchedule;
+import GoLogAPI.model.enums.WorkScheduleStatus;
 import GoLogAPI.repository.WorkScheduleRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Impede que o mesmo motorista ou o mesmo conjunto tenha duas escalas ativas com horários sobrepostos.
+ *
+ * <p>A regra antiga bloqueava qualquer segunda escala ativa do motorista, independentemente da data —
+ * o que tornava impossível planejar mais de um dia da operação.</p>
+ */
 @Component
 public class WorkSheduleValidate {
 
@@ -18,28 +30,48 @@ public class WorkSheduleValidate {
         this.workScheduleRepository = workScheduleRepository;
     }
 
-    public void validate(WorkScheduleRequest workScheduleRequest){
-        List<String> errors = new ArrayList<>();
+    public void validate(WorkScheduleRequest request){
+        validate(request, null);
+    }
 
-        driver(workScheduleRequest.driverId(), errors);
-        equipamentGroup(workScheduleRequest.equipamentGroupId(), errors);
+    public void validate(WorkScheduleRequest request, UUID selfId){
+        List<String> errors = new ArrayList<>();
+        if (request.status() == WorkScheduleStatus.DESATIVADO) return;
+
+        if (request.startWorkday() != null && request.endWorkday() != null
+                && request.startWorkday().equals(request.endWorkday())) {
+            errors.add("O início e o fim do turno não podem ser iguais.");
+        }
+
+        List<WorkSchedule> active = workScheduleRepository.findAll().stream()
+                .filter(w -> !Objects.equals(w.getId(), selfId))
+                .filter(w -> w.getStatus() == WorkScheduleStatus.ATIVO || w.getStatus() == WorkScheduleStatus.EM_OPERACAO)
+                .filter(w -> overlaps(w, request.scheduleDate(), request.startWorkday(), request.endWorkday()))
+                .toList();
+
+        if (active.stream().anyMatch(w -> w.getDriver() != null && w.getDriver().getId().equals(request.driverId())))
+            errors.add("Este motorista já possui uma escala ativa que se sobrepõe a este horário.");
+        if (active.stream().anyMatch(w -> w.getEquipamentGroup() != null && w.getEquipamentGroup().getId().equals(request.equipamentGroupId())))
+            errors.add("Este conjunto de equipamentos já está escalado em um horário que se sobrepõe a este.");
 
         if(!errors.isEmpty())
             throw new ConflictException(errors);
     }
 
-    public void driver(UUID driverId, List<String> errors){
-        boolean exists = workScheduleRepository.existsActiveByDriverId(driverId);
-
-        if(exists)
-            errors.add("Já existe uma escala ativa para esse motorista.");
+    private static boolean overlaps(WorkSchedule w, LocalDate date, LocalTime start, LocalTime end) {
+        if (w.getScheduleDate() == null || date == null || w.getStartWorkday() == null || start == null) {
+            return Objects.equals(w.getScheduleDate(), date);
+        }
+        LocalDateTime[] a = interval(w.getScheduleDate(), w.getStartWorkday(), w.getEndWorkday());
+        LocalDateTime[] b = interval(date, start, end);
+        return a[0].isBefore(b[1]) && b[0].isBefore(a[1]);
     }
 
-    public void equipamentGroup(UUID equipamentGroupId, List<String> errors){
-        boolean exists = workScheduleRepository.existsActiveByEquipamentGroupId(equipamentGroupId);
-
-        if(exists)
-            errors.add("Conjunto de equipamento já está sendo utilizado por um motorista");
+    /** Turnos que viram a noite (fim &lt; início) terminam no dia seguinte. */
+    private static LocalDateTime[] interval(LocalDate date, LocalTime start, LocalTime end) {
+        LocalDateTime s = date.atTime(start);
+        LocalDateTime e = date.atTime(end != null ? end : start.plusHours(8));
+        if (!e.isAfter(s)) e = e.plusDays(1);
+        return new LocalDateTime[]{s, e};
     }
-
 }

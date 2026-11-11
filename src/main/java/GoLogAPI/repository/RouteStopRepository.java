@@ -11,6 +11,8 @@ public interface RouteStopRepository extends JpaRepository<RouteStop, UUID> {
 
     List<RouteStop> findByTransportId(UUID transportId);
 
+    List<RouteStop> findByShipmentId(UUID shipmentId);
+
     List<RouteStop> findByTransportIdOrderBySequenceOrderAsc(UUID transportId);
 
     List<RouteStop> findByTransportIdAndArrivedAtIsNullOrderBySequenceOrderAsc(UUID transportId);

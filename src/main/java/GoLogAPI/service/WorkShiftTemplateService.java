@@ -24,9 +24,12 @@ public class WorkShiftTemplateService {
 
     private final WorkShiftTemplateRepository workShiftTemplateRepository;
     private final CompanyRepository companyRepository;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
     public WorkShiftTemplateService(WorkShiftTemplateRepository workShiftTemplateRepository,
-                                    CompanyRepository companyRepository) {
+                                    CompanyRepository companyRepository,
+                                    GoLogAPI.infra.tenant.TenantGuard tenantGuard) {
+        this.tenantGuard = tenantGuard;
         this.workShiftTemplateRepository = workShiftTemplateRepository;
         this.companyRepository = companyRepository;
     }
@@ -120,9 +123,11 @@ public class WorkShiftTemplateService {
         UUID currentTenant = TenantContext.getCurrentTenantId();
         List<WorkShiftTemplate> templates = new ArrayList<>();
 
-        // Adiciona templates específicos da empresa
+        // Adiciona templates específicos da empresa (na Visão Global, de todas as empresas)
         if (currentTenant != null) {
             templates.addAll(workShiftTemplateRepository.findByCompanyId(currentTenant));
+        } else if (tenantGuard.isGlobalView()) {
+            templates.addAll(workShiftTemplateRepository.findAll().stream().filter(t -> t.getCompany() != null).toList());
         }
 
         // Adiciona os modelos pré-definidos globais do sistema
@@ -134,6 +139,7 @@ public class WorkShiftTemplateService {
     public WorkShiftTemplateResponse getById(UUID id) {
         WorkShiftTemplate template = workShiftTemplateRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogRead(template.getCompany(), id);
         return toResponse(template);
     }
 
@@ -144,10 +150,7 @@ public class WorkShiftTemplateService {
 
     @Transactional
     public WorkShiftTemplateResponse save(WorkShiftTemplateCreateRequest request) {
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        Company company = (currentTenant != null)
-                ? companyRepository.findById(currentTenant).orElse(null)
-                : null;
+        Company company = tenantGuard.ownerForCatalog(null);
 
         WorkShiftTemplate template = WorkShiftTemplate.builder()
                 .name(request.name())
@@ -171,6 +174,7 @@ public class WorkShiftTemplateService {
     public WorkShiftTemplateResponse update(UUID id, WorkShiftTemplateCreateRequest request) {
         WorkShiftTemplate template = workShiftTemplateRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(template.getCompany(), id);
 
         template.setName(request.name());
         template.setDescription(request.description());
@@ -191,6 +195,7 @@ public class WorkShiftTemplateService {
     public void delete(UUID id) {
         WorkShiftTemplate template = workShiftTemplateRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(template.getCompany(), id);
         workShiftTemplateRepository.delete(template);
     }
 

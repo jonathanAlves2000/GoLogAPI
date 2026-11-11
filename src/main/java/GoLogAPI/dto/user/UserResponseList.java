@@ -9,7 +9,6 @@ public record UserResponseList(
         UUID id,
         String name,
         String email,
-        String password,
         String cpf,
         UserProfile userProfile,
         CompanyResponse company

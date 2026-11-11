@@ -74,7 +74,9 @@ public class RouteOptimizationClient {
         try {
             return getClient().optimizeTours(request);
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao comunicar com a API de Otimização de Rotas do Google: " + e.getMessage(), e);
+            String detail = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            throw new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.BAD_GATEWAY,
+                    "Falha na API de Otimização de Rotas do Google: " + detail);
         }
     }
 

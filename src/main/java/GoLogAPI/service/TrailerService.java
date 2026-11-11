@@ -1,14 +1,12 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.trailer.TrailerCreateRequest;
-import GoLogAPI.dto.trailer.TrailerUpdateRequest;
 import GoLogAPI.dto.trailer.TrailerResponse;
+import GoLogAPI.dto.trailer.TrailerUpdateRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
-import GoLogAPI.infra.tenant.TenantContext;
+import GoLogAPI.infra.tenant.TenantGuard;
 import GoLogAPI.mapper.TrailerMapper;
-import GoLogAPI.model.Company;
 import GoLogAPI.model.Trailer;
-import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.TrailerRepository;
 import GoLogAPI.validation.TrailerValidate;
 import org.springframework.stereotype.Service;
@@ -17,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/** Carretas / reboques. Mesmas regras de propriedade de {@link TractorService}. */
 @Service
 @Transactional(readOnly = true)
 public class TrailerService {
@@ -24,92 +23,85 @@ public class TrailerService {
     private final TrailerRepository trailerRepository;
     private final TrailerMapper trailerMapper;
     private final TrailerValidate trailerValidate;
-    private final CompanyRepository companyRepository;
+    private final TenantGuard tenantGuard;
 
-    public TrailerService(TrailerRepository trailerRepository,
-                          TrailerMapper trailerMapper, TrailerValidate trailerValidate, CompanyRepository companyRepository){
+    public TrailerService(TrailerRepository trailerRepository, TrailerMapper trailerMapper,
+                          TrailerValidate trailerValidate, TenantGuard tenantGuard){
         this.trailerRepository = trailerRepository;
         this.trailerMapper = trailerMapper;
         this.trailerValidate = trailerValidate;
-        this.companyRepository = companyRepository;
+        this.tenantGuard = tenantGuard;
     }
 
     @Transactional
-    public TrailerResponse save(TrailerCreateRequest trailerCreateRequest){
-        trailerValidate.validate(trailerCreateRequest);
-
-        Company company = companyRepository.findById(trailerCreateRequest.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, trailerCreateRequest.companyId()));
-
-        Trailer trailer = trailerMapper.toEntity(trailerCreateRequest);
-        trailer.setCompany(company);
+    public TrailerResponse save(TrailerCreateRequest request){
+        trailerValidate.validate(request);
+        Trailer trailer = trailerMapper.toEntity(request);
+        trailer.setCompany(tenantGuard.ownerForWrite(request.companyId()));
         trailerRepository.save(trailer);
-
         return trailerMapper.toResponse(trailer);
     }
 
     public TrailerResponse get(UUID id){
-        Trailer trailer = trailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        return trailerMapper.toResponse(trailer);
+        return trailerMapper.toResponse(findVisible(id));
     }
 
     public List<TrailerResponse> getAll() {
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<Trailer> trailers = (currentTenant != null)
-                ? trailerRepository.findByCompanyId(currentTenant)
-                : trailerRepository.findAll();
+        List<Trailer> trailers = tenantGuard.isGlobalView()
+                ? trailerRepository.findAll()
+                : trailerRepository.findByCompanyId(tenantGuard.scope());
         return trailerMapper.toResponses(trailers);
     }
 
     @Transactional
     public void delete(UUID id){
-        Trailer trailer = trailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        trailerRepository.delete(trailer);
+        trailerRepository.delete(findVisible(id));
     }
 
     @Transactional
-    public TrailerResponse update(UUID id, TrailerCreateRequest trailerCreateRequest) {
-        trailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-
-        Company company = companyRepository.findById(trailerCreateRequest.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, trailerCreateRequest.companyId()));
-
-        Trailer trailer = trailerMapper.toEntity(trailerCreateRequest);
-        trailer.setId(id);
-        trailer.setCompany(company);
+    public TrailerResponse update(UUID id, TrailerCreateRequest request) {
+        Trailer trailer = findVisible(id);
+        trailerValidate.validate(request, id);
+        trailer.setPlate(request.plate());
+        trailer.setRenavam(request.renavam());
+        trailer.setModel(request.model());
+        trailer.setNumberAxles(request.numberAxles());
+        trailer.setMaximumCapacity(request.maximumCapacity());
+        trailer.setMaximumVolume(request.maximumVolume());
+        trailer.setStatus(request.status());
+        trailer.setCompany(tenantGuard.ownerForWrite(request.companyId()));
         trailerRepository.save(trailer);
-
         return trailerMapper.toResponse(trailer);
     }
 
     @Transactional
-    public TrailerResponse updatePartial(UUID id, TrailerUpdateRequest trailerUpdateRequest){
-        Trailer trailer = trailerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+    public TrailerResponse updatePartial(UUID id, TrailerUpdateRequest request){
+        Trailer trailer = findVisible(id);
+        trailerValidate.validate(request, id);
 
-        Company company = companyRepository.findById(trailerUpdateRequest.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, trailerUpdateRequest.companyId()));
-
-        trailerValidate.validate(trailerUpdateRequest);
-
-        if(trailerUpdateRequest.plate() != null && !trailerUpdateRequest.plate().isBlank())
-            trailer.setPlate(trailerUpdateRequest.plate());
-        if(trailerUpdateRequest.renavam() != null && !trailerUpdateRequest.renavam().isBlank())
-            trailer.setRenavam(trailerUpdateRequest.renavam());
-        if(trailerUpdateRequest.model() != null && !trailerUpdateRequest.model().isBlank())
-            trailer.setModel(trailerUpdateRequest.model());
-        if(trailerUpdateRequest.numberAxles() != null)
-            trailer.setNumberAxles(trailerUpdateRequest.numberAxles());
-        if(trailerUpdateRequest.maximumCapacity() != null)
-            trailer.setMaximumCapacity(trailerUpdateRequest.maximumCapacity());
-        if(trailerUpdateRequest.companyId() != null)
-            trailer.setCompany(company);
+        if(request.plate() != null && !request.plate().isBlank())
+            trailer.setPlate(request.plate());
+        if(request.renavam() != null && !request.renavam().isBlank())
+            trailer.setRenavam(request.renavam());
+        if(request.model() != null && !request.model().isBlank())
+            trailer.setModel(request.model());
+        if(request.numberAxles() != null)
+            trailer.setNumberAxles(request.numberAxles());
+        if(request.maximumCapacity() != null)
+            trailer.setMaximumCapacity(request.maximumCapacity());
+        if(request.maximumVolume() != null)
+            trailer.setMaximumVolume(request.maximumVolume());
+        if(request.companyId() != null)
+            trailer.setCompany(tenantGuard.ownerForWrite(request.companyId()));
 
         trailerRepository.save(trailer);
         return trailerMapper.toResponse(trailer);
+    }
 
+    public Trailer findVisible(UUID id) {
+        Trailer trailer = trailerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Carreta não encontrada: ", id));
+        tenantGuard.checkAccess(trailer.getCompany(), id);
+        return trailer;
     }
 }

@@ -24,10 +24,14 @@ public class DashboardService {
     private final ShipmentRepository shipmentRepository;
     private final RouteStopRepository routeStopRepository;
 
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
     public DashboardService(DriverRepository driverRepository,
                             TransportRepository transportRepository,
                             ShipmentRepository shipmentRepository,
-                            RouteStopRepository routeStopRepository) {
+                            RouteStopRepository routeStopRepository,
+                            GoLogAPI.infra.tenant.TenantGuard tenantGuard) {
+        this.tenantGuard = tenantGuard;
         this.driverRepository = driverRepository;
         this.transportRepository = transportRepository;
         this.shipmentRepository = shipmentRepository;
@@ -35,10 +39,16 @@ public class DashboardService {
     }
 
     public DashboardMetricsResponse getMetrics() {
-        List<Driver> drivers = driverRepository.findAll();
-        List<Transport> transports = transportRepository.findAll();
-        List<Shipment> shipments = shipmentRepository.findAll();
-        List<RouteStop> routeStops = routeStopRepository.findAll();
+        // Métricas sempre restritas ao tenant ativo (Visão Global do Master consolida todos)
+        boolean global = tenantGuard.isGlobalView();
+        UUID scope = tenantGuard.scope();
+        List<Driver> drivers = global ? driverRepository.findAll() : driverRepository.findByCompanyId(scope);
+        List<Transport> transports = global ? transportRepository.findAll() : transportRepository.findByTransporterId(scope);
+        List<Shipment> shipments = global ? shipmentRepository.findAll() : shipmentRepository.findByCompanyId(scope);
+        java.util.Set<UUID> transportIds = transports.stream().map(Transport::getId).collect(Collectors.toSet());
+        List<RouteStop> routeStops = routeStopRepository.findAll().stream()
+                .filter(rs -> global || (rs.getTransport() != null && transportIds.contains(rs.getTransport().getId())))
+                .toList();
 
         Map<UUID, RouteStop> shipmentToRouteStop = routeStops.stream()
                 .filter(rs -> rs.getShipment() != null)

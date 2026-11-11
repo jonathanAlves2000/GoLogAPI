@@ -59,7 +59,9 @@ public class InvoiceImportService {
         UUID currentTenant = TenantContext.getCurrentTenantId();
         Company currentCompany = currentTenant != null
                 ? companyRepository.findById(currentTenant).orElse(null)
-                : companyRepository.findFirstByIsMasterTrue().orElse(null);
+                : (TenantContext.getUserCompanyId() != null
+                    ? companyRepository.findById(TenantContext.getUserCompanyId()).orElse(null)
+                    : companyRepository.findFirstByIsMasterTrue().orElse(null));
 
         // Fallbacks de configuração
         ShipmentType defaultShipmentType = shipmentTypeRepository.findAll().stream().findFirst().orElse(null);
@@ -149,8 +151,10 @@ public class InvoiceImportService {
         String cleanDoc = rawDoc != null ? rawDoc.replaceAll("[^0-9]", "") : "";
 
         if (!cleanDoc.isBlank()) {
-            var existing = companyRepository.findByCnpjCpf(cleanDoc)
-                    .or(() -> companyRepository.findByCnpjCpf(rawDoc.trim()));
+            // Cliente é procurado apenas na carteira do tenant que está importando
+            UUID ownerId = currentCompany != null ? currentCompany.getId() : null;
+            var existing = companyRepository.findFirstByCnpjCpfAndOwnerTenantId(cleanDoc, ownerId)
+                    .or(() -> companyRepository.findFirstByCnpjCpfAndOwnerTenantId(rawDoc.trim(), ownerId));
             if (existing.isPresent()) {
                 return existing.get();
             }
@@ -204,7 +208,7 @@ public class InvoiceImportService {
         customer.setAddress(savedAddress);
         customer.setCompanyType(CompanyType.CLIENT);
         customer.setIsMaster(false);
-        customer.setParentCompany(currentCompany);
+        customer.setOwnerTenant(currentCompany);
 
         return companyRepository.save(customer);
     }

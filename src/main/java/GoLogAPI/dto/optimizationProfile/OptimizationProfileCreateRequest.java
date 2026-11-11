@@ -11,7 +11,7 @@ public record OptimizationProfileCreateRequest(
 
         String description,
 
-        @NotNull(message = "O ID da empresa é obrigatório")
+        /** Opcional: quando omitido, o perfil pertence ao tenant ativo. */
         UUID companyId,
 
         Boolean isDefault,

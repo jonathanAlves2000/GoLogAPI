@@ -24,6 +24,13 @@ public class ShipmentDemandService {
     private final ShipmentRepository shipmentRepository;
     private final DemandTypeRepository demandTypeRepository;
 
+    private GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setTenantGuard(GoLogAPI.infra.tenant.TenantGuard tenantGuard) {
+        this.tenantGuard = tenantGuard;
+    }
+
     public ShipmentDemandService(ShipmentDemandRepository shipmentDemandRepository,
                                  ShipmentRepository shipmentRepository,
                                  DemandTypeRepository demandTypeRepository) {
@@ -36,6 +43,7 @@ public class ShipmentDemandService {
     public List<ShipmentDemandResponse> saveDemands(UUID shipmentId, List<ShipmentDemandRequest> requests) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, shipmentId));
+        tenantGuard.checkAccess(shipment.getCompany(), shipmentId);
 
         // Substitui demandas anteriores
         shipmentDemandRepository.deleteByShipmentId(shipmentId);
@@ -58,6 +66,7 @@ public class ShipmentDemandService {
     }
 
     public List<ShipmentDemandResponse> getDemandsByShipmentId(UUID shipmentId) {
+        shipmentRepository.findById(shipmentId).ifPresent(e -> tenantGuard.checkAccess(e.getCompany(), shipmentId));
         return shipmentDemandRepository.findByShipmentId(shipmentId).stream()
                 .map(this::toResponse)
                 .toList();

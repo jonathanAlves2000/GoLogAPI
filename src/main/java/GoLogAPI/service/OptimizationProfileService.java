@@ -22,10 +22,13 @@ public class OptimizationProfileService {
     private final OptimizationProfileRepository optimizationProfileRepository;
     private final CompanyRepository companyRepository;
     private final OptimizationProfileMapper optimizationProfileMapper;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
     public OptimizationProfileService(OptimizationProfileRepository optimizationProfileRepository,
                                       CompanyRepository companyRepository,
-                                      OptimizationProfileMapper optimizationProfileMapper) {
+                                      OptimizationProfileMapper optimizationProfileMapper,
+                                      GoLogAPI.infra.tenant.TenantGuard tenantGuard) {
+        this.tenantGuard = tenantGuard;
         this.optimizationProfileRepository = optimizationProfileRepository;
         this.companyRepository = companyRepository;
         this.optimizationProfileMapper = optimizationProfileMapper;
@@ -33,8 +36,7 @@ public class OptimizationProfileService {
 
     @Transactional
     public OptimizationProfileResponse save(OptimizationProfileCreateRequest request) {
-        Company company = companyRepository.findById(request.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.companyId()));
+        Company company = tenantGuard.ownerForWrite(request.companyId());
 
         OptimizationProfile profile = optimizationProfileMapper.toEntity(request);
         profile.setCompany(company);
@@ -56,20 +58,27 @@ public class OptimizationProfileService {
     }
 
     public OptimizationProfileResponse get(UUID id) {
-        OptimizationProfile profile = optimizationProfileRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        OptimizationProfile profile = findVisible(id);
         return optimizationProfileMapper.toResponse(profile);
     }
 
     public List<OptimizationProfileResponse> getAll() {
-        return optimizationProfileMapper.toResponses(optimizationProfileRepository.findAll());
+        return optimizationProfileMapper.toResponses(tenantGuard.isGlobalView()
+                ? optimizationProfileRepository.findAll()
+                : optimizationProfileRepository.findByCompanyId(tenantGuard.scope()));
     }
 
     public List<OptimizationProfileResponse> getByCompany(UUID companyId) {
+        if (!tenantGuard.isGlobalView() && !companyId.equals(tenantGuard.scope())) {
+            return List.of();
+        }
         return optimizationProfileMapper.toResponses(optimizationProfileRepository.findByCompanyId(companyId));
     }
 
     public OptimizationProfileResponse getDefaultByCompany(UUID companyId) {
+        if (!tenantGuard.isGlobalView() && !companyId.equals(tenantGuard.scope())) {
+            throw new ResourceNotFoundException("Nenhum perfil de otimização encontrado para a empresa: ", companyId);
+        }
         OptimizationProfile profile = optimizationProfileRepository.findFirstByCompanyIdAndIsDefaultTrue(companyId)
                 .or(() -> optimizationProfileRepository.findFirstByCompanyId(companyId))
                 .orElseThrow(() -> new ResourceNotFoundException("Nenhum perfil de otimização encontrado para a empresa: ", companyId));
@@ -78,15 +87,13 @@ public class OptimizationProfileService {
 
     @Transactional
     public void delete(UUID id) {
-        OptimizationProfile profile = optimizationProfileRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        OptimizationProfile profile = findVisible(id);
         optimizationProfileRepository.delete(profile);
     }
 
     @Transactional
     public OptimizationProfileResponse update(UUID id, OptimizationProfileUpdateRequest request) {
-        OptimizationProfile profile = optimizationProfileRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        OptimizationProfile profile = findVisible(id);
 
         if (Boolean.TRUE.equals(request.isDefault()) && !Boolean.TRUE.equals(profile.getIsDefault())) {
             unsetPreviousDefault(profile.getCompany().getId());
@@ -95,6 +102,13 @@ public class OptimizationProfileService {
         optimizationProfileMapper.updateFromDto(request, profile);
         optimizationProfileRepository.save(profile);
         return optimizationProfileMapper.toResponse(profile);
+    }
+
+    public OptimizationProfile findVisible(UUID id) {
+        OptimizationProfile profile = optimizationProfileRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Perfil de otimização não encontrado: ", id));
+        tenantGuard.checkAccess(profile.getCompany(), id);
+        return profile;
     }
 
     private void unsetPreviousDefault(UUID companyId) {

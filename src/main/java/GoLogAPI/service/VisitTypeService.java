@@ -24,9 +24,13 @@ public class VisitTypeService {
     private final CompanyRepository companyRepository;
     private final VisitTypeMapper visitTypeMapper;
 
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
     public VisitTypeService(VisitTypeRepository visitTypeRepository,
                             CompanyRepository companyRepository,
-                            VisitTypeMapper visitTypeMapper) {
+                            VisitTypeMapper visitTypeMapper,
+            GoLogAPI.infra.tenant.TenantGuard tenantGuard) {
+        this.tenantGuard = tenantGuard;
         this.visitTypeRepository = visitTypeRepository;
         this.companyRepository = companyRepository;
         this.visitTypeMapper = visitTypeMapper;
@@ -34,17 +38,17 @@ public class VisitTypeService {
 
     @Transactional
     public VisitTypeResponse save(VisitTypeCreateRequest request) {
-        if (request.companyId() != null && visitTypeRepository.existsByCodeAndCompanyId(request.code(), request.companyId())) {
-            throw new ConflictException("Já existe um tipo de visita com este código para esta empresa.");
+        Company owner = tenantGuard.ownerForCatalog(request.companyId());
+        UUID ownerId = owner != null ? owner.getId() : null;
+        boolean duplicated = visitTypeRepository.findAvailableByCompanyId(ownerId).stream()
+                .anyMatch(v -> v.getCode() != null && v.getCode().equalsIgnoreCase(request.code())
+                        && (v.getCompany() == null || ownerId == null || v.getCompany().getId().equals(ownerId)));
+        if (duplicated) {
+            throw new ConflictException("Já existe um tipo de visita com o código '" + request.code() + "' disponível para esta empresa.");
         }
 
         VisitType visitType = visitTypeMapper.toEntity(request);
-
-        if (request.companyId() != null) {
-            Company company = companyRepository.findById(request.companyId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.companyId()));
-            visitType.setCompany(company);
-        }
+        visitType.setCompany(owner);
 
         visitTypeRepository.save(visitType);
         return visitTypeMapper.toResponse(visitType);
@@ -53,14 +57,17 @@ public class VisitTypeService {
     public VisitTypeResponse get(UUID id) {
         VisitType visitType = visitTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogRead(visitType.getCompany(), id);
         return visitTypeMapper.toResponse(visitType);
     }
 
     public List<VisitTypeResponse> getAll() {
-        return visitTypeMapper.toResponses(visitTypeRepository.findAll());
+        return visitTypeMapper.toResponses(visitTypeRepository.findAvailableByCompanyId(tenantGuard.scope()));
     }
 
     public List<VisitTypeResponse> getAvailableForCompany(UUID companyId) {
+        // Fora da Visão Global, só é possível consultar o catálogo do próprio tenant
+        if (!tenantGuard.isGlobalView()) companyId = tenantGuard.scope();
         if (companyId == null) {
             return visitTypeMapper.toResponses(visitTypeRepository.findAll());
         }
@@ -71,6 +78,7 @@ public class VisitTypeService {
     public void delete(UUID id) {
         VisitType visitType = visitTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(visitType.getCompany(), id);
         visitTypeRepository.delete(visitType);
     }
 
@@ -78,6 +86,7 @@ public class VisitTypeService {
     public VisitTypeResponse update(UUID id, VisitTypeUpdateRequest request) {
         VisitType visitType = visitTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(visitType.getCompany(), id);
 
         visitTypeMapper.updateFromDto(request, visitType);
         visitTypeRepository.save(visitType);

@@ -35,3 +35,8 @@ build/
 ### Docker ###
 .env
 ApiRouteOptimization.json
+
+# segredos e backups locais
+backups/
+ApiRouteOptimization.json
+src/main/resources/ApiRouteOptimization.json

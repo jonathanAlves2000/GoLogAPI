@@ -12,5 +12,11 @@ public record CompanyResponseList(
         String email,
         String cnpjCpf,
         CompanyType companyType,
-        Boolean isMaster
+        Boolean isMaster,
+        UUID parentCompanyId,
+        UUID ownerTenantId,
+        String ownerTenantName,
+        UUID addressId,
+        String city,
+        String state
 ) { }

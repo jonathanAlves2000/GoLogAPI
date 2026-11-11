@@ -24,4 +24,16 @@ public interface CompanyRepository extends JpaRepository<Company, UUID> {
     Optional<Company> findFirstByIsMasterTrue();
     Optional<Company> findByCnpjCpf(String cnpjCpf);
     Optional<Company> findFirstByCnpjCpf(String cnpjCpf);
+
+    /** Empresas visíveis a um tenant: ele mesmo, suas filiais e a carteira de clientes/fornecedores que possui. */
+    @org.springframework.data.jpa.repository.Query("""
+            SELECT c FROM Company c
+            LEFT JOIN c.parentCompany p
+            LEFT JOIN c.ownerTenant o
+            WHERE c.id = :tenantId OR p.id = :tenantId OR o.id = :tenantId
+            ORDER BY c.legalName
+            """)
+    List<Company> findVisibleForTenant(@org.springframework.data.repository.query.Param("tenantId") UUID tenantId);
+
+    Optional<Company> findFirstByCnpjCpfAndOwnerTenantId(String cnpjCpf, UUID ownerTenantId);
 }

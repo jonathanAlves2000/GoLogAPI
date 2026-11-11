@@ -25,12 +25,14 @@ public class OccurrenceService {
     private final TransportRepository transportRepository;
     private final UserRepository userRepository;
     private final OccurrenceMapper occurrenceMapper;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
     public OccurrenceService(
             OccurrenceRepository occurrenceRepository, OccurrenceMapper occurrenceMapper,
             ShipmentRepository shipmentRepository, UserRepository userRepository,
-            TransportRepository transportRepository)
+            TransportRepository transportRepository, GoLogAPI.infra.tenant.TenantGuard tenantGuard)
     {
+        this.tenantGuard = tenantGuard;
         this.occurrenceRepository = occurrenceRepository;
         this.occurrenceMapper = occurrenceMapper;
         this.transportRepository = transportRepository;
@@ -41,21 +43,18 @@ public class OccurrenceService {
     @Transactional
     public OccurrenceCreateResponse save(OccurrenceCreateRequest occurrenceCreateRequest){
 
-        Shipment shipment = shipmentRepository.findById(occurrenceCreateRequest.shipmentId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.shipmentId()));
-
-        Transport transport = transportRepository.findById(occurrenceCreateRequest.transportId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.transportId()));
-
-        User sender = userRepository.findById(occurrenceCreateRequest.senderId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.senderId()));
+        Shipment shipment = findShipment(occurrenceCreateRequest.shipmentId());
+        Transport transport = findTransport(occurrenceCreateRequest.transportId());
+        User sender = findSender(occurrenceCreateRequest.senderId());
 
         Occurrence occurrence = occurrenceMapper.toEntity(occurrenceCreateRequest);
 
-        if(occurrenceCreateRequest.type().equals("Inicio"))
+        String type = occurrenceCreateRequest.type().trim();
+        if(type.equalsIgnoreCase("Inicio") || type.equalsIgnoreCase("Início"))
              shipment.setStatus(ShipmentStatus.INICIADO);
-        if(occurrenceCreateRequest.type().equals("Fim"))
+        if(type.equalsIgnoreCase("Fim"))
             shipment.setStatus(ShipmentStatus.FINALIZADO);
+        shipmentRepository.save(shipment);
 
         occurrence.setShipment(shipment);
         occurrence.setTransport(transport);
@@ -72,46 +71,33 @@ public class OccurrenceService {
     }
 
     public OccurrenceResponse get(UUID id){
-        Occurrence occurrence = occurrenceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Occurrence occurrence = findVisible(id);
 
         return occurrenceMapper.toResponse(occurrence);
     }
 
     public List<OccurrenceResponseList> getAll(){
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<Occurrence> occurrences = (currentTenant != null)
-                ? occurrenceRepository.findByCompanyId(currentTenant)
-                : occurrenceRepository.findAll();
+        List<Occurrence> occurrences = tenantGuard.isGlobalView()
+                ? occurrenceRepository.findAll()
+                : occurrenceRepository.findByCompanyId(tenantGuard.scope());
         return occurrenceMapper.toResponseList(occurrences);
     }
 
     @Transactional
     public void delete(UUID id){
-        Occurrence occurrence = occurrenceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Occurrence occurrence = findVisible(id);
         occurrenceRepository.delete(occurrence);
     }
 
     @Transactional
     public OccurrenceCreateResponse update(UUID id, OccurrenceCreateRequest occurrenceCreateRequest){
-        occurrenceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-
-        Shipment shipment = shipmentRepository.findById(occurrenceCreateRequest.shipmentId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.shipmentId()));
-
-        Transport transport = transportRepository.findById(occurrenceCreateRequest.transportId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.transportId()));
-
-        User sender = userRepository.findById(occurrenceCreateRequest.senderId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceCreateRequest.senderId()));
-
-        Occurrence occurrence = occurrenceMapper.toEntity(occurrenceCreateRequest);
-        occurrence.setShipment(shipment);
-        occurrence.setTransport(transport);
-        occurrence.setSender(sender);
-        occurrence.setId(id);
+        Occurrence occurrence = findVisible(id);
+        occurrence.setType(occurrenceCreateRequest.type());
+        occurrence.setDateTime(occurrenceCreateRequest.dateTime());
+        occurrence.setDescription(occurrenceCreateRequest.description());
+        occurrence.setShipment(findShipment(occurrenceCreateRequest.shipmentId()));
+        occurrence.setTransport(findTransport(occurrenceCreateRequest.transportId()));
+        occurrence.setSender(findSender(occurrenceCreateRequest.senderId()));
 
         occurrenceRepository.save(occurrence);
 
@@ -120,8 +106,7 @@ public class OccurrenceService {
 
     @Transactional
     public OccurrenceCreateResponse updatePartial(UUID id, OccurrenceUpdateRequest occurrenceUpdateRequest){
-        Occurrence occurrence = occurrenceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Occurrence occurrence = findVisible(id);
 
         if(occurrenceUpdateRequest.type() != null && !occurrenceUpdateRequest.type().isBlank())
             occurrence.setType(occurrenceUpdateRequest.type());
@@ -133,22 +118,19 @@ public class OccurrenceService {
             occurrence.setAttachment(occurrenceUpdateRequest.attachment());
 
         if(occurrenceUpdateRequest.shipmentId() != null){
-            Shipment shipment = shipmentRepository.findById(occurrenceUpdateRequest.shipmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceUpdateRequest.shipmentId()));
+            Shipment shipment = findShipment(occurrenceUpdateRequest.shipmentId());
 
             occurrence.setShipment(shipment);
         }
 
         if(occurrenceUpdateRequest.transportId() != null){
-            Transport transport = transportRepository.findById(occurrenceUpdateRequest.transportId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceUpdateRequest.transportId()));
+            Transport transport = findTransport(occurrenceUpdateRequest.transportId());
 
             occurrence.setTransport(transport);
         }
 
         if(occurrenceUpdateRequest.senderId() != null){
-            User sender = userRepository.findById(occurrenceUpdateRequest.senderId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, occurrenceUpdateRequest.senderId()));
+            User sender = findSender(occurrenceUpdateRequest.senderId());
 
             occurrence.setSender(sender);
         }
@@ -158,4 +140,42 @@ public class OccurrenceService {
         return occurrenceMapper.toCreateResponse(occurrence);
     }
 
+
+    private Occurrence findVisible(UUID id) {
+        Occurrence occurrence = occurrenceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ocorrência não encontrada: ", id));
+        tenantGuard.checkAccess(occurrence.getCompany(), id);
+        return occurrence;
+    }
+
+    /** Motoristas registram ocorrências nas próprias rotas (o app não envia X-Tenant-Id). */
+    private boolean isDriver() {
+        return "DRIVER".equals(GoLogAPI.infra.tenant.TenantContext.getCurrentRole());
+    }
+
+    private Shipment findShipment(UUID id) {
+        Shipment shipment = shipmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Remessa não encontrada: ", id));
+        if (!isDriver()) tenantGuard.checkAccess(shipment.getCompany(), id);
+        return shipment;
+    }
+
+    private Transport findTransport(UUID id) {
+        Transport transport = transportRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Transporte não encontrado: ", id));
+        if (isDriver()) {
+            UUID me = GoLogAPI.infra.tenant.TenantContext.getCurrentUserId();
+            boolean mine = transport.getDriver() != null && transport.getDriver().getUser() != null
+                    && transport.getDriver().getUser().getId().equals(me);
+            if (!mine) throw new ResourceNotFoundException("Transporte não encontrado: ", id);
+        } else {
+            tenantGuard.checkAccess(transport.getTransporter(), id);
+        }
+        return transport;
+    }
+
+    private User findSender(UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário emissor não encontrado: ", id));
+    }
 }

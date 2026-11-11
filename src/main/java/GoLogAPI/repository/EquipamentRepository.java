@@ -15,6 +15,8 @@ public interface EquipamentRepository extends JpaRepository<Equipament, UUID> {
 
     List<Equipament> findAllByPlate(String plate);
 
+    List<Equipament> findAllByRenavam(String renavam);
+
     default Optional<Equipament> findByPlate(String plate) {
         return findFirstByPlateOrderByCreatedAtDesc(plate);
     }

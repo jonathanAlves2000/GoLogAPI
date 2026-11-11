@@ -1,17 +1,21 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.user.UserCreateRequest;
-import GoLogAPI.dto.user.UserUpdateRequest;
 import GoLogAPI.dto.user.UserResponse;
 import GoLogAPI.dto.user.UserResponseList;
+import GoLogAPI.dto.user.UserUpdateRequest;
+import GoLogAPI.exception.BusinessException;
+import GoLogAPI.exception.ConflictException;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.infra.tenant.TenantContext;
+import GoLogAPI.infra.tenant.TenantGuard;
 import GoLogAPI.mapper.UserMapper;
 import GoLogAPI.model.Company;
-import GoLogAPI.repository.CompanyRepository;
-import GoLogAPI.repository.UserRepository;
 import GoLogAPI.model.User;
+import GoLogAPI.model.UserProfile;
+import GoLogAPI.repository.UserRepository;
 import GoLogAPI.validation.UserValidate;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,32 +23,35 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Usuários do tenant. A empresa do usuário precisa ser um tenant do escopo (a própria matriz ou uma
+ * filial); clientes não possuem usuários de backoffice.
+ */
 @Service
 @Transactional(readOnly = true)
 public class UserService {
 
     private final UserRepository userRepository;
-    private final CompanyRepository companyRepository;
     private final UserMapper userMapper;
     private final UserValidate userValidate;
     private final PasswordEncoder passwordEncoder;
+    private final TenantGuard tenantGuard;
 
-    public UserService(UserRepository userRepository, CompanyRepository companyRepository , UserMapper userMapper, UserValidate userValidate, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, UserMapper userMapper, UserValidate userValidate,
+                       PasswordEncoder passwordEncoder, TenantGuard tenantGuard){
         this.userRepository = userRepository;
-        this.companyRepository = companyRepository;
         this.userMapper = userMapper;
         this.userValidate = userValidate;
         this.passwordEncoder = passwordEncoder;
+        this.tenantGuard = tenantGuard;
     }
 
     @Transactional
-    public UserResponse save(UserCreateRequest userCreateRequest){
-        Company company = companyRepository.findById(userCreateRequest.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userCreateRequest.companyId()));
-        userValidate.validate(userCreateRequest);
-        String passwordEnconder = passwordEncoder.encode(userCreateRequest.password());
-        User user = userMapper.toEntity(userCreateRequest);
-        user.setPassword(passwordEnconder);
+    public UserResponse save(UserCreateRequest request){
+        Company company = tenantGuard.ownerForWrite(request.companyId());
+        userValidate.validate(request);
+        User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.password()));
         user.setCompany(company);
         userRepository.save(user);
         return userMapper.toResponse(user);
@@ -52,98 +59,72 @@ public class UserService {
 
     @Transactional
     public void delete(UUID id){
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        User user = findVisible(id);
+        if (TenantContext.getUserCompanyId() != null && user.getEmail() != null
+                && user.getEmail().equalsIgnoreCase(currentEmail())) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Você não pode excluir o próprio usuário logado.");
+        }
         userRepository.delete(user);
     }
 
     public UserResponse get(UUID id){
-       User user = userRepository.findById(id).
-                orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-       return userMapper.toResponse(user);
+       return userMapper.toResponse(findVisible(id));
     }
 
     public List<UserResponseList> getAll(){
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<User> users = (currentTenant != null)
-                ? userRepository.findByCompanyIdOrCompanyIsNull(currentTenant)
-                : userRepository.findAll();
+        List<User> users = tenantGuard.isGlobalView()
+                ? userRepository.findAll()
+                : userRepository.findByCompanyId(tenantGuard.scope());
         return userMapper.toResponses(users);
     }
 
     @Transactional
-    public UserResponse update(UUID id, UserUpdateRequest userUpdateRequest){
-        return updatePartial(id, userUpdateRequest);
+    public UserResponse update(UUID id, UserUpdateRequest request){
+        return updatePartial(id, request);
     }
 
     @Transactional
-    public UserResponse update(UUID id, UserCreateRequest userCreateRequest){
-      User existing = userRepository.findById(id)
-              .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+    public UserResponse updatePartial(UUID id, UserUpdateRequest request){
+        User user = findVisible(id);
 
-      if (userCreateRequest.email() != null && !userCreateRequest.email().isBlank()) {
-          userRepository.findByEmail(userCreateRequest.email())
-                  .filter(u -> !u.getId().equals(id))
-                  .ifPresent(u -> {
-                      throw new GoLogAPI.exception.ConflictException(List.of("Email já cadastrado!"));
-                  });
-      }
-      if (userCreateRequest.cpf() != null && !userCreateRequest.cpf().isBlank()) {
-          userRepository.findByCpf(userCreateRequest.cpf())
-                  .filter(u -> !u.getId().equals(id))
-                  .ifPresent(u -> {
-                      throw new GoLogAPI.exception.ConflictException(List.of("CPF já cadastrado!"));
-                  });
-      }
-
-      User user = userMapper.toEntity(userCreateRequest);
-      Company company = companyRepository.findById(userCreateRequest.companyId())
-              .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userCreateRequest.companyId()));
-      user.setCompany(company);
-      user.setId(id);
-      if (userCreateRequest.password() != null && !userCreateRequest.password().isBlank()) {
-          user.setPassword(passwordEncoder.encode(userCreateRequest.password()));
-      } else {
-          user.setPassword(existing.getPassword());
-      }
-      userRepository.save(user);
-      return userMapper.toResponse(user);
-    }
-
-    @Transactional
-    public UserResponse updatePartial(UUID id, UserUpdateRequest userUpdateRequest){
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-
-        if(userUpdateRequest.name() != null && !userUpdateRequest.name().isBlank())
-            user.setName(userUpdateRequest.name());
-        if(userUpdateRequest.userProfile() != null)
-            user.setUserProfile(userUpdateRequest.userProfile());
-        if(userUpdateRequest.cpf() != null && !userUpdateRequest.cpf().isBlank()) {
-            userRepository.findByCpf(userUpdateRequest.cpf())
+        if(request.name() != null && !request.name().isBlank())
+            user.setName(request.name());
+        if(request.userProfile() != null) {
+            if (request.userProfile() == UserProfile.POWERBI) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "O perfil POWERBI é reservado a tokens de integração.");
+            }
+            user.setUserProfile(request.userProfile());
+        }
+        if(request.cpf() != null && !request.cpf().isBlank()) {
+            userRepository.findByCpf(request.cpf())
                     .filter(u -> !u.getId().equals(id))
-                    .ifPresent(u -> {
-                        throw new GoLogAPI.exception.ConflictException(List.of("CPF já cadastrado!"));
-                    });
-            user.setCpf(userUpdateRequest.cpf());
+                    .ifPresent(u -> { throw new ConflictException(List.of("CPF já cadastrado!")); });
+            user.setCpf(request.cpf());
         }
-        if(userUpdateRequest.email() != null && !userUpdateRequest.email().isBlank()) {
-            userRepository.findByEmail(userUpdateRequest.email())
+        if(request.email() != null && !request.email().isBlank()) {
+            userRepository.findByEmail(request.email())
                     .filter(u -> !u.getId().equals(id))
-                    .ifPresent(u -> {
-                        throw new GoLogAPI.exception.ConflictException(List.of("Email já cadastrado!"));
-                    });
-            user.setEmail(userUpdateRequest.email());
+                    .ifPresent(u -> { throw new ConflictException(List.of("Email já cadastrado!")); });
+            user.setEmail(request.email());
         }
-        if(userUpdateRequest.password() != null && !userUpdateRequest.password().isBlank())
-            user.setPassword(passwordEncoder.encode(userUpdateRequest.password()));
-        if(userUpdateRequest.companyId() != null){
-            Company company = companyRepository.findById(userUpdateRequest.companyId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, userUpdateRequest.companyId()));
-            user.setCompany(company);
-        }
+        if(request.password() != null && !request.password().isBlank())
+            user.setPassword(passwordEncoder.encode(request.password()));
+        if(request.companyId() != null)
+            user.setCompany(tenantGuard.ownerForWrite(request.companyId()));
 
         userRepository.save(user);
         return userMapper.toResponse(user);
+    }
+
+    public User findVisible(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: ", id));
+        tenantGuard.checkAccess(user.getCompany(), id);
+        return user;
+    }
+
+    private static String currentEmail() {
+        var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getPrincipal() instanceof String s ? s : null;
     }
 }

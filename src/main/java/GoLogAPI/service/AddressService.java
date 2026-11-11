@@ -25,58 +25,72 @@ public class AddressService {
     private final AddressMapper addressMapper;
     private final AddressValidate addressValidate;
     private final CompanyRepository companyRepository;
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
 
     public AddressService(AddressRepository addressRepository, AddressMapper addressMapper,
-                          AddressValidate addressValidate, CompanyRepository companyRepository){
+                          AddressValidate addressValidate, CompanyRepository companyRepository,
+                          GoLogAPI.infra.tenant.TenantGuard tenantGuard){
         this.addressRepository = addressRepository;
         this.addressMapper = addressMapper;
         this.addressValidate = addressValidate;
         this.companyRepository = companyRepository;
+        this.tenantGuard = tenantGuard;
+    }
+
+    /** Endereço visível no escopo do tenant ativo (404 caso contrário). */
+    public Address findVisible(UUID id) {
+        Address address = addressRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Endereço não encontrado: ", id));
+        tenantGuard.checkAccess(address.getCompany(), id);
+        return address;
     }
 
     @Transactional
     public AddressResponse save(AddressCreateRequest addressCreateRequest){
         Address address = addressMapper.toEntity(addressCreateRequest);
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        if (currentTenant != null) {
-            Company company = companyRepository.findById(currentTenant).orElse(null);
-            address.setCompany(company);
-        }
+        address.setCompany(tenantGuard.ownerForWrite(null));
         addressRepository.save(address);
         return addressMapper.toResponse(address);
     }
 
     public AddressResponse get(UUID id){
-        Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Address address = findVisible(id);
         return addressMapper.toResponse(address);
     }
 
     public List<AddressResponse> getAll(){
-        return addressMapper.toResponses(addressRepository.findAll());
+        List<Address> addresses = tenantGuard.isGlobalView()
+                ? addressRepository.findAll()
+                : addressRepository.findByCompanyId(tenantGuard.scope());
+        return addressMapper.toResponses(addresses);
     }
 
     @Transactional
     public void delete(UUID id){
-        Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Address address = findVisible(id);
         addressRepository.delete(address);
     }
 
     @Transactional
     public AddressResponse update(UUID id, AddressCreateRequest addressCreateRequest){
-        addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        Address address = addressMapper.toEntity(addressCreateRequest);
-        address.setId(id);
+        Address address = findVisible(id);
+        address.setStreet(addressCreateRequest.street());
+        address.setNumber(addressCreateRequest.number());
+        address.setDistrict(addressCreateRequest.district());
+        address.setCity(addressCreateRequest.city());
+        address.setState(addressCreateRequest.state());
+        address.setCountry(addressCreateRequest.country());
+        address.setCep(addressCreateRequest.cep());
+        address.setComplement(addressCreateRequest.complement());
+        address.setLatitude(addressCreateRequest.latitude());
+        address.setLongitude(addressCreateRequest.longitude());
         addressRepository.save(address);
         return addressMapper.toResponse(address);
     }
 
     @Transactional
     public AddressResponse updatePartial(UUID id, AddressUpdateRequest addressUpdateRequest){
-        Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        Address address = findVisible(id);
 
         if(addressUpdateRequest.cep() != null && !addressUpdateRequest.cep().isBlank())
             address.setCep(addressUpdateRequest.cep());

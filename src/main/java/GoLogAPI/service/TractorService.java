@@ -1,14 +1,12 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.tractor.TractorCreateRequest;
-import GoLogAPI.dto.tractor.TractorUpdateRequest;
 import GoLogAPI.dto.tractor.TractorResponse;
+import GoLogAPI.dto.tractor.TractorUpdateRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
-import GoLogAPI.infra.tenant.TenantContext;
+import GoLogAPI.infra.tenant.TenantGuard;
 import GoLogAPI.mapper.TractorMapper;
-import GoLogAPI.model.Company;
 import GoLogAPI.model.Tractor;
-import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.TractorRepository;
 import GoLogAPI.validation.TractorValidate;
 import org.springframework.stereotype.Service;
@@ -17,6 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Cavalos mecânicos / caminhões (unidades de tração). O dono é sempre um tenant (transportadora): se o
+ * formulário enviar um {@code companyId}, ele precisa ser um tenant do escopo; caso contrário usa o
+ * tenant ativo.
+ */
 @Service
 @Transactional(readOnly = true)
 public class TractorService {
@@ -24,138 +27,87 @@ public class TractorService {
     private final TractorRepository tractorRepository;
     private final TractorMapper tractorMapper;
     private final TractorValidate tractorValidate;
-    private final CompanyRepository companyRepository;
+    private final TenantGuard tenantGuard;
 
     public TractorService(TractorRepository tractorRepository, TractorMapper tractorMapper,
-                          TractorValidate tractorValidate, CompanyRepository companyRepository){
+                          TractorValidate tractorValidate, TenantGuard tenantGuard){
         this.tractorRepository = tractorRepository;
         this.tractorMapper = tractorMapper;
         this.tractorValidate = tractorValidate;
-        this.companyRepository = companyRepository;
+        this.tenantGuard = tenantGuard;
     }
 
     @Transactional
-    public TractorResponse save(TractorCreateRequest tractorCreateRequest){
-        tractorValidate.validate(tractorCreateRequest);
-        Tractor tractor = tractorMapper.toEntity(tractorCreateRequest);
-
-        Company company = companyRepository.findById(tractorCreateRequest.companyId())
-                        .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, tractorCreateRequest.companyId()));
-
-        tractor.setCompany(company);
-
-//        Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
-//        Double factorEmission;
-//        Double co2EmissionPerKm;
-//
-//        factorEmission = switch (tractor.getTypeFuel()) {
-//            case DIESEL -> 2.68;
-//            case ETANOL -> 1.52;
-//            case GASOLINA -> 2.28;
-//            default -> 0.0;
-//        };
-//
-//        co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
-//        tractor.setCo2PerKm(co2EmissionPerKm);
-
+    public TractorResponse save(TractorCreateRequest request){
+        tractorValidate.validate(request);
+        Tractor tractor = tractorMapper.toEntity(request);
+        tractor.setCompany(tenantGuard.ownerForWrite(request.companyId()));
         tractorRepository.save(tractor);
         return tractorMapper.toResponse(tractor);
     }
 
     public TractorResponse get(UUID id){
-        Tractor tractor = tractorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        return tractorMapper.toResponse(tractor);
+        return tractorMapper.toResponse(findVisible(id));
     }
 
     public List<TractorResponse> getAll() {
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        List<Tractor> tractors = (currentTenant != null)
-                ? tractorRepository.findByCompanyId(currentTenant)
-                : tractorRepository.findAll();
+        List<Tractor> tractors = tenantGuard.isGlobalView()
+                ? tractorRepository.findAll()
+                : tractorRepository.findByCompanyId(tenantGuard.scope());
         return tractorMapper.toResponses(tractors);
     }
 
     @Transactional
     public void delete(UUID id){
-        Tractor tractor = tractorRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-        tractorRepository.delete(tractor);
+        tractorRepository.delete(findVisible(id));
     }
 
+    /** Atualização completa aplicada sobre a entidade existente (preserva capacidades e auditoria). */
     @Transactional
-    public TractorResponse update(UUID id, TractorCreateRequest tractorCreateRequest){
-        tractorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
-
-        Company company = companyRepository.findById(tractorCreateRequest.companyId())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, tractorCreateRequest.companyId()));
-
-        //tractorValidator.validate(tractorCreateRequest);
-        Tractor tractor = tractorMapper.toEntity(tractorCreateRequest);
-
-//        Double litersPerKm = 1.0 / tractorCreateRequest.kmPerLiter();
-//        Double factorEmission;
-//        Double co2EmissionPerKm;
-//
-//        factorEmission = switch (tractor.getTypeFuel()) {
-//            case DIESEL -> 2.68;
-//            case ETANOL -> 1.52;
-//            case GASOLINA -> 2.28;
-//            default -> 0.0;
-//        };
-//
-//        co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
-//        tractor.setCo2PerKm(co2EmissionPerKm);
-
-        tractor.setId(id);
-        tractor.setCompany(company);
+    public TractorResponse update(UUID id, TractorCreateRequest request){
+        Tractor tractor = findVisible(id);
+        tractorValidate.validate(request, id);
+        tractor.setPlate(request.plate());
+        tractor.setRenavam(request.renavam());
+        tractor.setModel(request.model());
+        tractor.setNumberAxles(request.numberAxles());
+        tractor.setMaximumCapacity(request.maximumCapacity());
+        tractor.setTypeFuel(request.typeFuel());
+        tractor.setCostPerKilometer(request.costPerKilometer());
+        tractor.setStatus(request.status());
+        tractor.setCompany(tenantGuard.ownerForWrite(request.companyId()));
         tractorRepository.save(tractor);
-
         return tractorMapper.toResponse(tractor);
     }
 
     @Transactional
-    public TractorResponse updatePartial(UUID id, TractorUpdateRequest tractorUpdateRequest){
-        Tractor tractor = tractorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+    public TractorResponse updatePartial(UUID id, TractorUpdateRequest request){
+        Tractor tractor = findVisible(id);
+        tractorValidate.validate(request, id);
 
-        //tractorValidator.validate(tractorUpdateRequest);
+        if(request.plate() != null && !request.plate().isBlank())
+            tractor.setPlate(request.plate());
+        if(request.renavam() != null && !request.renavam().isBlank())
+            tractor.setRenavam(request.renavam());
+        if(request.model() != null && !request.model().isBlank())
+            tractor.setModel(request.model());
+        if(request.maximumCapacity() != null)
+            tractor.setMaximumCapacity(request.maximumCapacity());
+        if(request.numberAxles() != null)
+            tractor.setNumberAxles(request.numberAxles());
+        if(request.costPerKilometer() != null)
+            tractor.setCostPerKilometer(request.costPerKilometer());
+        if(request.companyId() != null)
+            tractor.setCompany(tenantGuard.ownerForWrite(request.companyId()));
 
-        if(tractorUpdateRequest.plate() != null && !tractorUpdateRequest.plate().isBlank())
-            tractor.setPlate(tractorUpdateRequest.plate());
-        if(tractorUpdateRequest.renavam() != null && !tractorUpdateRequest.renavam().isBlank())
-            tractor.setRenavam(tractorUpdateRequest.renavam());
-        if(tractorUpdateRequest.model() != null && !tractorUpdateRequest.model().isBlank())
-            tractor.setModel(tractorUpdateRequest.model());
-        if(tractorUpdateRequest.maximumCapacity() != null)
-            tractor.setMaximumCapacity(tractorUpdateRequest.maximumCapacity());
-        if(tractorUpdateRequest.numberAxles() != null)
-            tractor.setNumberAxles(tractorUpdateRequest.numberAxles());
-        if(tractorUpdateRequest.costPerKilometer() != null) {
-            tractor.setCostPerKilometer(tractorUpdateRequest.costPerKilometer());
-
-//            Double litersPerKm = 1.0 / tractorUpdateRequest.kmPerLiter();
-//            Double factorEmission;
-//            Double co2EmissionPerKm;
-//
-//            factorEmission = switch (tractor.getTypeFuel()) {
-//                case DIESEL -> 2.68;
-//                case ETANOL -> 1.52;
-//                case GASOLINA -> 2.28;
-//                default -> 0.0;
-//            };
-
-//            co2EmissionPerKm = Math.round(factorEmission * litersPerKm * 100.0) / 100.0;
-//            tractor.setCo2PerKm(co2EmissionPerKm);
-        }
-
-        if(tractorUpdateRequest.companyId() != null) {
-            Company company = companyRepository.findById(tractorUpdateRequest.companyId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, tractorUpdateRequest.companyId()));
-            tractor.setCompany(company);
-        }
         tractorRepository.save(tractor);
         return tractorMapper.toResponse(tractor);
+    }
+
+    public Tractor findVisible(UUID id) {
+        Tractor tractor = tractorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cavalo/caminhão não encontrado: ", id));
+        tenantGuard.checkAccess(tractor.getCompany(), id);
+        return tractor;
     }
 }

@@ -24,6 +24,13 @@ public class EquipamentCapacityService {
     private final EquipamentRepository equipamentRepository;
     private final DemandTypeRepository demandTypeRepository;
 
+    private GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setTenantGuard(GoLogAPI.infra.tenant.TenantGuard tenantGuard) {
+        this.tenantGuard = tenantGuard;
+    }
+
     public EquipamentCapacityService(EquipamentCapacityRepository equipamentCapacityRepository,
                                      EquipamentRepository equipamentRepository,
                                      DemandTypeRepository demandTypeRepository) {
@@ -36,6 +43,7 @@ public class EquipamentCapacityService {
     public List<EquipamentCapacityResponse> saveCapacities(UUID equipamentId, List<EquipamentCapacityRequest> requests) {
         Equipament equipament = equipamentRepository.findById(equipamentId)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentId));
+        tenantGuard.checkAccess(equipament.getCompany(), equipamentId);
 
         equipamentCapacityRepository.deleteByEquipamentId(equipamentId);
 
@@ -59,6 +67,7 @@ public class EquipamentCapacityService {
     }
 
     public List<EquipamentCapacityResponse> getCapacitiesByEquipamentId(UUID equipamentId) {
+        equipamentRepository.findById(equipamentId).ifPresent(e -> tenantGuard.checkAccess(e.getCompany(), equipamentId));
         return equipamentCapacityRepository.findByEquipamentId(equipamentId).stream()
                 .map(this::toResponse)
                 .toList();

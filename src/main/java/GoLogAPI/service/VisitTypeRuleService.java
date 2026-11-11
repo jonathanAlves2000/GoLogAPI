@@ -27,10 +27,14 @@ public class VisitTypeRuleService {
     private final CompanyRepository companyRepository;
     private final VisitTypeRuleMapper visitTypeRuleMapper;
 
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
     public VisitTypeRuleService(VisitTypeRuleRepository visitTypeRuleRepository,
                                 VisitTypeRepository visitTypeRepository,
                                 CompanyRepository companyRepository,
-                                VisitTypeRuleMapper visitTypeRuleMapper) {
+                                VisitTypeRuleMapper visitTypeRuleMapper,
+            GoLogAPI.infra.tenant.TenantGuard tenantGuard) {
+        this.tenantGuard = tenantGuard;
         this.visitTypeRuleRepository = visitTypeRuleRepository;
         this.visitTypeRepository = visitTypeRepository;
         this.companyRepository = companyRepository;
@@ -43,21 +47,14 @@ public class VisitTypeRuleService {
             throw new ConflictException("Uma regra de incompatibilidade/exigência não pode ser associada ao mesmo tipo de visita.");
         }
 
-        VisitType visitType1 = visitTypeRepository.findById(request.visitType1Id())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.visitType1Id()));
-
-        VisitType visitType2 = visitTypeRepository.findById(request.visitType2Id())
-                .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.visitType2Id()));
+        VisitType visitType1 = findVisitType(request.visitType1Id());
+        VisitType visitType2 = findVisitType(request.visitType2Id());
 
         VisitTypeRule rule = visitTypeRuleMapper.toEntity(request);
         rule.setVisitType1(visitType1);
         rule.setVisitType2(visitType2);
 
-        if (request.companyId() != null) {
-            Company company = companyRepository.findById(request.companyId())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.companyId()));
-            rule.setCompany(company);
-        }
+        rule.setCompany(tenantGuard.ownerForCatalog(request.companyId()));
 
         visitTypeRuleRepository.save(rule);
         return visitTypeRuleMapper.toResponse(rule);
@@ -66,10 +63,13 @@ public class VisitTypeRuleService {
     public VisitTypeRuleResponse get(UUID id) {
         VisitTypeRule rule = visitTypeRuleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogRead(rule.getCompany(), id);
         return visitTypeRuleMapper.toResponse(rule);
     }
 
     public List<VisitTypeRuleResponse> getByCompany(UUID companyId) {
+        // Fora da Visão Global, só é possível consultar o catálogo do próprio tenant
+        if (!tenantGuard.isGlobalView()) companyId = tenantGuard.scope();
         if (companyId == null) {
             return visitTypeRuleMapper.toResponses(visitTypeRuleRepository.findAll());
         }
@@ -80,6 +80,7 @@ public class VisitTypeRuleService {
     public void delete(UUID id) {
         VisitTypeRule rule = visitTypeRuleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(rule.getCompany(), id);
         visitTypeRuleRepository.delete(rule);
     }
 
@@ -87,21 +88,27 @@ public class VisitTypeRuleService {
     public VisitTypeRuleResponse update(UUID id, VisitTypeRuleUpdateRequest request) {
         VisitTypeRule rule = visitTypeRuleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
+        tenantGuard.checkCatalogWrite(rule.getCompany(), id);
 
         if (request.visitType1Id() != null) {
-            VisitType visitType1 = visitTypeRepository.findById(request.visitType1Id())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.visitType1Id()));
+            VisitType visitType1 = findVisitType(request.visitType1Id());
             rule.setVisitType1(visitType1);
         }
 
         if (request.visitType2Id() != null) {
-            VisitType visitType2 = visitTypeRepository.findById(request.visitType2Id())
-                    .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, request.visitType2Id()));
+            VisitType visitType2 = findVisitType(request.visitType2Id());
             rule.setVisitType2(visitType2);
         }
 
         visitTypeRuleMapper.updateFromDto(request, rule);
         visitTypeRuleRepository.save(rule);
         return visitTypeRuleMapper.toResponse(rule);
+    }
+
+    private VisitType findVisitType(UUID id) {
+        VisitType visitType = visitTypeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de visita não encontrado: ", id));
+        tenantGuard.checkCatalogRead(visitType.getCompany(), id);
+        return visitType;
     }
 }

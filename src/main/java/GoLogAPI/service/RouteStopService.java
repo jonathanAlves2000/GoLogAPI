@@ -14,12 +14,23 @@ public class RouteStopService {
 
     private final RouteStopRepository routeStopRepository;
 
-    public RouteStopService(RouteStopRepository routeStopRepository){
+    private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+
+    public RouteStopService(RouteStopRepository routeStopRepository, GoLogAPI.infra.tenant.TenantGuard tenantGuard){
         this.routeStopRepository = routeStopRepository;
+        this.tenantGuard = tenantGuard;
     }
 
     public List<RouteStopResponseList> getAll(){
-        List<RouteStop> routeStopResponses = routeStopRepository.findAll();
+        boolean isDriver = "DRIVER".equals(GoLogAPI.infra.tenant.TenantContext.getCurrentRole());
+        java.util.UUID me = GoLogAPI.infra.tenant.TenantContext.getCurrentUserId();
+        List<RouteStop> routeStopResponses = routeStopRepository.findAll().stream()
+                .filter(rs -> rs.getTransport() != null)
+                .filter(rs -> isDriver
+                        ? rs.getTransport().getDriver() != null && rs.getTransport().getDriver().getUser() != null
+                            && rs.getTransport().getDriver().getUser().getId().equals(me)
+                        : tenantGuard.canSee(rs.getTransport().getTransporter()))
+                .toList();
         return routeStopResponses.stream()
                 .map(routeStop -> new RouteStopResponseList(
                         routeStop.getId(),

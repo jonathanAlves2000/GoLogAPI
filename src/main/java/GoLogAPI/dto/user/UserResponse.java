@@ -8,7 +8,6 @@ public record UserResponse(
         UUID id,
         String name,
         String email,
-        String password,
         String cpf,
         UserProfile userProfile,
         CompanyResponse company

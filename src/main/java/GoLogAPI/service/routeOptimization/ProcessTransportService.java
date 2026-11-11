@@ -101,52 +101,18 @@ public class ProcessTransportService {
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, equipamentId));
         }
 
-        Company company = null;
-        // 1. Empresa dona do conjunto de equipamentos (se for transportadora/tenant habilitado)
-        if (equipamentGroup.getCompany() != null && !Boolean.TRUE.equals(equipamentGroup.getCompany().getIsCliente())) {
-            company = equipamentGroup.getCompany();
-        }
-        // 2. Empresa dona do cavalo/veículo se não for cliente
+        // O transporte pertence ao tenant dono do conjunto (validado em RouteRequestService)
+        Company company = equipamentGroup.getCompany();
         if (company == null && equipament.getCompany() != null) {
-            Company eqComp = companyRepository.findById(equipament.getCompany().getId()).orElse(null);
-            if (eqComp != null && !Boolean.TRUE.equals(eqComp.getIsCliente())) {
-                company = eqComp;
-            }
+            company = equipament.getCompany();
         }
-        // 3. Tenant ativo da requisição se for operadora de transporte
-        UUID currentTenant = TenantContext.getCurrentTenantId();
-        if (company == null && currentTenant != null) {
-            Company tenantComp = companyRepository.findById(currentTenant).orElse(null);
-            if (tenantComp != null && !Boolean.TRUE.equals(tenantComp.getIsCliente())) {
-                company = tenantComp;
-            }
-        }
-        // 4. Empresa do usuário logado se operadora de transporte
-        UUID userCompId = TenantContext.getUserCompanyId();
-        if (company == null && userCompId != null) {
-            Company userComp = companyRepository.findById(userCompId).orElse(null);
-            if (userComp != null && !Boolean.TRUE.equals(userComp.getIsCliente())) {
-                company = userComp;
-            }
-        }
-        // 5. Empresa Master do sistema (operadora central)
-        if (company == null) {
-            company = companyRepository.findAll().stream()
-                    .filter(c -> Boolean.TRUE.equals(c.getIsMaster()))
-                    .findFirst()
-                    .orElse(null);
-        }
-        // 6. Qualquer empresa operadora que não seja cliente
-        if (company == null) {
-            company = companyRepository.findAll().stream()
-                    .filter(c -> !Boolean.TRUE.equals(c.getIsCliente()))
-                    .findFirst()
-                    .orElseGet(() -> companyRepository.findAll().stream().findFirst().orElse(null));
+        if (company == null && TenantContext.getCurrentTenantId() != null) {
+            company = companyRepository.findById(TenantContext.getCurrentTenantId()).orElse(null);
         }
 
-        Transport transport = transportRepository.findFirstByEquipamentGroupOrderByCreatedAtDesc(equipamentGroup)
-                .filter(t -> t.getDistanceTraveled() == null)
-                .orElse(new Transport());
+        // Cada roteirização gera um transporte novo. Reaproveitar o último transporte do conjunto apagava
+        // as paradas de planejamentos anteriores ainda não executados.
+        Transport transport = new Transport();
 
         if (workSchedule == null) {
             workSchedule = workScheduleRepository.findFirstByEquipamentGroupIdOrderByCreatedAtDesc(equipamentGroup.getId())
@@ -173,7 +139,8 @@ public class ProcessTransportService {
         Double costKmMultiplied = routeCosts.get("model.vehicles.cost_per_kilometer");
         Double costKmCalculated = costKmMultiplied != null ? costKmMultiplied / kmMultiplier : 0.0;
         Double driverCostPerHour = (driver != null && driver.getCostPerHour() != null) ? driver.getCostPerHour() : 25.0;
-        Double costHourCalculated = operationDurationHour * driverCostPerHour;
+        // Horas fracionadas: a divisão inteira zerava o custo de rotas com menos de 1h
+        Double costHourCalculated = (operationalDuration / 3600.0) * driverCostPerHour;
         Double custoTotalCalculated = costKmCalculated + costHourCalculated + settings.fixedCostPerVehicle();
 
         transport.setShipmentQuantity(vehicleRoute.getVisitsCount());
@@ -198,10 +165,9 @@ public class ProcessTransportService {
             }
         }
 
-        if (!totalRoutePoints.isEmpty()) {
-            String totalPolylineCode = com.google.maps.internal.PolylineEncoding.encode(totalRoutePoints);
-            transport.setRoutePlanned(totalPolylineCode);
-        }
+        // route_planned é NOT NULL: sem polilinha (ex.: todas as paradas no mesmo ponto) grava vazio
+        transport.setRoutePlanned(totalRoutePoints.isEmpty() ? ""
+                : com.google.maps.internal.PolylineEncoding.encode(totalRoutePoints));
 
         return transportRepository.save(transport);
     }
