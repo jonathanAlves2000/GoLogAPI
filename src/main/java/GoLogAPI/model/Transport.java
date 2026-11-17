@@ -88,6 +88,24 @@ public class Transport extends Audit {
     @NotFound(action = NotFoundAction.IGNORE)
     private EquipamentGroup equipamentGroup;
 
+    /** t·km realizada: Σ (toneladas a bordo × km de cada trecho recebido por telemetria). */
+    @Column(name = "ton_km_traveled")
+    private Double tonKmTraveled;
+
+    /** Primeiro ponto de telemetria aceito na viagem (início do trecho realizado). */
+    @Column(name = "tracking_started_at")
+    private java.time.LocalDateTime trackingStartedAt;
+
+    /** Último ponto aceito: base do próximo trecho e do delta da polilinha realizada. */
+    @Column(name = "last_telemetry_at")
+    private java.time.LocalDateTime lastTelemetryAt;
+
+    @Column(name = "last_telemetry_lat")
+    private Double lastTelemetryLat;
+
+    @Column(name = "last_telemetry_lon")
+    private Double lastTelemetryLon;
+
     @Column(name = "code_transport", insertable = false, updatable = false)
     @org.hibernate.annotations.Generated()
     private Integer codeTransport;

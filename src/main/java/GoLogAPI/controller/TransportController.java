@@ -23,9 +23,20 @@ import java.util.UUID;
 public class TransportController {
 
     private final TransportService transportService;
+    private final GoLogAPI.service.TripIndicatorsService tripIndicatorsService;
 
-    public TransportController(TransportService transportService) {
+    public TransportController(TransportService transportService,
+                               GoLogAPI.service.TripIndicatorsService tripIndicatorsService) {
         this.transportService = transportService;
+        this.tripIndicatorsService = tripIndicatorsService;
+    }
+
+    @Operation(summary = "Indicadores realizados da viagem",
+            description = "Distância, t·km, combustível, CO₂ e custo efetivo sobre a rota recebida por telemetria "
+                    + "(zerados sem rota) e paradas com agenda atendida")
+    @GetMapping(value = "{id}/indicators")
+    public ResponseEntity<GoLogAPI.dto.transport.TripIndicatorsResponse> indicators(@PathVariable("id") UUID id) {
+        return ResponseEntity.ok(tripIndicatorsService.forTransport(id));
     }
 
     @Operation(summary = "Cadastrar Transporte", description = "Cadastra uma nova viagem/transporte no sistema")

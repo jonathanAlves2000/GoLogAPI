@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,13 +25,16 @@ public class TelemetryBatchService {
     private final VehiclePlateCacheService vehiclePlateCacheService;
     private final GeofencingService geofencingService;
     private final TelemetryRepository telemetryRepository;
+    private final TripTrackingService tripTrackingService;
 
     public TelemetryBatchService(VehiclePlateCacheService vehiclePlateCacheService,
                                  GeofencingService geofencingService,
-                                 TelemetryRepository telemetryRepository) {
+                                 TelemetryRepository telemetryRepository,
+                                 TripTrackingService tripTrackingService) {
         this.vehiclePlateCacheService = vehiclePlateCacheService;
         this.geofencingService = geofencingService;
         this.telemetryRepository = telemetryRepository;
+        this.tripTrackingService = tripTrackingService;
     }
 
     @Transactional
@@ -47,7 +51,14 @@ public class TelemetryBatchService {
         int successCount = 0;
         int errorCount = 0;
 
-        for (int i = 0; i < items.size(); i++) {
+        // Processa em ordem cronológica: a rota realizada é incremental e descarta pontos fora de ordem.
+        // O índice original é mantido nas mensagens de erro.
+        LocalDateTime receivedAt = LocalDateTime.now();
+        List<Integer> order = new ArrayList<>(items.size());
+        for (int i = 0; i < items.size(); i++) order.add(i);
+        order.sort(Comparator.comparing(i -> items.get(i).dateTime() != null ? items.get(i).dateTime() : receivedAt));
+
+        for (int i : order) {
             TelemetryBatchItemRequest item = items.get(i);
             try {
                 // 1. Resolução instantânea do equipamento via cache em memória (zero overhead de banco)
@@ -70,11 +81,14 @@ public class TelemetryBatchService {
                 double lat = Double.parseDouble(latStr);
                 double lon = Double.parseDouble(lonStr);
 
-                LocalDateTime timestamp = item.dateTime() != null ? item.dateTime() : LocalDateTime.now();
+                LocalDateTime timestamp = item.dateTime() != null ? item.dateTime() : receivedAt;
                 Double speed = item.speed() != null ? item.speed() : 0.0;
                 String alert = item.alert();
 
-                // 2. Normalização e Geofencing: detecção automática de chegada do caminhão na parada
+                // 2. Rota realizada da viagem (antes do geofencing: o trecho que chega à parada ainda leva a carga dela)
+                tripTrackingService.track(equipament, lat, lon, timestamp);
+
+                // 3. Normalização e Geofencing: detecção automática de chegada do caminhão na parada
                 Optional<GeofenceEventResponse> geofenceEvent = geofencingService.checkGeofenceArrival(
                         equipament, lat, lon, timestamp, speed
                 );
@@ -87,7 +101,7 @@ public class TelemetryBatchService {
                     alert = (alert != null && !alert.isBlank()) ? (alert + " | " + checkInTag) : checkInTag;
                 }
 
-                // 3. Montagem da entidade Telemetry
+                // 4. Montagem da entidade Telemetry
                 Telemetry telemetry = new Telemetry();
                 telemetry.setEquipamentId(equipament);
                 telemetry.setLatitude(latStr);
@@ -109,7 +123,7 @@ public class TelemetryBatchService {
             }
         }
 
-        // 4. Ingestão em lote de alta performance no banco (saveAll)
+        // 5. Ingestão em lote de alta performance no banco (saveAll)
         if (!telemetriesToSave.isEmpty()) {
             telemetryRepository.saveAll(telemetriesToSave);
         }
