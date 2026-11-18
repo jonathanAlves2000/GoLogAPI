@@ -44,17 +44,43 @@ public class TripTrackingService {
      * @return o transporte em execução ao qual o ponto pertence, ou {@code null} se o veículo não está em viagem
      */
     public Transport track(Equipament equipament, double lat, double lon, LocalDateTime timestamp) {
-        if (equipament == null || equipament.getId() == null || timestamp == null) return null;
+        return track(equipament, null, lat, lon, timestamp);
+    }
 
-        List<Transport> transports = transportRepository.findByEquipament1IdOrderByCreatedAtDesc(equipament.getId());
-        if (transports.isEmpty() && equipament.getPlate() != null) {
-            transports = transportRepository.findByEquipament1PlateOrderByCreatedAtDesc(equipament.getPlate());
+    /**
+     * Registra o ponto na viagem informada explicitamente (vínculo enviado pelo app) ou, sem ela, na viagem em
+     * execução do veículo. Não usa simplesmente o transporte mais recente: o veículo pode ter outra viagem criada
+     * depois (ainda aguardando início), e os pontos da viagem em curso seriam descartados.
+     *
+     * @return o transporte em execução ao qual o ponto pertence, ou {@code null} se o veículo não está em viagem
+     */
+    public Transport track(Equipament equipament, Transport linked, double lat, double lon, LocalDateTime timestamp) {
+        if (timestamp == null) return null;
+
+        Transport transport = null;
+        List<RouteStop> stops = null;
+        if (linked != null && linked.getId() != null) {
+            List<RouteStop> linkedStops = routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(linked.getId());
+            if (isRunning(linkedStops)) {
+                transport = linked;
+                stops = linkedStops;
+            }
+        } else {
+            if (equipament == null || equipament.getId() == null) return null;
+            List<Transport> transports = transportRepository.findByEquipament1IdOrderByCreatedAtDesc(equipament.getId());
+            if (transports.isEmpty() && equipament.getPlate() != null) {
+                transports = transportRepository.findByEquipament1PlateOrderByCreatedAtDesc(equipament.getPlate());
+            }
+            for (Transport candidate : transports) {
+                List<RouteStop> candidateStops = routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(candidate.getId());
+                if (isRunning(candidateStops)) {
+                    transport = candidate;
+                    stops = candidateStops;
+                    break;
+                }
+            }
         }
-        if (transports.isEmpty()) return null;
-
-        Transport transport = transports.get(0);
-        List<RouteStop> stops = routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(transport.getId());
-        if (!isRunning(stops)) return null;
+        if (transport == null) return null;
 
         if (apply(transport, stops, lat, lon, timestamp)) {
             transportRepository.save(transport);

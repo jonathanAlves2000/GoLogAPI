@@ -94,8 +94,13 @@ public class TelemetryBatchService {
                 Double speed = item.speed() != null ? item.speed() : 0.0;
                 String alert = item.alert();
 
-                // 2. Rota realizada da viagem (antes do geofencing: o trecho que chega à parada ainda leva a carga dela)
-                Transport runningTransport = tripTrackingService.track(equipament, lat, lon, timestamp);
+                // 2. Rota realizada da viagem (antes do geofencing: o trecho que chega à parada ainda leva a carga dela).
+                //    Vínculo explícito do item tem prioridade sobre a viagem em execução inferida pelo veículo.
+                TelemetryTripLinkResolver.TripLink explicitLink = (item.shipmentId() != null || item.transportId() != null)
+                        ? tripLinkResolver.resolve(item.shipmentId(), item.transportId())
+                        : null;
+                Transport runningTransport = tripTrackingService.track(
+                        equipament, explicitLink != null ? explicitLink.transport() : null, lat, lon, timestamp);
 
                 // 3. Normalização e Geofencing: detecção automática de chegada do caminhão na parada
                 Optional<GeofenceEventResponse> geofenceEvent = geofencingService.checkGeofenceArrival(
@@ -114,10 +119,9 @@ public class TelemetryBatchService {
                 //    do veículo e, se houve check-in, a remessa da parada atendida.
                 Shipment shipment = null;
                 Transport transport = runningTransport;
-                if (item.shipmentId() != null || item.transportId() != null) {
-                    TelemetryTripLinkResolver.TripLink link = tripLinkResolver.resolve(item.shipmentId(), item.transportId());
-                    shipment = link.shipment();
-                    transport = link.transport();
+                if (explicitLink != null) {
+                    shipment = explicitLink.shipment();
+                    transport = explicitLink.transport();
                 } else if (geofenceEvent.isPresent() && geofenceEvent.get().shipmentId() != null) {
                     shipment = shipmentRepository.findById(geofenceEvent.get().shipmentId()).orElse(null);
                     if (transport == null && geofenceEvent.get().transportId() != null) {

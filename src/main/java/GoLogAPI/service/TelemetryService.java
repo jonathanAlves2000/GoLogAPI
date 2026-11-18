@@ -55,14 +55,15 @@ public class TelemetryService {
        Equipament equipament = equipamentRepository.findById(telemetryCreateRequest.equipamentId())
                        .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, telemetryCreateRequest.equipamentId()));
        telemetry.setEquipamentId(equipament);
-       applyTripLink(telemetry, tripLinkResolver.resolve(telemetryCreateRequest.shipmentId(), telemetryCreateRequest.transportId()));
+       TelemetryTripLinkResolver.TripLink link = tripLinkResolver.resolve(telemetryCreateRequest.shipmentId(), telemetryCreateRequest.transportId());
+       applyTripLink(telemetry, link);
        telemetryRepository.save(telemetry);
 
        try {
            double lat = Double.parseDouble(telemetryCreateRequest.latitude().trim().replace(',', '.'));
            double lon = Double.parseDouble(telemetryCreateRequest.longitude().trim().replace(',', '.'));
            LocalDateTime ts = telemetryCreateRequest.dateTime() != null ? telemetryCreateRequest.dateTime() : LocalDateTime.now();
-           tripTrackingService.track(equipament, lat, lon, ts);
+           tripTrackingService.track(equipament, link.transport(), lat, lon, ts);
            geofencingService.checkGeofenceArrival(equipament, lat, lon, ts, telemetryCreateRequest.speed());
        } catch (Exception ignored) {}
 
