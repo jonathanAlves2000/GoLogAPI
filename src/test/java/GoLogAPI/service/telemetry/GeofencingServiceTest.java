@@ -7,10 +7,10 @@ import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.ShipmentRepository;
 import GoLogAPI.repository.TransportRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,8 +38,13 @@ class GeofencingServiceTest {
     @Mock
     private GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService;
 
-    @InjectMocks
     private GeofencingService geofencingService;
+
+    @BeforeEach
+    void setUp() {
+        ActiveTripResolver resolver = new ActiveTripResolver(transportRepository, routeStopRepository);
+        geofencingService = new GeofencingService(routeStopRepository, shipmentRepository, webhookDispatcherService, resolver);
+    }
 
     @Test
     @DisplayName("Deve calcular distância Haversine com alta precisão e detectar proximidade")
@@ -98,6 +103,8 @@ class GeofencingServiceTest {
         when(transportRepository.findByEquipament1IdOrderByCreatedAtDesc(equipamentId))
                 .thenReturn(List.of(transport));
 
+        when(routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(transportId))
+                .thenReturn(List.of(routeStop));
         when(routeStopRepository.findByTransportIdAndArrivedAtIsNullOrderBySequenceOrderAsc(transportId))
                 .thenReturn(List.of(routeStop));
 
@@ -126,5 +133,41 @@ class GeofencingServiceTest {
 
         verify(routeStopRepository, times(1)).save(routeStop);
         verify(shipmentRepository, times(1)).save(shipment);
+    }
+
+    @Test
+    @DisplayName("Com várias viagens no veículo, faz check-in na viagem informada pelo app e não na mais recente")
+    void shouldCheckInOnLinkedTripNotNewest() {
+        Equipament equipament = new Equipament();
+        equipament.setId(UUID.randomUUID());
+        equipament.setPlate("ABC1D23");
+
+        Transport emCurso = new Transport();
+        emCurso.setId(UUID.randomUUID());
+
+        Address address = new Address();
+        address.setLatitude("-23.550520");
+        address.setLongitude("-46.633308");
+        Shipment shipment = new Shipment();
+        shipment.setId(UUID.randomUUID());
+        shipment.setAddress(address);
+        shipment.setStatus(ShipmentStatus.INICIADO);
+        RouteStop routeStop = new RouteStop();
+        routeStop.setId(UUID.randomUUID());
+        routeStop.setSequenceOrder(2);
+        routeStop.setShipment(shipment);
+        routeStop.setTransport(emCurso);
+
+        when(routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(emCurso.getId())).thenReturn(List.of(routeStop));
+        when(routeStopRepository.findByTransportIdAndArrivedAtIsNullOrderBySequenceOrderAsc(emCurso.getId()))
+                .thenReturn(List.of(routeStop));
+
+        Optional<GeofenceEventResponse> event = geofencingService.checkGeofenceArrival(
+                equipament, emCurso, -23.550800, -46.633500, LocalDateTime.now(), 10.0);
+
+        assertTrue(event.isPresent());
+        assertEquals(emCurso.getId(), event.get().transportId());
+        // Com viagem informada, não consulta as outras viagens do veículo
+        verifyNoInteractions(transportRepository);
     }
 }

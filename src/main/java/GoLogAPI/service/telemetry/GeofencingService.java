@@ -11,14 +11,12 @@ import GoLogAPI.model.enums.RouteStopStatus;
 import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.ShipmentRepository;
-import GoLogAPI.repository.TransportRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,25 +28,22 @@ public class GeofencingService {
     // Raio padrão para detecção de chegada na parada (200 metros)
     public static final double DEFAULT_GEOFENCE_RADIUS_METERS = 200.0;
 
-    private final TransportRepository transportRepository;
     private final RouteStopRepository routeStopRepository;
     private final ShipmentRepository shipmentRepository;
     private final GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService;
+    private final ActiveTripResolver tripResolver;
 
-    public GeofencingService(TransportRepository transportRepository,
-                             RouteStopRepository routeStopRepository,
+    public GeofencingService(RouteStopRepository routeStopRepository,
                              ShipmentRepository shipmentRepository,
-                             GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService) {
-        this.transportRepository = transportRepository;
+                             GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService,
+                             ActiveTripResolver tripResolver) {
         this.routeStopRepository = routeStopRepository;
         this.shipmentRepository = shipmentRepository;
         this.webhookDispatcherService = webhookDispatcherService;
+        this.tripResolver = tripResolver;
     }
 
-    /**
-     * Processa as coordenadas de um veículo e verifica se ele adentrou o raio de alguma parada pendente.
-     * Caso positivo, executa o check-in automático.
-     */
+    /** Check-in automático na viagem do veículo, sem viagem informada no ponto. */
     @Transactional
     public Optional<GeofenceEventResponse> checkGeofenceArrival(
             Equipament equipament,
@@ -56,23 +51,32 @@ public class GeofencingService {
             double vehicleLon,
             LocalDateTime timestamp,
             Double speed) {
+        return checkGeofenceArrival(equipament, null, vehicleLat, vehicleLon, timestamp, speed);
+    }
 
-        if (equipament == null || equipament.getId() == null) {
+    /**
+     * Processa as coordenadas de um veículo e verifica se ele adentrou o raio de alguma parada pendente.
+     * Caso positivo, executa o check-in automático.
+     *
+     * <p>A viagem é a informada pelo app no ponto ({@code linked}) ou, sem ela, a em execução do veículo; se
+     * nenhuma estiver em execução, a aberta mais recente, para o check-in na primeira parada iniciar a viagem
+     * (critério em {@link ActiveTripResolver}).</p>
+     */
+    @Transactional
+    public Optional<GeofenceEventResponse> checkGeofenceArrival(
+            Equipament equipament,
+            Transport linked,
+            double vehicleLat,
+            double vehicleLon,
+            LocalDateTime timestamp,
+            Double speed) {
+
+        // 1. Viagem à qual o ponto pertence
+        ActiveTripResolver.ResolvedTrip trip = tripResolver.resolve(equipament, linked, true);
+        if (trip == null) {
             return Optional.empty();
         }
-
-        // 1. Busca os transportes do veículo
-        List<Transport> transports = transportRepository.findByEquipament1IdOrderByCreatedAtDesc(equipament.getId());
-        if (transports.isEmpty() && equipament.getPlate() != null) {
-            transports = transportRepository.findByEquipament1PlateOrderByCreatedAtDesc(equipament.getPlate());
-        }
-
-        if (transports.isEmpty()) {
-            return Optional.empty();
-        }
-
-        // Transporte mais recente / em andamento
-        Transport currentTransport = transports.get(0);
+        Transport currentTransport = trip.transport();
 
         // 2. Busca paradas pendentes que ainda não tiveram chegada
         List<RouteStop> pendingStops = routeStopRepository.findByTransportIdAndArrivedAtIsNullOrderBySequenceOrderAsc(currentTransport.getId());

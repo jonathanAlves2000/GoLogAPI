@@ -2,17 +2,13 @@ package GoLogAPI.service.telemetry;
 
 import GoLogAPI.model.Equipament;
 import GoLogAPI.model.RouteStop;
-import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Transport;
-import GoLogAPI.model.enums.ShipmentStatus;
-import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.TransportRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Monta a rota realizada da viagem a partir da telemetria, de forma incremental: cada ponto aceito estende a
@@ -20,8 +16,8 @@ import java.util.Objects;
  * que estava a bordo. Precisa ficar no backend porque depende de todos os pontos (o front nunca os recebe) e da
  * carga a bordo no instante de cada ponto, que não é reconstruível depois.
  *
- * <p>Só acumula enquanto a viagem está em execução: há parada atendida ou remessa iniciada, e ainda há remessa
- * não finalizada. Pontos fora de ordem, saltos impossíveis (&gt; {@value #MAX_SPEED_KMH} km/h) e ruído de GPS
+ * <p>Só acumula em viagem aberta: a informada pelo app no ponto ou, sem ela, a em execução do veículo (ver
+ * {@link ActiveTripResolver}). Pontos fora de ordem, saltos impossíveis (&gt; {@value #MAX_SPEED_KMH} km/h) e ruído de GPS
  * (&lt; {@value #MIN_SEGMENT_METERS} m) são descartados.</p>
  */
 @Service
@@ -31,71 +27,38 @@ public class TripTrackingService {
     static final double MAX_SPEED_KMH = 200.0;
 
     private final TransportRepository transportRepository;
-    private final RouteStopRepository routeStopRepository;
+    private final ActiveTripResolver tripResolver;
 
-    public TripTrackingService(TransportRepository transportRepository, RouteStopRepository routeStopRepository) {
+    public TripTrackingService(TransportRepository transportRepository, ActiveTripResolver tripResolver) {
         this.transportRepository = transportRepository;
-        this.routeStopRepository = routeStopRepository;
+        this.tripResolver = tripResolver;
     }
 
-    /**
-     * Registra o ponto na viagem atual do veículo (mesma resolução do geofencing).
-     *
-     * @return o transporte em execução ao qual o ponto pertence, ou {@code null} se o veículo não está em viagem
-     */
+    /** Registra o ponto na viagem em execução do veículo (sem viagem informada). */
     public Transport track(Equipament equipament, double lat, double lon, LocalDateTime timestamp) {
         return track(equipament, null, lat, lon, timestamp);
     }
 
     /**
-     * Registra o ponto na viagem informada explicitamente (vínculo enviado pelo app) ou, sem ela, na viagem em
-     * execução do veículo. Não usa simplesmente o transporte mais recente: o veículo pode ter outra viagem criada
-     * depois (ainda aguardando início), e os pontos da viagem em curso seriam descartados.
+     * Registra o ponto na viagem informada pelo app ou, sem ela, na viagem em execução do veículo
+     * (critério em {@link ActiveTripResolver}).
      *
-     * @return o transporte em execução ao qual o ponto pertence, ou {@code null} se o veículo não está em viagem
+     * @return o transporte ao qual o ponto pertence, ou {@code null} se ele não pertence a nenhuma viagem aberta
      */
     public Transport track(Equipament equipament, Transport linked, double lat, double lon, LocalDateTime timestamp) {
         if (timestamp == null) return null;
+        ActiveTripResolver.ResolvedTrip trip = tripResolver.resolve(equipament, linked, false);
+        if (trip == null) return null;
 
-        Transport transport = null;
-        List<RouteStop> stops = null;
-        if (linked != null && linked.getId() != null) {
-            List<RouteStop> linkedStops = routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(linked.getId());
-            if (isRunning(linkedStops)) {
-                transport = linked;
-                stops = linkedStops;
-            }
-        } else {
-            if (equipament == null || equipament.getId() == null) return null;
-            List<Transport> transports = transportRepository.findByEquipament1IdOrderByCreatedAtDesc(equipament.getId());
-            if (transports.isEmpty() && equipament.getPlate() != null) {
-                transports = transportRepository.findByEquipament1PlateOrderByCreatedAtDesc(equipament.getPlate());
-            }
-            for (Transport candidate : transports) {
-                List<RouteStop> candidateStops = routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(candidate.getId());
-                if (isRunning(candidateStops)) {
-                    transport = candidate;
-                    stops = candidateStops;
-                    break;
-                }
-            }
-        }
-        if (transport == null) return null;
-
-        if (apply(transport, stops, lat, lon, timestamp)) {
+        Transport transport = trip.transport();
+        if (apply(transport, trip.stops(), lat, lon, timestamp)) {
             transportRepository.save(transport);
         }
         return transport;
     }
 
     static boolean isRunning(List<RouteStop> stops) {
-        List<Shipment> shipments = stops.stream().map(RouteStop::getShipment).filter(Objects::nonNull).toList();
-        if (shipments.isEmpty()) return false;
-        boolean allDone = shipments.stream().allMatch(s -> s.getStatus() == ShipmentStatus.FINALIZADO);
-        if (allDone) return false;
-        return stops.stream().anyMatch(rs -> rs.getArrivedAt() != null)
-                || shipments.stream().anyMatch(s -> s.getStatus() == ShipmentStatus.INICIADO
-                || s.getStatus() == ShipmentStatus.FINALIZADO);
+        return ActiveTripResolver.isRunning(stops);
     }
 
     /** Aplica o ponto ao transporte; devolve {@code true} se algo mudou. */

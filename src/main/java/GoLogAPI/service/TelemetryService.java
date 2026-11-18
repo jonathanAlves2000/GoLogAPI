@@ -64,7 +64,7 @@ public class TelemetryService {
            double lon = Double.parseDouble(telemetryCreateRequest.longitude().trim().replace(',', '.'));
            LocalDateTime ts = telemetryCreateRequest.dateTime() != null ? telemetryCreateRequest.dateTime() : LocalDateTime.now();
            tripTrackingService.track(equipament, link.transport(), lat, lon, ts);
-           geofencingService.checkGeofenceArrival(equipament, lat, lon, ts, telemetryCreateRequest.speed());
+           geofencingService.checkGeofenceArrival(equipament, link.transport(), lat, lon, ts, telemetryCreateRequest.speed());
        } catch (Exception ignored) {}
 
        return telemetryMapper.toResponse(telemetry);

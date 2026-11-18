@@ -99,12 +99,12 @@ public class TelemetryBatchService {
                 TelemetryTripLinkResolver.TripLink explicitLink = (item.shipmentId() != null || item.transportId() != null)
                         ? tripLinkResolver.resolve(item.shipmentId(), item.transportId())
                         : null;
-                Transport runningTransport = tripTrackingService.track(
-                        equipament, explicitLink != null ? explicitLink.transport() : null, lat, lon, timestamp);
+                Transport linkedTransport = explicitLink != null ? explicitLink.transport() : null;
+                Transport runningTransport = tripTrackingService.track(equipament, linkedTransport, lat, lon, timestamp);
 
                 // 3. Normalização e Geofencing: detecção automática de chegada do caminhão na parada
                 Optional<GeofenceEventResponse> geofenceEvent = geofencingService.checkGeofenceArrival(
-                        equipament, lat, lon, timestamp, speed
+                        equipament, linkedTransport, lat, lon, timestamp, speed
                 );
 
                 if (geofenceEvent.isPresent()) {
