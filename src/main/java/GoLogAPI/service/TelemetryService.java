@@ -10,11 +10,14 @@ import GoLogAPI.model.Equipament;
 import GoLogAPI.model.Telemetry;
 import GoLogAPI.repository.EquipamentRepository;
 import GoLogAPI.repository.TelemetryRepository;
+import GoLogAPI.service.telemetry.GeofencingService;
 import GoLogAPI.service.telemetry.TelemetryTripLinkResolver;
 import GoLogAPI.service.telemetry.TelemetryTripLinkResolver.TripLink;
+import GoLogAPI.service.telemetry.TripTrackingService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,13 +31,19 @@ public class TelemetryService {
 
     private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
     private final TelemetryTripLinkResolver tripLinkResolver;
+    private final TripTrackingService tripTrackingService;
+    private final GeofencingService geofencingService;
 
     public TelemetryService(TelemetryRepository telemetryRepository,
                             TelemetryMapper telemetryMapper, EquipamentRepository equipamentRepository,
                             GoLogAPI.infra.tenant.TenantGuard tenantGuard,
-                            TelemetryTripLinkResolver tripLinkResolver){
+                            TelemetryTripLinkResolver tripLinkResolver,
+                            TripTrackingService tripTrackingService,
+                            GeofencingService geofencingService){
         this.tenantGuard = tenantGuard;
         this.tripLinkResolver = tripLinkResolver;
+        this.tripTrackingService = tripTrackingService;
+        this.geofencingService = geofencingService;
         this.telemetryRepository = telemetryRepository;
         this.telemetryMapper = telemetryMapper;
         this.equipamentRepository = equipamentRepository;
@@ -48,6 +57,15 @@ public class TelemetryService {
        telemetry.setEquipamentId(equipament);
        applyTripLink(telemetry, tripLinkResolver.resolve(telemetryCreateRequest.shipmentId(), telemetryCreateRequest.transportId()));
        telemetryRepository.save(telemetry);
+
+       try {
+           double lat = Double.parseDouble(telemetryCreateRequest.latitude().trim().replace(',', '.'));
+           double lon = Double.parseDouble(telemetryCreateRequest.longitude().trim().replace(',', '.'));
+           LocalDateTime ts = telemetryCreateRequest.dateTime() != null ? telemetryCreateRequest.dateTime() : LocalDateTime.now();
+           tripTrackingService.track(equipament, lat, lon, ts);
+           geofencingService.checkGeofenceArrival(equipament, lat, lon, ts, telemetryCreateRequest.speed());
+       } catch (Exception ignored) {}
+
        return telemetryMapper.toResponse(telemetry);
     }
 

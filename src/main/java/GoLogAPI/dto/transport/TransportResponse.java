@@ -1,5 +1,6 @@
 package GoLogAPI.dto.transport;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import GoLogAPI.model.Company;
@@ -27,6 +28,11 @@ public record TransportResponse(
          Driver driver,
          Company transporter,
          EquipamentGroup equipamentGroup,
-         Integer codeTransport
+         Integer codeTransport,
+         LocalDateTime lastTelemetryAt,
+         Double lastTelemetryLat,
+         Double lastTelemetryLon,
+         Double tonKmTraveled,
+         LocalDateTime trackingStartedAt
 ) { }
 

@@ -83,11 +83,16 @@ public class GeofencingService {
         // 3. Avalia cada parada pendente
         for (RouteStop stop : pendingStops) {
             Shipment shipment = stop.getShipment();
-            if (shipment == null || shipment.getAddress() == null) {
+            if (shipment == null) {
                 continue;
             }
 
-            Address addr = shipment.getAddress();
+            Address addr = shipment.getAddress() != null ? shipment.getAddress()
+                    : (shipment.getCustomer() != null ? shipment.getCustomer().getAddress() : null);
+            if (addr == null) {
+                continue;
+            }
+
             Double targetLat = parseCoordinate(addr.getLatitude());
             Double targetLon = parseCoordinate(addr.getLongitude());
 
