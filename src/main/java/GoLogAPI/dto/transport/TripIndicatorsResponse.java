@@ -22,7 +22,9 @@ public record TripIndicatorsResponse(
         Double effectiveCostPerKm,
         CostBreakdown cost,
         ScheduleAdherence schedule,
-        VehicleFactors factors
+        VehicleFactors factors,
+        /** Polilinha (Encoded Polyline) montada com os pontos de telemetria que têm o transport_id da viagem. */
+        String routeCompleted
 ) {
     /** Custo efetivo = km realizados × custo/km do veículo + horas realizadas × custo/hora do plano + custo fixo do plano. */
     public record CostBreakdown(double kmCost, double hourCost, double fixedCost) {

@@ -4,6 +4,7 @@ import GoLogAPI.model.RouteStop;
 import GoLogAPI.model.Shipment;
 import GoLogAPI.model.enums.TypeOperation;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,14 @@ public final class TripLoad {
 
     /** kg a bordo agora, considerando atendidas as paradas com chegada registrada. */
     public static double onboardKg(List<RouteStop> stops) {
+        return onboardKgAt(stops, null);
+    }
+
+    /**
+     * kg a bordo no instante {@code at}: só contam como atendidas as paradas com chegada até esse instante.
+     * {@code null} considera todas as chegadas registradas.
+     */
+    public static double onboardKgAt(List<RouteStop> stops, LocalDateTime at) {
         Set<UUID> collectsInTrip = stops.stream().map(RouteStop::getShipment).filter(Objects::nonNull)
                 .filter(s -> s.getTypeOperation() == TypeOperation.COLETA).map(Shipment::getId)
                 .collect(Collectors.toSet());
@@ -43,6 +52,7 @@ public final class TripLoad {
         for (RouteStop rs : stops) {
             Shipment s = rs.getShipment();
             if (s == null || rs.getArrivedAt() == null) continue;
+            if (at != null && rs.getArrivedAt().isAfter(at)) continue;
             if (s.getTypeOperation() == TypeOperation.ENTREGA) {
                 onboard = Math.max(0, onboard - nz(s.getWeight()));
             } else if (s.getTypeOperation() == TypeOperation.COLETA) {

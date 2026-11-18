@@ -8,6 +8,7 @@ import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.mapper.TelemetryMapper;
 import GoLogAPI.model.Equipament;
 import GoLogAPI.model.Telemetry;
+import GoLogAPI.model.Transport;
 import GoLogAPI.repository.EquipamentRepository;
 import GoLogAPI.repository.TelemetryRepository;
 import GoLogAPI.service.telemetry.GeofencingService;
@@ -57,15 +58,18 @@ public class TelemetryService {
        telemetry.setEquipamentId(equipament);
        TelemetryTripLinkResolver.TripLink link = tripLinkResolver.resolve(telemetryCreateRequest.shipmentId(), telemetryCreateRequest.transportId());
        applyTripLink(telemetry, link);
-       telemetryRepository.save(telemetry);
 
        try {
            double lat = Double.parseDouble(telemetryCreateRequest.latitude().trim().replace(',', '.'));
            double lon = Double.parseDouble(telemetryCreateRequest.longitude().trim().replace(',', '.'));
            LocalDateTime ts = telemetryCreateRequest.dateTime() != null ? telemetryCreateRequest.dateTime() : LocalDateTime.now();
-           tripTrackingService.track(equipament, link.transport(), lat, lon, ts);
+           Transport tracked = tripTrackingService.track(equipament, link.transport(), lat, lon, ts);
+           // Sem viagem informada, o ponto fica com a viagem em execução: a rota é montada pelo transport_id do ponto
+           if (telemetry.getTransportId() == null && tracked != null) telemetry.setTransportId(tracked);
            geofencingService.checkGeofenceArrival(equipament, link.transport(), lat, lon, ts, telemetryCreateRequest.speed());
        } catch (Exception ignored) {}
+
+       telemetryRepository.save(telemetry);
 
        return telemetryMapper.toResponse(telemetry);
     }

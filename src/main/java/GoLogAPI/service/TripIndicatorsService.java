@@ -11,6 +11,8 @@ import GoLogAPI.model.Tractor;
 import GoLogAPI.model.Transport;
 import GoLogAPI.model.enums.TypeFuel;
 import GoLogAPI.repository.RouteStopRepository;
+import GoLogAPI.repository.TransportRepository;
+import GoLogAPI.service.telemetry.TripTrackingService;
 import GoLogAPI.service.sustainability.EmissionFactors;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
@@ -22,8 +24,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Indicadores realizados da viagem (acompanhamento e resumo operacional). A base — distância e t·km — é
- * acumulada na ingestão de telemetria ({@code TripTrackingService}); aqui só se aplicam os fatores do cadastro,
+ * Indicadores realizados da viagem (acompanhamento e resumo operacional). A base — rota, distância e t·km — vem
+ * dos pontos de telemetria com o {@code transport_id} da viagem ({@code TripTrackingService.rebuild}); aqui se aplicam os fatores do cadastro,
  * com as mesmas regras do dashboard ({@link EmissionFactors}).
  */
 @Service
@@ -31,20 +33,36 @@ public class TripIndicatorsService {
 
     private final RouteStopRepository routeStopRepository;
     private final TransportService transportService;
+    private final TripTrackingService tripTrackingService;
+    private final TransportRepository transportRepository;
 
-    public TripIndicatorsService(RouteStopRepository routeStopRepository, TransportService transportService) {
+    public TripIndicatorsService(RouteStopRepository routeStopRepository, TransportService transportService,
+                                 TripTrackingService tripTrackingService, TransportRepository transportRepository) {
         this.routeStopRepository = routeStopRepository;
         this.transportService = transportService;
+        this.tripTrackingService = tripTrackingService;
+        this.transportRepository = transportRepository;
     }
 
-    /** Indicadores de uma viagem visível para o tenant atual. */
-    @Transactional(readOnly = true)
+    /**
+     * Indicadores de uma viagem visível para o tenant atual. A rota realizada é remontada a partir dos pontos de
+     * telemetria com o {@code transport_id} da viagem; se diferir do que estava gravado, a viagem é corrigida.
+     */
+    @Transactional
     public TripIndicatorsResponse forTransport(UUID transportId) {
-        return compute(transportService.findVisible(transportId));
+        Transport t = transportService.findVisible(transportId);
+        List<RouteStop> stops = routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(t.getId());
+        if (tripTrackingService.rebuild(t, stops)) {
+            transportRepository.save(t);
+        }
+        return compute(t, stops);
     }
 
     public TripIndicatorsResponse compute(Transport t) {
-        List<RouteStop> stops = routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(t.getId());
+        return compute(t, routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(t.getId()));
+    }
+
+    public TripIndicatorsResponse compute(Transport t, List<RouteStop> stops) {
         Tractor tractor = tractor(t);
 
         Double kmPerLiter = tractor != null ? tractor.getKmPerLiter() : null;
@@ -59,7 +77,8 @@ public class TripIndicatorsService {
         boolean hasRoute = t.getTrackingStartedAt() != null && km > 0;
         if (!hasRoute) {
             return new TripIndicatorsResponse(t.getId(), false, t.getTrackingStartedAt(), t.getLastTelemetryAt(),
-                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null, new CostBreakdown(0, 0, 0), schedule, factors);
+                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null, new CostBreakdown(0, 0, 0), schedule, factors,
+                    t.getRouteCompleted());
         }
 
         double hours = Duration.between(t.getTrackingStartedAt(), t.getLastTelemetryAt()).toSeconds() / 3600.0;
@@ -81,7 +100,7 @@ public class TripIndicatorsService {
         return new TripIndicatorsResponse(t.getId(), true, t.getTrackingStartedAt(), t.getLastTelemetryAt(),
                 round(km, 2), round(hours, 2), round(tonKm, 2), round(fuel, 2), round(co2, 2),
                 round(effectiveCost, 2), effectiveCost == null ? null : round(effectiveCost / km, 2),
-                cost, schedule, factors);
+                cost, schedule, factors, t.getRouteCompleted());
     }
 
     // ================================================================= regras

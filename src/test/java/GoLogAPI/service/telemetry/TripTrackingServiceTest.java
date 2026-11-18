@@ -73,4 +73,13 @@ class TripTrackingServiceTest {
         assertTrue(TripTrackingService.isRunning(List.of(stop(TypeOperation.ENTREGA, 1, ShipmentStatus.INICIADO, null))));
         assertFalse(TripTrackingService.isRunning(List.of(stop(TypeOperation.ENTREGA, 1, ShipmentStatus.FINALIZADO, T0))));
     }
+
+    @Test
+    void cargaNoInstanteSoDescontaParadasAtendidasAteEle() {
+        RouteStop e1 = stop(TypeOperation.ENTREGA, 1500, ShipmentStatus.FINALIZADO, T0.plusMinutes(30));
+        RouteStop e2 = stop(TypeOperation.ENTREGA, 500, ShipmentStatus.AGUARDANDO_INICIO, null);
+        List<RouteStop> stops = List.of(e1, e2);
+        assertEquals(2000, TripLoad.onboardKgAt(stops, T0), 0.001);                  // antes da 1ª entrega
+        assertEquals(500, TripLoad.onboardKgAt(stops, T0.plusMinutes(31)), 0.001);   // depois dela
+    }
 }

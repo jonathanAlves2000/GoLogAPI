@@ -2,13 +2,16 @@ package GoLogAPI.service.telemetry;
 
 import GoLogAPI.model.Equipament;
 import GoLogAPI.model.RouteStop;
+import GoLogAPI.model.Telemetry;
 import GoLogAPI.model.Transport;
+import GoLogAPI.repository.TelemetryRepository;
 import GoLogAPI.repository.TransportRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Monta a rota realizada da viagem a partir da telemetria, de forma incremental: cada ponto aceito estende a
@@ -28,10 +31,56 @@ public class TripTrackingService {
 
     private final TransportRepository transportRepository;
     private final ActiveTripResolver tripResolver;
+    private final TelemetryRepository telemetryRepository;
 
-    public TripTrackingService(TransportRepository transportRepository, ActiveTripResolver tripResolver) {
+    public TripTrackingService(TransportRepository transportRepository, ActiveTripResolver tripResolver,
+                               TelemetryRepository telemetryRepository) {
         this.transportRepository = transportRepository;
         this.tripResolver = tripResolver;
+        this.telemetryRepository = telemetryRepository;
+    }
+
+    /**
+     * Remonta a rota realizada da viagem só com os pontos de telemetria gravados com o {@code transport_id} dela,
+     * em ordem cronológica e com os mesmos filtros da ingestão. É a fonte da verdade: corrige viagens cujos pontos
+     * foram acumulados na viagem errada ou perdidos na ingestão incremental.
+     *
+     * @return {@code true} se a rota, distância, t·km ou última posição mudaram (o chamador decide se persiste)
+     */
+    public boolean rebuild(Transport t, List<RouteStop> stops) {
+        String route = t.getRouteCompleted();
+        Integer distance = t.getDistanceTraveled();
+        Double tonKm = t.getTonKmTraveled();
+        LocalDateTime started = t.getTrackingStartedAt();
+        LocalDateTime lastAt = t.getLastTelemetryAt();
+
+        t.setRouteCompleted(null);
+        t.setDistanceTraveled(null);
+        t.setTonKmTraveled(null);
+        t.setTrackingStartedAt(null);
+        t.setLastTelemetryAt(null);
+        t.setLastTelemetryLat(null);
+        t.setLastTelemetryLon(null);
+
+        for (Telemetry point : telemetryRepository.findByTransportIdIdOrderByDateTimeAsc(t.getId())) {
+            Double lat = parse(point.getLatitude());
+            Double lon = parse(point.getLongitude());
+            if (lat == null || lon == null || point.getDateTime() == null) continue;
+            apply(t, stops, lat, lon, point.getDateTime());
+        }
+
+        return !Objects.equals(route, t.getRouteCompleted()) || !Objects.equals(distance, t.getDistanceTraveled())
+                || !Objects.equals(tonKm, t.getTonKmTraveled()) || !Objects.equals(started, t.getTrackingStartedAt())
+                || !Objects.equals(lastAt, t.getLastTelemetryAt());
+    }
+
+    private static Double parse(String coord) {
+        if (coord == null || coord.isBlank()) return null;
+        try {
+            return Double.parseDouble(coord.trim().replace(',', '.'));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     /** Registra o ponto na viagem em execução do veículo (sem viagem informada). */
@@ -81,7 +130,7 @@ public class TripTrackingService {
         double hours = Duration.between(t.getLastTelemetryAt(), ts).toMillis() / 3_600_000.0;
         if (hours > 0 && (meters / 1000.0) / hours > MAX_SPEED_KMH) return false;
 
-        double tons = TripLoad.onboardKg(stops) / 1000.0;
+        double tons = TripLoad.onboardKgAt(stops, ts) / 1000.0;
         int traveled = t.getDistanceTraveled() == null ? 0 : t.getDistanceTraveled();
         double tonKm = t.getTonKmTraveled() == null ? 0.0 : t.getTonKmTraveled();
 
