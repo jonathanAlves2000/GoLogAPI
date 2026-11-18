@@ -53,6 +53,10 @@ public class WorkScheduleService {
 
     @Transactional
     public WorkSheduleResponses save(WorkSheduleCreateRequest request) {
+        if ("DRIVER".equalsIgnoreCase(TenantContext.getCurrentRole())) {
+            throw new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.FORBIDDEN,
+                    "Motoristas têm acesso somente leitura às escalas de trabalho.");
+        }
         workSheduleValidate.validate(request);
 
         EquipamentGroup equipamentGroup = findGroup(request.equipamentGroupId());
@@ -103,6 +107,15 @@ public class WorkScheduleService {
     }
 
     public List<WorkSheduleResponses> getAll() {
+        if ("DRIVER".equalsIgnoreCase(TenantContext.getCurrentRole())) {
+            UUID userId = TenantContext.getCurrentUserId();
+            if (userId != null) {
+                return workScheduleRepository.findByDriverUserId(userId).stream()
+                        .filter(w -> tenantGuard.canSee(w.getCompany()))
+                        .map(this::toResponse)
+                        .toList();
+            }
+        }
         List<WorkSchedule> workSchedules = tenantGuard.isGlobalView()
                 ? workScheduleRepository.findAll()
                 : workScheduleRepository.findByCompanyId(tenantGuard.scope());
@@ -116,6 +129,10 @@ public class WorkScheduleService {
 
     @Transactional
     public void update(UUID id, WorkSheduleCreateRequest request) {
+        if ("DRIVER".equalsIgnoreCase(TenantContext.getCurrentRole())) {
+            throw new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.FORBIDDEN,
+                    "Motoristas têm acesso somente leitura às escalas de trabalho.");
+        }
         WorkSchedule workSchedule = findVisible(id);
         workSheduleValidate.validate(request, id);
 
@@ -168,6 +185,10 @@ public class WorkScheduleService {
 
     @Transactional
     public void delete(UUID id) {
+        if ("DRIVER".equalsIgnoreCase(TenantContext.getCurrentRole())) {
+            throw new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.FORBIDDEN,
+                    "Motoristas têm acesso somente leitura às escalas de trabalho.");
+        }
         WorkSchedule workSchedule = findVisible(id);
 
         workScheduleRepository.delete(workSchedule);
@@ -177,6 +198,12 @@ public class WorkScheduleService {
         WorkSchedule ws = workScheduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Escala não encontrada: ", id));
         tenantGuard.checkAccess(ws.getCompany(), id);
+        if ("DRIVER".equalsIgnoreCase(TenantContext.getCurrentRole())) {
+            UUID userId = TenantContext.getCurrentUserId();
+            if (userId != null && (ws.getDriver() == null || ws.getDriver().getUser() == null || !userId.equals(ws.getDriver().getUser().getId()))) {
+                throw new ResourceNotFoundException("Escala não encontrada: ", id);
+            }
+        }
         return ws;
     }
 

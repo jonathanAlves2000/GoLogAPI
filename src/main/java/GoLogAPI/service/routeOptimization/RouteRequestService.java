@@ -137,7 +137,13 @@ public class RouteRequestService {
     }
 
     @Transactional
-    public OptimizeToursResponse optimizeRoutes(OptimizeRouteRequest optimizeRouteRequest) {
+    /** Remessas que nem chegaram ao Google (nenhum veículo escalado compatível), com o motivo. */
+    public record PreSkipped(List<UUID> shipmentIds, String label, List<String> reasons) { }
+
+    /** Resposta do Google (nula quando nenhuma remessa pôde ser enviada) + remessas recusadas antes do envio. */
+    public record Outcome(OptimizeToursResponse response, List<PreSkipped> preSkipped) { }
+
+    public Outcome optimizeRoutes(OptimizeRouteRequest optimizeRouteRequest) {
 
         List<WorkSchedule> workSchedules = optimizeRouteRequest.workScheduleIds() == null ? List.of()
                 : workScheduleRepository.findAllById(optimizeRouteRequest.workScheduleIds());
@@ -151,6 +157,9 @@ public class RouteRequestService {
         Duration stopDuration = Duration.newBuilder().setSeconds(settings.defaultServiceDurationSeconds()).build();
 
         ShipmentModel.Builder shipmentModelBuilder = ShipmentModel.newBuilder();
+        // Conjunto de cada veículo, na mesma ordem dos índices do modelo (usado em allowedVehicleIndices)
+        List<EquipamentGroup> vehicleGroups = new ArrayList<>();
+        List<PreSkipped> preSkipped = new ArrayList<>();
 
         // 1. Montagem dos Veículos usando classes nativas do protobuf
         for (WorkSchedule workSchedule : workSchedules) {
@@ -315,6 +324,7 @@ public class RouteRequestService {
             }
 
             shipmentModelBuilder.addVehicles(vehicleBuilder.build());
+            vehicleGroups.add(equipament);
         }
 
         // 2. Montagem dos Shipments (suporta COLETA com filhas, COLETA avulsa e ENTREGA avulsa/direta)
@@ -413,14 +423,13 @@ public class RouteRequestService {
                         deliveryReqBuilder.addAllVisitTypes(deliveryVisitTypes);
                     }
 
-                    com.google.maps.routeoptimization.v1.Shipment protoShipment = com.google.maps.routeoptimization.v1.Shipment.newBuilder()
+                    com.google.maps.routeoptimization.v1.Shipment.Builder protoShipment = com.google.maps.routeoptimization.v1.Shipment.newBuilder()
                             .setLabel(collect.getId().toString() + "/" + delivery.getId().toString())
                             .addPickups(pickupReqBuilder.build())
                             .addDeliveries(deliveryReqBuilder.build())
-                            .setPenaltyCost(settings.penaltyCostUnserved())
-                            .build();
+                            .setPenaltyCost(settings.penaltyCostUnserved());
 
-                    shipmentModelBuilder.addShipments(protoShipment);
+                    addWithCompatibility(shipmentModelBuilder, protoShipment, List.of(collect, delivery), vehicleGroups, preSkipped);
                 }
             } else {
                 // Coleta individual sem entrega filha cadastrada ainda
@@ -442,13 +451,12 @@ public class RouteRequestService {
                     pickupReqBuilder.addAllVisitTypes(collectVisitTypes);
                 }
 
-                com.google.maps.routeoptimization.v1.Shipment protoShipment = com.google.maps.routeoptimization.v1.Shipment.newBuilder()
+                com.google.maps.routeoptimization.v1.Shipment.Builder protoShipment = com.google.maps.routeoptimization.v1.Shipment.newBuilder()
                         .setLabel("pickup/" + collect.getId().toString())
                         .addPickups(pickupReqBuilder.build())
-                        .setPenaltyCost(settings.penaltyCostUnserved())
-                        .build();
+                        .setPenaltyCost(settings.penaltyCostUnserved());
 
-                shipmentModelBuilder.addShipments(protoShipment);
+                addWithCompatibility(shipmentModelBuilder, protoShipment, List.of(collect), vehicleGroups, preSkipped);
             }
         }
 
@@ -538,7 +546,9 @@ public class RouteRequestService {
                 shipmentBuilder.setLabel("delivery/" + delivery.getId().toString());
             }
 
-            shipmentModelBuilder.addShipments(shipmentBuilder.build());
+            List<Shipment> members = delivery.getOperationOrigem() != null
+                    ? List.of(delivery.getOperationOrigem(), delivery) : List.of(delivery);
+            addWithCompatibility(shipmentModelBuilder, shipmentBuilder, members, vehicleGroups, preSkipped);
         }
 
         // Horizonte Global Dinâmico: engloba todas as datas de escalas, remessas e folga operacional
@@ -579,11 +589,20 @@ public class RouteRequestService {
         if (company != null && company.getId() != null) {
             List<VisitTypeRule> rules = visitTypeRuleRepository.findAvailableByCompanyId(company.getId());
             for (VisitTypeRule rule : rules) {
+                String type1 = TypeTransport.codeOf(rule.getVisitType1().getCode());
+                String type2 = TypeTransport.codeOf(rule.getVisitType2().getCode());
                 if (rule.getRuleType() == VisitTypeRuleType.INCOMPATIBLE_ON_SAME_VEHICLE) {
                     shipmentModelBuilder.addShipmentTypeIncompatibilities(com.google.maps.routeoptimization.v1.ShipmentTypeIncompatibility.newBuilder()
-                            .addTypes(rule.getVisitType1().getCode())
-                            .addTypes(rule.getVisitType2().getCode())
+                            .addTypes(type1)
+                            .addTypes(type2)
                             .setIncompatibilityMode(com.google.maps.routeoptimization.v1.ShipmentTypeIncompatibility.IncompatibilityMode.NOT_PERFORMED_BY_SAME_VEHICLE)
+                            .build());
+                } else if (rule.getRuleType() == VisitTypeRuleType.REQUIRES_SAME_VEHICLE) {
+                    // Remessas do tipo 1 só são atendidas por um veículo que também atenda alguma do tipo 2
+                    shipmentModelBuilder.addShipmentTypeRequirements(com.google.maps.routeoptimization.v1.ShipmentTypeRequirement.newBuilder()
+                            .addDependentShipmentTypes(type1)
+                            .addRequiredShipmentTypeAlternatives(type2)
+                            .setRequirementMode(com.google.maps.routeoptimization.v1.ShipmentTypeRequirement.RequirementMode.PERFORMED_BY_SAME_VEHICLE)
                             .build());
                 }
             }
@@ -596,6 +615,58 @@ public class RouteRequestService {
                 .setPopulateTransitionPolylines(true)
                 .build();
 
-        return routeOptimizationClient.optimizeTours(request);
+        if (shipmentModelBuilder.getShipmentsCount() == 0) {
+            return new Outcome(null, preSkipped);
+        }
+        return new Outcome(routeOptimizationClient.optimizeTours(request), preSkipped);
+    }
+
+    /**
+     * Adiciona a remessa ao modelo respeitando a compatibilidade carga × equipamento.
+     *
+     * <ul>
+     *   <li>{@code shipment_type} = código do tipo de transporte (entrega, ou coleta quando avulsa): é o que as regras de
+     *       incompatibilidade/exigência comparam no Google.</li>
+     *   <li>Tipos marcados "exige veículo compatível" restringem a remessa aos veículos cujo conjunto declara atendê-los
+     *       ({@code allowedVehicleIndices}).</li>
+     *   <li>Se nenhum veículo escalado atende, a remessa não é enviada (no Google uma lista vazia significaria "qualquer
+     *       veículo") e volta em {@code preSkipped} com o motivo.</li>
+     * </ul>
+     */
+    static void addWithCompatibility(ShipmentModel.Builder model,
+                                     com.google.maps.routeoptimization.v1.Shipment.Builder proto,
+                                     List<Shipment> members,
+                                     List<EquipamentGroup> vehicleGroups,
+                                     List<PreSkipped> preSkipped) {
+        Shipment main = members.get(members.size() - 1);
+        if (main.getTypeTransport() != null) {
+            proto.setShipmentType(main.getTypeTransport().code());
+        }
+
+        Set<UUID> required = new java.util.LinkedHashSet<>();
+        List<String> requiredNames = new ArrayList<>();
+        for (Shipment m : members) {
+            TypeTransport t = m.getTypeTransport();
+            if (t != null && Boolean.TRUE.equals(t.getRequiresCompatibleVehicle()) && required.add(t.getId())) {
+                requiredNames.add(t.getName());
+            }
+        }
+
+        if (!required.isEmpty()) {
+            List<Integer> allowed = new ArrayList<>();
+            for (int i = 0; i < vehicleGroups.size(); i++) {
+                Set<TypeTransport> supported = vehicleGroups.get(i).getTypeTransports();
+                Set<UUID> supportedIds = new HashSet<>();
+                if (supported != null) supported.forEach(t -> supportedIds.add(t.getId()));
+                if (supportedIds.containsAll(required)) allowed.add(i);
+            }
+            if (allowed.isEmpty()) {
+                preSkipped.add(new PreSkipped(members.stream().map(Shipment::getId).toList(), proto.getLabel(),
+                        List.of("nenhum veículo escalado está equipado para " + String.join(" + ", requiredNames))));
+                return;
+            }
+            proto.addAllAllowedVehicleIndices(allowed);
+        }
+        model.addShipments(proto.build());
     }
 }

@@ -6,5 +6,8 @@ public record TypeTransportResponse(
         UUID id,
         String name,
         String description,
-        String care
+        String care,
+        Boolean requiresCompatibleVehicle,
+        String code,
+        Boolean shared
 ) { }

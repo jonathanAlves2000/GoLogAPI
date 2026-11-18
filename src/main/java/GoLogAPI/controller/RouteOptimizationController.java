@@ -46,10 +46,18 @@ public class RouteOptimizationController {
             + "grava transportes e paradas e devolve o resumo com as remessas não atendidas e o motivo.")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public OptimizeRouteResult optimizeRoutes(@RequestBody OptimizeRouteRequest request) {
-        OptimizeToursResponse response = routeRequestService.optimizeRoutes(request);
+        RouteRequestService.Outcome outcome = routeRequestService.optimizeRoutes(request);
+        List<OptimizeRouteResult.SkippedShipment> skipped = new ArrayList<>();
+        // Recusadas antes do envio ao Google (nenhum veículo escalado equipado para o tipo de carga)
+        for (RouteRequestService.PreSkipped p : outcome.preSkipped()) {
+            skipped.add(new OptimizeRouteResult.SkippedShipment(p.shipmentIds(), p.label(), p.reasons()));
+        }
+        OptimizeToursResponse response = outcome.response();
+        if (response == null) {
+            return new OptimizeRouteResult(0, 0, List.of(), skipped, 0L, 0.0);
+        }
         List<Transport> transports = processRouteService.processRoute(response, request);
 
-        List<OptimizeRouteResult.SkippedShipment> skipped = new ArrayList<>();
         for (SkippedShipment s : response.getSkippedShipmentsList()) {
             List<String> reasons = s.getReasonsList().stream()
                     .map(r -> SKIP_REASONS.getOrDefault(r.getCode().name(), r.getCode().name()))

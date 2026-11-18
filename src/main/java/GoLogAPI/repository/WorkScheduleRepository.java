@@ -43,4 +43,7 @@ public interface WorkScheduleRepository extends JpaRepository<WorkSchedule, UUID
 
     @Query("SELECT w FROM WorkSchedule w LEFT JOIN w.company c WHERE c.id = :companyId OR c.id IS NULL")
     List<WorkSchedule> findByCompanyIdOrCompanyIsNull(@Param("companyId") UUID companyId);
+
+    @Query("SELECT w FROM WorkSchedule w WHERE w.driver.user.id = :userId")
+    List<WorkSchedule> findByDriverUserId(@Param("userId") UUID userId);
 }

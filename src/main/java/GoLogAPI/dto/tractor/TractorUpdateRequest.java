@@ -30,6 +30,9 @@ public record TractorUpdateRequest(
         Double kmPerLiter,
 
         @Schema(description = "Emissão em kg CO2/km medida pela operação. Se informada, prevalece sobre o cálculo por consumo.")
-        Double co2PerKilometer
+        Double co2PerKilometer,
+
+        @Schema(description = "Tipos de transporte que o veículo está equipado para atender (aplicado ao conjunto de veículo único dos rígidos). null = mantém.")
+        java.util.List<UUID> typeTransportIds
 
 ) implements TractorRequest { }

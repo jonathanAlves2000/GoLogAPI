@@ -29,6 +29,14 @@ public class TractorService {
     private final TractorValidate tractorValidate;
     private final TenantGuard tenantGuard;
     private final GoLogAPI.repository.EquipamentGroupRepository equipamentGroupRepository;
+    private FleetGroupLookup fleetGroupLookup;
+    private GoLogAPI.repository.TypeTransportRepository typeTransportRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setCollaborators(FleetGroupLookup fleetGroupLookup, GoLogAPI.repository.TypeTransportRepository typeTransportRepository) {
+        this.fleetGroupLookup = fleetGroupLookup;
+        this.typeTransportRepository = typeTransportRepository;
+    }
 
     public TractorService(TractorRepository tractorRepository, TractorMapper tractorMapper,
                           TractorValidate tractorValidate, TenantGuard tenantGuard,
@@ -47,19 +55,21 @@ public class TractorService {
         tractor.setCompany(tenantGuard.ownerForWrite(request.companyId()));
         applyDefaults(tractor);
         tractorRepository.save(tractor);
-        ensureSingleVehicleGroup(tractor);
-        return tractorMapper.toResponse(tractor);
+        ensureSingleVehicleGroup(tractor, request.typeTransportIds());
+        return fleetGroupLookup.enrich(tractorMapper.toResponse(tractor));
     }
 
     public TractorResponse get(UUID id){
-        return tractorMapper.toResponse(findVisible(id));
+        return fleetGroupLookup.enrich(tractorMapper.toResponse(findVisible(id)));
     }
 
     public List<TractorResponse> getAll() {
         List<Tractor> tractors = tenantGuard.isGlobalView()
                 ? tractorRepository.findAll()
                 : tractorRepository.findByCompanyId(tenantGuard.scope());
-        return tractorMapper.toResponses(tractors);
+        List<TractorResponse> responses = tractorMapper.toResponses(tractors);
+        fleetGroupLookup.enrichAll(responses);
+        return responses;
     }
 
     @Transactional
@@ -87,8 +97,8 @@ public class TractorService {
         tractor.setCo2PerKilometer(request.co2PerKilometer());
         applyDefaults(tractor);
         tractorRepository.save(tractor);
-        ensureSingleVehicleGroup(tractor);
-        return tractorMapper.toResponse(tractor);
+        ensureSingleVehicleGroup(tractor, request.typeTransportIds());
+        return fleetGroupLookup.enrich(tractorMapper.toResponse(tractor));
     }
 
     @Transactional
@@ -121,8 +131,8 @@ public class TractorService {
 
         applyDefaults(tractor);
         tractorRepository.save(tractor);
-        ensureSingleVehicleGroup(tractor);
-        return tractorMapper.toResponse(tractor);
+        ensureSingleVehicleGroup(tractor, request.typeTransportIds());
+        return fleetGroupLookup.enrich(tractorMapper.toResponse(tractor));
     }
 
     /** Sem valores presumidos: a emissão vem do cadastro ou do consumo informado (ver EmissionFactors). */
@@ -137,20 +147,43 @@ public class TractorService {
      * Veículos rígidos (moto, van, VUC, truck...) operam sozinhos: garante um conjunto de veículo único para
      * que possam ser escalados e roteirizados sem passar pelo cadastro de conjuntos.
      */
-    private void ensureSingleVehicleGroup(Tractor tractor) {
-        if (tractor.getVehicleType() == null || !tractor.getVehicleType().isRigid()) return;
-        boolean alreadyGrouped = equipamentGroupRepository.findAll().stream()
-                .anyMatch(g -> (g.getEquipament1() != null && g.getEquipament1().getId().equals(tractor.getId()))
+    private void ensureSingleVehicleGroup(Tractor tractor, List<UUID> typeTransportIds) {
+        var existing = equipamentGroupRepository.findAll().stream()
+                .filter(g -> (g.getEquipament1() != null && g.getEquipament1().getId().equals(tractor.getId()))
                         || (g.getEquipament2() != null && g.getEquipament2().getId().equals(tractor.getId()))
-                        || (g.getEquipament3() != null && g.getEquipament3().getId().equals(tractor.getId())));
-        if (alreadyGrouped) return;
+                        || (g.getEquipament3() != null && g.getEquipament3().getId().equals(tractor.getId())))
+                .findFirst();
+        // Tipos atendidos informados no veículo valem para o conjunto em que ele é a tração
+        if (existing.isPresent()) {
+            var g = existing.get();
+            if (typeTransportIds != null && g.getEquipament1() != null && g.getEquipament1().getId().equals(tractor.getId())) {
+                applyTypes(g, typeTransportIds);
+                equipamentGroupRepository.save(g);
+            }
+            return;
+        }
+        if (tractor.getVehicleType() == null || !tractor.getVehicleType().isRigid()) return;
         GoLogAPI.model.EquipamentGroup group = new GoLogAPI.model.EquipamentGroup();
         group.setEquipament1(tractor);
         group.setCompany(tractor.getCompany());
         group.setStatus(GoLogAPI.model.enums.EquipamentGroupStatus.DISPONIVEL);
         group.setTypeTransports(new java.util.HashSet<>());
         group.setObservation(tractor.getVehicleType().getDescription() + " " + tractor.getPlate() + " (veículo único)");
+        if (typeTransportIds != null) applyTypes(group, typeTransportIds);
         equipamentGroupRepository.save(group);
+    }
+
+    private void applyTypes(GoLogAPI.model.EquipamentGroup group, List<UUID> typeIds) {
+        var types = new java.util.HashSet<GoLogAPI.model.TypeTransport>();
+        for (UUID typeId : typeIds) {
+            var type = typeTransportRepository.findById(typeId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Tipo de transporte não encontrado: ", typeId));
+            tenantGuard.checkCatalogRead(type.getCompany(), typeId);
+            types.add(type);
+        }
+        if (group.getTypeTransports() == null) group.setTypeTransports(new java.util.HashSet<>());
+        group.getTypeTransports().clear();
+        group.getTypeTransports().addAll(types);
     }
 
     public Tractor findVisible(UUID id) {

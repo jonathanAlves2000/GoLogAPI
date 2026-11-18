@@ -20,6 +20,10 @@ public class EquipamentService {
     private final EquipamentMapper equipamentMapper;
 
     private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+    private FleetGroupLookup fleetGroupLookup;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setFleetGroupLookup(FleetGroupLookup fleetGroupLookup) { this.fleetGroupLookup = fleetGroupLookup; }
 
     public EquipamentService(EquipamentRepository equipamentRepository, EquipamentMapper equipamentMapper,
                              GoLogAPI.infra.tenant.TenantGuard tenantGuard){
@@ -32,13 +36,15 @@ public class EquipamentService {
         Equipament equipament = equipamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, id));
         tenantGuard.checkAccess(equipament.getCompany(), id);
-        return equipamentMapper.toResponse(equipament);
+        return fleetGroupLookup.enrich(equipamentMapper.toResponse(equipament));
     }
 
     public List<EquipamentResponse> getAll(){
         List<Equipament> equipaments = tenantGuard.isGlobalView()
                 ? equipamentRepository.findAll()
                 : equipamentRepository.findByCompanyId(tenantGuard.scope());
-        return equipamentMapper.toResponseList(equipaments);
+        List<EquipamentResponse> responses = equipamentMapper.toResponseList(equipaments);
+        fleetGroupLookup.enrichAll(responses);
+        return responses;
     }
 }

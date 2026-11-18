@@ -9,5 +9,6 @@ public record TypeTransportUpdateRequest(
         )
         String name,
         String description,
-        String care
+        String care,
+        Boolean requiresCompatibleVehicle
 ) { }

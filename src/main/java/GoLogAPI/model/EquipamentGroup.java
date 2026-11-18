@@ -69,19 +69,12 @@ public class EquipamentGroup extends Audit{
     @NotFound(action = NotFoundAction.IGNORE)
     private Company company;
 
+    /** Tipos de transporte que o conjunto está equipado para atender (lido pelo otimizador). */
     @ManyToMany
     @JoinTable(
             name = "group_transport_type_table",
             joinColumns = @JoinColumn(name = "equipament_group_id"),
             inverseJoinColumns = @JoinColumn(name = "type_transport_id")
     )
-    private Set<TypeTransport> typeTransports;
-
-    @ManyToMany
-    @JoinTable(
-            name = "equipament_group_visit_type_table",
-            joinColumns = @JoinColumn(name = "equipament_group_id"),
-            inverseJoinColumns = @JoinColumn(name = "visit_type_id")
-    )
-    private Set<VisitType> supportedVisitTypes = new HashSet<>();
+    private Set<TypeTransport> typeTransports = new HashSet<>();
 }

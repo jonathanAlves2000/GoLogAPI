@@ -14,5 +14,11 @@ public record EquipamentGroupCreateRequest(
 
         UUID equipament3Id,
 
-        UUID companyId
+        UUID companyId,
+
+        /**
+         * Tipos de transporte para os quais o conjunto está equipado (ex.: baú refrigerado → Refrigerada).
+         * Só restringe tipos marcados com "exige veículo compatível". Em edições, {@code null} mantém o que está salvo.
+         */
+        java.util.List<UUID> typeTransportIds
 ){}

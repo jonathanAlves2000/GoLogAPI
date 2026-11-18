@@ -24,6 +24,10 @@ public class TrailerService {
     private final TrailerMapper trailerMapper;
     private final TrailerValidate trailerValidate;
     private final TenantGuard tenantGuard;
+    private GoLogAPI.service.FleetGroupLookup fleetGroupLookup;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setFleetGroupLookup(GoLogAPI.service.FleetGroupLookup fleetGroupLookup) { this.fleetGroupLookup = fleetGroupLookup; }
 
     public TrailerService(TrailerRepository trailerRepository, TrailerMapper trailerMapper,
                           TrailerValidate trailerValidate, TenantGuard tenantGuard){
@@ -43,14 +47,16 @@ public class TrailerService {
     }
 
     public TrailerResponse get(UUID id){
-        return trailerMapper.toResponse(findVisible(id));
+        return fleetGroupLookup.enrich(trailerMapper.toResponse(findVisible(id)));
     }
 
     public List<TrailerResponse> getAll() {
         List<Trailer> trailers = tenantGuard.isGlobalView()
                 ? trailerRepository.findAll()
                 : trailerRepository.findByCompanyId(tenantGuard.scope());
-        return trailerMapper.toResponses(trailers);
+        List<TrailerResponse> responses = trailerMapper.toResponses(trailers);
+        fleetGroupLookup.enrichAll(responses);
+        return responses;
     }
 
     @Transactional

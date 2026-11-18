@@ -64,6 +64,7 @@ public class EquipamentGroupService {
         group.setStatus(EquipamentGroupStatus.DISPONIVEL);
         group.setTypeTransports(new HashSet<>());
         applyComposition(group, request.observation(), request.equipament1Id(), request.equipament2Id(), request.equipament3Id());
+        applyTypes(group, request.typeTransportIds());
         equipamentGroupRepository.save(group);
         return equipamentGroupMapper.toResponse(group);
     }
@@ -89,6 +90,7 @@ public class EquipamentGroupService {
         EquipamentGroup group = findVisible(id);
         equipamentGroupValidate.validate(request.equipament1Id(), request.equipament2Id(), request.equipament3Id(), id);
         applyComposition(group, request.observation(), request.equipament1Id(), request.equipament2Id(), request.equipament3Id());
+        applyTypes(group, request.typeTransportIds());
         equipamentGroupRepository.save(group);
         return equipamentGroupMapper.toResponse(group);
     }
@@ -102,6 +104,7 @@ public class EquipamentGroupService {
         equipamentGroupValidate.validate(eq1, eq2, eq3, id);
         String observation = request.observation() != null ? request.observation() : group.getObservation();
         applyComposition(group, observation, eq1, eq2, eq3);
+        applyTypes(group, request.typeTransportIds());
         equipamentGroupRepository.save(group);
         return equipamentGroupMapper.toResponse(group);
     }
@@ -143,6 +146,21 @@ public class EquipamentGroupService {
         group.setEquipament3(eq3);
         group.setCompany(owner);
         if (group.getStatus() == null) group.setStatus(EquipamentGroupStatus.DISPONIVEL);
+    }
+
+    /** Substitui os tipos atendidos; {@code null} mantém os atuais. Só aceita tipos visíveis no tenant. */
+    private void applyTypes(EquipamentGroup group, java.util.List<UUID> typeIds) {
+        if (typeIds == null) return;
+        java.util.Set<TypeTransport> types = new HashSet<>();
+        for (UUID typeId : typeIds) {
+            TypeTransport type = typeTransportRepository.findById(typeId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Tipo de transporte não encontrado: ", typeId));
+            tenantGuard.checkCatalogRead(type.getCompany(), typeId);
+            types.add(type);
+        }
+        if (group.getTypeTransports() == null) group.setTypeTransports(new HashSet<>());
+        group.getTypeTransports().clear();
+        group.getTypeTransports().addAll(types);
     }
 
     private Equipament findEquipament(UUID id) {

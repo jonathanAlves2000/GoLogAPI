@@ -12,8 +12,11 @@ import java.util.List;
 public interface TypeTransportMapper {
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "company", ignore = true)
     TypeTransport toEntity(TypeTransportCreateRequest typeTransportCreateRequest);
 
+    @Mapping(target = "code", expression = "java(typeTransport.code())")
+    @Mapping(target = "shared", expression = "java(typeTransport.getCompany() == null)")
     TypeTransportResponse toResponse(TypeTransport typeTransport);
 
     List<TypeTransportResponse> toResponses(List<TypeTransport> typeTransports);

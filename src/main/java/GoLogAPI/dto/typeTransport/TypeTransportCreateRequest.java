@@ -14,10 +14,12 @@ public record TypeTransportCreateRequest(
 
         String description,
         String care,
-        UUID companyId
+        UUID companyId,
+        /** Exige veículo equipado para este tipo (ex.: baú refrigerado). Omitido = falso. */
+        Boolean requiresCompatibleVehicle
 ) implements TypeTransportRequest {
     public TypeTransportCreateRequest(String name, String description, String care) {
-        this(name, description, care, null);
+        this(name, description, care, null, null);
     }
 }
 

@@ -25,6 +25,10 @@ public class TypeTransportService {
     private final TypeTransportMapper typeTransportMapper;
     private final CompanyRepository companyRepository;
     private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+    private VisitTypeSync visitTypeSync;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    void setVisitTypeSync(VisitTypeSync visitTypeSync) { this.visitTypeSync = visitTypeSync; }
 
     public TypeTransportService(TypeTransportRepository typeTransportRepository,
                                 TypeTransportMapper typeTransportMapper,
@@ -42,8 +46,10 @@ public class TypeTransportService {
         // descrição e cuidados são opcionais na API, mas NOT NULL no banco
         if (typeTransport.getDescription() == null) typeTransport.setDescription("");
         if (typeTransport.getCare() == null) typeTransport.setCare("");
+        typeTransport.setRequiresCompatibleVehicle(Boolean.TRUE.equals(typeTransportCreateRequest.requiresCompatibleVehicle()));
         typeTransport.setCompany(tenantGuard.ownerForCatalog(typeTransportCreateRequest.companyId()));
         typeTransportRepository.save(typeTransport);
+        visitTypeSync.ensureFor(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
 
@@ -73,7 +79,10 @@ public class TypeTransportService {
         typeTransport.setName(typeTransportCreateRequest.name());
         typeTransport.setDescription(typeTransportCreateRequest.description() != null ? typeTransportCreateRequest.description() : "");
         typeTransport.setCare(typeTransportCreateRequest.care() != null ? typeTransportCreateRequest.care() : "");
+        if (typeTransportCreateRequest.requiresCompatibleVehicle() != null)
+            typeTransport.setRequiresCompatibleVehicle(typeTransportCreateRequest.requiresCompatibleVehicle());
         typeTransportRepository.save(typeTransport);
+        visitTypeSync.ensureFor(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
 
@@ -88,8 +97,11 @@ public class TypeTransportService {
             typeTransport.setDescription(typeTransportUpdateRequest.description());
         if(typeTransportUpdateRequest.care() != null)
             typeTransport.setCare(typeTransportUpdateRequest.care());
+        if(typeTransportUpdateRequest.requiresCompatibleVehicle() != null)
+            typeTransport.setRequiresCompatibleVehicle(typeTransportUpdateRequest.requiresCompatibleVehicle());
 
         typeTransportRepository.save(typeTransport);
+        visitTypeSync.ensureFor(typeTransport);
         return typeTransportMapper.toResponse(typeTransport);
     }
 
