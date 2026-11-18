@@ -135,6 +135,8 @@ public class GlobalExceptionHandler {
             message = "Já existe um registro com estes dados (valor duplicado).";
         } else if (raw != null && raw.contains("not-null")) {
             message = "Campo obrigatório não informado.";
+        } else if (raw != null && (raw.contains("value too long") || raw.contains("valor é muito longo"))) {
+            message = "Um dos campos enviados excede o tamanho máximo permitido.";
         } else {
             message = "Os dados enviados violam uma regra de integridade do banco de dados.";
         }

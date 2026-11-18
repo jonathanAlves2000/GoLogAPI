@@ -275,7 +275,7 @@ CREATE TABLE public.occurrence_table (
     created_by character varying(255),
     updated_at timestamp(6) with time zone,
     updated_by character varying(255),
-    attachment character varying(255),
+    attachment text,
     description character varying(255),
     type character varying(255) NOT NULL,
     sender_id uuid NOT NULL,
