@@ -14,4 +14,6 @@ public interface TelemetryRequest {
     String data2();
     String device();
     UUID equipamentId();
+    UUID transportId();
+    UUID shipmentId();
 }

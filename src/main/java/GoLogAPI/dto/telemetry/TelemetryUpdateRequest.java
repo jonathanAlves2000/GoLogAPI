@@ -12,5 +12,7 @@ public record TelemetryUpdateRequest(
         String data1,
         String data2,
         String device,
-        UUID equipamentId
+        UUID equipamentId,
+        UUID shipmentId,
+        UUID transportId
 ) implements TelemetryRequest{ }

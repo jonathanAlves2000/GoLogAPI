@@ -30,5 +30,9 @@ public record TelemetryCreateRequest(
         String device,
 
         @NotNull(message = "O ID do equipamento deve ser informado.")
-        UUID equipamentId
+        UUID equipamentId,
+
+        UUID shipmentId,
+
+        UUID transportId
 ) implements TelemetryRequest{ }

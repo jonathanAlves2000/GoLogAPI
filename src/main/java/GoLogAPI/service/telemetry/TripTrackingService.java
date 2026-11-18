@@ -38,23 +38,28 @@ public class TripTrackingService {
         this.routeStopRepository = routeStopRepository;
     }
 
-    /** Registra o ponto na viagem atual do veículo (mesma resolução do geofencing). */
-    public void track(Equipament equipament, double lat, double lon, LocalDateTime timestamp) {
-        if (equipament == null || equipament.getId() == null || timestamp == null) return;
+    /**
+     * Registra o ponto na viagem atual do veículo (mesma resolução do geofencing).
+     *
+     * @return o transporte em execução ao qual o ponto pertence, ou {@code null} se o veículo não está em viagem
+     */
+    public Transport track(Equipament equipament, double lat, double lon, LocalDateTime timestamp) {
+        if (equipament == null || equipament.getId() == null || timestamp == null) return null;
 
         List<Transport> transports = transportRepository.findByEquipament1IdOrderByCreatedAtDesc(equipament.getId());
         if (transports.isEmpty() && equipament.getPlate() != null) {
             transports = transportRepository.findByEquipament1PlateOrderByCreatedAtDesc(equipament.getPlate());
         }
-        if (transports.isEmpty()) return;
+        if (transports.isEmpty()) return null;
 
         Transport transport = transports.get(0);
         List<RouteStop> stops = routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(transport.getId());
-        if (!isRunning(stops)) return;
+        if (!isRunning(stops)) return null;
 
         if (apply(transport, stops, lat, lon, timestamp)) {
             transportRepository.save(transport);
         }
+        return transport;
     }
 
     static boolean isRunning(List<RouteStop> stops) {

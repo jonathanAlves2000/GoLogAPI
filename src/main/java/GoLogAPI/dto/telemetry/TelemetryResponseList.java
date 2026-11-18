@@ -12,6 +12,8 @@ public record TelemetryResponseList(
         String alert,
         String data1,
         String data2,
-        String device
+        String device,
+        UUID shipmentId,
+        UUID transportId
 ) {
 }

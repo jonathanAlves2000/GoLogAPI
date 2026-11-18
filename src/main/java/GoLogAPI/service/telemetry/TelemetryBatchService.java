@@ -4,7 +4,10 @@ import GoLogAPI.dto.telemetry.GeofenceEventResponse;
 import GoLogAPI.dto.telemetry.TelemetryBatchItemRequest;
 import GoLogAPI.dto.telemetry.TelemetryBatchResponse;
 import GoLogAPI.model.Equipament;
+import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Telemetry;
+import GoLogAPI.model.Transport;
+import GoLogAPI.repository.ShipmentRepository;
 import GoLogAPI.repository.TelemetryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +29,17 @@ public class TelemetryBatchService {
     private final GeofencingService geofencingService;
     private final TelemetryRepository telemetryRepository;
     private final TripTrackingService tripTrackingService;
+    private final TelemetryTripLinkResolver tripLinkResolver;
+    private final ShipmentRepository shipmentRepository;
 
     public TelemetryBatchService(VehiclePlateCacheService vehiclePlateCacheService,
                                  GeofencingService geofencingService,
                                  TelemetryRepository telemetryRepository,
-                                 TripTrackingService tripTrackingService) {
+                                 TripTrackingService tripTrackingService,
+                                 TelemetryTripLinkResolver tripLinkResolver,
+                                 ShipmentRepository shipmentRepository) {
+        this.tripLinkResolver = tripLinkResolver;
+        this.shipmentRepository = shipmentRepository;
         this.vehiclePlateCacheService = vehiclePlateCacheService;
         this.geofencingService = geofencingService;
         this.telemetryRepository = telemetryRepository;
@@ -86,7 +95,7 @@ public class TelemetryBatchService {
                 String alert = item.alert();
 
                 // 2. Rota realizada da viagem (antes do geofencing: o trecho que chega à parada ainda leva a carga dela)
-                tripTrackingService.track(equipament, lat, lon, timestamp);
+                Transport runningTransport = tripTrackingService.track(equipament, lat, lon, timestamp);
 
                 // 3. Normalização e Geofencing: detecção automática de chegada do caminhão na parada
                 Optional<GeofenceEventResponse> geofenceEvent = geofencingService.checkGeofenceArrival(
@@ -101,7 +110,22 @@ public class TelemetryBatchService {
                     alert = (alert != null && !alert.isBlank()) ? (alert + " | " + checkInTag) : checkInTag;
                 }
 
-                // 4. Montagem da entidade Telemetry
+                // 4. Vínculo com a viagem: IDs explícitos do item têm prioridade; senão o transporte em execução
+                //    do veículo e, se houve check-in, a remessa da parada atendida.
+                Shipment shipment = null;
+                Transport transport = runningTransport;
+                if (item.shipmentId() != null || item.transportId() != null) {
+                    TelemetryTripLinkResolver.TripLink link = tripLinkResolver.resolve(item.shipmentId(), item.transportId());
+                    shipment = link.shipment();
+                    transport = link.transport();
+                } else if (geofenceEvent.isPresent() && geofenceEvent.get().shipmentId() != null) {
+                    shipment = shipmentRepository.findById(geofenceEvent.get().shipmentId()).orElse(null);
+                    if (transport == null && geofenceEvent.get().transportId() != null) {
+                        transport = tripLinkResolver.resolve(null, geofenceEvent.get().transportId()).transport();
+                    }
+                }
+
+                // 5. Montagem da entidade Telemetry
                 Telemetry telemetry = new Telemetry();
                 telemetry.setEquipamentId(equipament);
                 telemetry.setLatitude(latStr);
@@ -112,6 +136,8 @@ public class TelemetryBatchService {
                 telemetry.setDevice(item.device());
                 telemetry.setData1(item.data1());
                 telemetry.setData2(item.data2());
+                telemetry.setShipmentId(shipment);
+                telemetry.setTransportId(transport);
 
                 telemetriesToSave.add(telemetry);
                 successCount++;
@@ -123,7 +149,7 @@ public class TelemetryBatchService {
             }
         }
 
-        // 5. Ingestão em lote de alta performance no banco (saveAll)
+        // 6. Ingestão em lote de alta performance no banco (saveAll)
         if (!telemetriesToSave.isEmpty()) {
             telemetryRepository.saveAll(telemetriesToSave);
         }

@@ -57,4 +57,15 @@ public class Telemetry extends Audit{
     @JoinColumn(name = "equipament_id", nullable = false)
     @NotFound(action = NotFoundAction.IGNORE)
     private Equipament equipamentId;
+
+    @ManyToOne
+    @JoinColumn(name = "shipment_id", nullable = true)
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Shipment shipmentId;
+
+    @ManyToOne
+    @JoinColumn(name = "transport_id", nullable = true)
+    @NotFound(action = NotFoundAction.IGNORE)
+    private Transport transportId;
+
 }

@@ -15,5 +15,7 @@ public record TelemetryReponse(
         String data1,
         String data2,
         String device,
-        Equipament equipament
+        Equipament equipament,
+        UUID shipmentId,
+        UUID transportId
 ) { }

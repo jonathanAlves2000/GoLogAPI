@@ -10,6 +10,8 @@ import GoLogAPI.model.Equipament;
 import GoLogAPI.model.Telemetry;
 import GoLogAPI.repository.EquipamentRepository;
 import GoLogAPI.repository.TelemetryRepository;
+import GoLogAPI.service.telemetry.TelemetryTripLinkResolver;
+import GoLogAPI.service.telemetry.TelemetryTripLinkResolver.TripLink;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +27,14 @@ public class TelemetryService {
     private final EquipamentRepository equipamentRepository;
 
     private final GoLogAPI.infra.tenant.TenantGuard tenantGuard;
+    private final TelemetryTripLinkResolver tripLinkResolver;
 
     public TelemetryService(TelemetryRepository telemetryRepository,
                             TelemetryMapper telemetryMapper, EquipamentRepository equipamentRepository,
-                            GoLogAPI.infra.tenant.TenantGuard tenantGuard){
+                            GoLogAPI.infra.tenant.TenantGuard tenantGuard,
+                            TelemetryTripLinkResolver tripLinkResolver){
         this.tenantGuard = tenantGuard;
+        this.tripLinkResolver = tripLinkResolver;
         this.telemetryRepository = telemetryRepository;
         this.telemetryMapper = telemetryMapper;
         this.equipamentRepository = equipamentRepository;
@@ -41,6 +46,7 @@ public class TelemetryService {
        Equipament equipament = equipamentRepository.findById(telemetryCreateRequest.equipamentId())
                        .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, telemetryCreateRequest.equipamentId()));
        telemetry.setEquipamentId(equipament);
+       applyTripLink(telemetry, tripLinkResolver.resolve(telemetryCreateRequest.shipmentId(), telemetryCreateRequest.transportId()));
        telemetryRepository.save(telemetry);
        return telemetryMapper.toResponse(telemetry);
     }
@@ -53,7 +59,22 @@ public class TelemetryService {
     }
 
     public List<TelemetryResponseList> getAll(){
-        List<Telemetry> telemetries = telemetryRepository.findAll().stream()
+        return getAll(null, null);
+    }
+
+    /** Lista as leituras, opcionalmente filtradas pela viagem (transporte) e/ou remessa, em ordem cronológica. */
+    public List<TelemetryResponseList> getAll(UUID transportId, UUID shipmentId){
+        List<Telemetry> source;
+        if (transportId != null && shipmentId != null) {
+            source = telemetryRepository.findByTransportIdIdAndShipmentIdIdOrderByDateTimeAsc(transportId, shipmentId);
+        } else if (transportId != null) {
+            source = telemetryRepository.findByTransportIdIdOrderByDateTimeAsc(transportId);
+        } else if (shipmentId != null) {
+            source = telemetryRepository.findByShipmentIdIdOrderByDateTimeAsc(shipmentId);
+        } else {
+            source = telemetryRepository.findAll();
+        }
+        List<Telemetry> telemetries = source.stream()
                 .filter(t -> t.getEquipamentId() != null && tenantGuard.canSee(t.getEquipamentId().getCompany()))
                 .toList();
         return telemetryMapper.toResponseList(telemetries);
@@ -78,6 +99,7 @@ public class TelemetryService {
 
         telemetry.setId(id);
         telemetry.setEquipamentId(equipament);
+        applyTripLink(telemetry, tripLinkResolver.resolve(telemetryCreateRequest.shipmentId(), telemetryCreateRequest.transportId()));
         telemetryRepository.save(telemetry);
         return telemetryMapper.toResponse(telemetry);
     }
@@ -91,6 +113,7 @@ public class TelemetryService {
         if(telemetryUpdateRequest.data1() != null) telemetry.setData1(telemetryUpdateRequest.data1());
         if(telemetryUpdateRequest.data2() != null) telemetry.setData2(telemetryUpdateRequest.data2());
         if(telemetryUpdateRequest.device() != null) telemetry.setDevice(telemetryUpdateRequest.device());
+        if(telemetryUpdateRequest.speed() != null) telemetry.setSpeed(telemetryUpdateRequest.speed());
         if(telemetryUpdateRequest.dateTime() != null) telemetry.setDateTime(telemetryUpdateRequest.dateTime());
         if(telemetryUpdateRequest.latitude() != null && !telemetryUpdateRequest.latitude().isBlank())
             telemetry.setLatitude(telemetryUpdateRequest.latitude());
@@ -101,8 +124,21 @@ public class TelemetryService {
                     .orElseThrow(() -> new ResourceNotFoundException(MessageException.NOT_FOUND_MESSAGE, telemetryUpdateRequest.equipamentId()));
             telemetry.setEquipamentId(equipament);
         }
+        if(telemetryUpdateRequest.shipmentId() != null || telemetryUpdateRequest.transportId() != null){
+            // Campo omitido no PATCH mantém o vínculo atual, que também entra na validação de consistência
+            UUID shipmentId = telemetryUpdateRequest.shipmentId() != null ? telemetryUpdateRequest.shipmentId()
+                    : (telemetry.getShipmentId() != null ? telemetry.getShipmentId().getId() : null);
+            UUID transportId = telemetryUpdateRequest.transportId() != null ? telemetryUpdateRequest.transportId()
+                    : (telemetryUpdateRequest.shipmentId() != null ? null
+                    : (telemetry.getTransportId() != null ? telemetry.getTransportId().getId() : null));
+            applyTripLink(telemetry, tripLinkResolver.resolve(shipmentId, transportId));
+        }
         telemetryRepository.save(telemetry);
         return telemetryMapper.toResponse(telemetry);
     }
 
+    private static void applyTripLink(Telemetry telemetry, TripLink link){
+        telemetry.setShipmentId(link.shipment());
+        telemetry.setTransportId(link.transport());
+    }
 }

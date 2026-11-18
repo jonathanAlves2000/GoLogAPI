@@ -13,5 +13,8 @@ public record TelemetryBatchItemRequest(
         String alert,
         String device,
         String data1,
-        String data2
+        String data2,
+        // Opcionais: quando ausentes, a viagem em execução do veículo é resolvida automaticamente
+        UUID shipmentId,
+        UUID transportId
 ) { }

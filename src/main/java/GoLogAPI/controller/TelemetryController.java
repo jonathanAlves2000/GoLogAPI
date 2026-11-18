@@ -60,10 +60,12 @@ public class TelemetryController {
         return ResponseEntity.ok(telemetryReponse);
     }
 
-    @Operation(summary = "Listar Telemetrias", description = "Retorna uma lista de todas as leituras de telemetria cadastradas")
+    @Operation(summary = "Listar Telemetrias",
+               description = "Retorna as leituras de telemetria cadastradas. Filtros opcionais por transporte (viagem) e/ou remessa, em ordem cronológica.")
     @GetMapping
-    public ResponseEntity<List<TelemetryResponseList>> getAll(){
-        List<TelemetryResponseList> telemetries = telemetryService.getAll();
+    public ResponseEntity<List<TelemetryResponseList>> getAll(@RequestParam(value = "transportId", required = false) UUID transportId,
+                                                              @RequestParam(value = "shipmentId", required = false) UUID shipmentId){
+        List<TelemetryResponseList> telemetries = telemetryService.getAll(transportId, shipmentId);
         return ResponseEntity.ok().body(telemetries);
     }
 
