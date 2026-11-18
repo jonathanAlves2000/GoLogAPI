@@ -33,6 +33,7 @@ public interface OccurrenceMapper {
     @Mapping(target = "shipmentId", source = "shipment.id")
     @Mapping(target = "transportId", source = "transport.id")
     @Mapping(target = "senderId", source = "sender.id")
+    @Mapping(target = "senderName", source = "sender.name")
     @Mapping(target = "createdAt", source = "createdAt")
     OccurrenceResponseList toResponseListItem(Occurrence occurrence);
 

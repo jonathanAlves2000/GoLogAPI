@@ -13,5 +13,6 @@ public record OccurrenceResponseList(
         String attachment,
         UUID shipmentId,
         UUID transportId,
-        UUID senderId
+        UUID senderId,
+        String senderName
 ) { }
