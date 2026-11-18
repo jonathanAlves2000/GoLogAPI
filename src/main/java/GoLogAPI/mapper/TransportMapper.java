@@ -22,6 +22,7 @@ public interface TransportMapper {
     @Mapping(target = "driverId", source = "driver.id")
     @Mapping(target = "transporterId", source = "transporter.id")
     @Mapping(target = "equipamentGroupId", source = "equipamentGroup.id")
+    @Mapping(target = "deliveryQuantity", source = "shipmentQuantity")
     TransportCreateResponse toCreateResponse(Transport transport);
 
     @Mapping(target = "transporter", source = "transporter")

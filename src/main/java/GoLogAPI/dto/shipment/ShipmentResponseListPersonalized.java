@@ -4,6 +4,7 @@ import GoLogAPI.model.*;
 import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.model.enums.TypeOperation;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -45,4 +46,9 @@ public record ShipmentResponseListPersonalized(
 
         @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "createdAt", "createdBy", "updatedAt", "updatedBy", "active", "transport", "shipment"})
         RouteStop routeStop
-) { }
+) {
+    @JsonProperty("schedulind")
+    public LocalDateTime schedulind() {
+        return shedulind;
+    }
+}

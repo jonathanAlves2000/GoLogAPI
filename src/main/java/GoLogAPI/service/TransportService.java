@@ -7,17 +7,20 @@ import GoLogAPI.dto.transport.TransportUpdateRequest;
 import GoLogAPI.exception.ResourceNotFoundException;
 import GoLogAPI.infra.tenant.TenantContext;
 import GoLogAPI.mapper.TransportMapper;
-import GoLogAPI.model.Company;
-import GoLogAPI.model.Driver;
-import GoLogAPI.model.EquipamentGroup;
-import GoLogAPI.model.Transport;
+import GoLogAPI.model.*;
+import GoLogAPI.model.enums.RouteStopStatus;
+import GoLogAPI.model.enums.ShipmentStatus;
 import GoLogAPI.repository.CompanyRepository;
 import GoLogAPI.repository.DriverRepository;
 import GoLogAPI.repository.EquipamentGroupRepository;
 import GoLogAPI.repository.TransportRepository;
+import GoLogAPI.service.telemetry.GeofencingService;
+import com.google.maps.internal.PolylineEncoding;
+import com.google.maps.model.LatLng;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -71,11 +74,83 @@ public class TransportService {
         if (transport.getCalculedDistance() == null) transport.setCalculedDistance(0);
         if (transport.getTimeStoppedCalculed() == null) transport.setTimeStoppedCalculed(0);
         if (transport.getTravelDuration() == null) transport.setTravelDuration(0);
+        if (transport.getTotalCostCalculed() == null) transport.setTotalCostCalculed(0.0);
+        if (transport.getTotalTimeCalculed() == null) transport.setTotalTimeCalculed(0);
+        if (transport.getCostKmCalculed() == null) transport.setCostKmCalculed(0.0);
+        if (transport.getCostHourCalculed() == null) transport.setCostHourCalculed(0.0);
 
         transport.setDriver(driver);
         transport.setTransporter(company);
         transport.setEquipamentGroup(equipamentGroup);
         transportRepository.save(transport);
+
+        if (transportCreateRequest.shipmentIds() != null && !transportCreateRequest.shipmentIds().isEmpty()) {
+            List<LatLng> routePoints = new ArrayList<>();
+            Address originAddr = (equipamentGroup.getCompany() != null && equipamentGroup.getCompany().getAddress() != null)
+                    ? equipamentGroup.getCompany().getAddress()
+                    : company.getAddress();
+            if (originAddr != null && originAddr.getLatitude() != null && originAddr.getLongitude() != null) {
+                try {
+                    routePoints.add(new LatLng(
+                            Double.parseDouble(originAddr.getLatitude()),
+                            Double.parseDouble(originAddr.getLongitude())
+                    ));
+                } catch (Exception ignored) {}
+            }
+
+            int sequence = 1;
+            int totalDistance = 0;
+            LatLng lastPoint = routePoints.isEmpty() ? null : routePoints.get(0);
+
+            for (UUID shipmentId : transportCreateRequest.shipmentIds()) {
+                Shipment shipment = shipmentRepository.findById(shipmentId).orElse(null);
+                if (shipment == null) continue;
+                tenantGuard.checkAccess(shipment.getCompany(), shipmentId);
+
+                RouteStop stop = new RouteStop();
+                stop.setTransport(transport);
+                stop.setShipment(shipment);
+                stop.setSequenceOrder(sequence++);
+                stop.setStatus(RouteStopStatus.PENDENTE);
+                stop.setWeight(shipment.getWeight());
+                stop.setVolume(shipment.getVolume());
+
+                Address addr = shipment.getAddress() != null ? shipment.getAddress()
+                        : (shipment.getCustomer() != null ? shipment.getCustomer().getAddress() : null);
+                if (addr != null && addr.getLatitude() != null && addr.getLongitude() != null) {
+                    try {
+                        LatLng stopPt = new LatLng(
+                                Double.parseDouble(addr.getLatitude()),
+                                Double.parseDouble(addr.getLongitude())
+                        );
+                        routePoints.add(stopPt);
+                        if (lastPoint != null) {
+                            totalDistance += (int) Math.round(GeofencingService.calculateHaversineDistanceMeters(
+                                    lastPoint.lat, lastPoint.lng, stopPt.lat, stopPt.lng
+                            ));
+                        }
+                        lastPoint = stopPt;
+                    } catch (Exception ignored) {}
+                }
+
+                routeStopRepository.save(stop);
+                shipment.setStatus(ShipmentStatus.AGUARDANDO_INICIO);
+                shipmentRepository.save(shipment);
+                if (shipmentEventPublisher != null) {
+                    shipmentEventPublisher.publish("SHIPMENT_PLANNED", shipment);
+                }
+            }
+
+            transport.setShipmentQuantity(sequence - 1);
+            if (!routePoints.isEmpty() && (transport.getRoutePlanned() == null || transport.getRoutePlanned().isBlank())) {
+                transport.setRoutePlanned(PolylineEncoding.encode(routePoints));
+            }
+            if (transport.getCalculedDistance() == null || transport.getCalculedDistance() == 0) {
+                transport.setCalculedDistance(totalDistance);
+            }
+            transportRepository.save(transport);
+        }
+
         return transportMapper.toCreateResponse(transport);
     }
 
