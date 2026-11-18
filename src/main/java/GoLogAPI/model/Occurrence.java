@@ -37,7 +37,7 @@ public class Occurrence extends Audit {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "attachment", nullable = true)
+    @Column(name = "attachment", nullable = true, columnDefinition = "TEXT")
     private String attachment;
 
     @ManyToOne

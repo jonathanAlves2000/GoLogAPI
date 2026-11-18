@@ -115,6 +115,7 @@ public class OccurrenceService {
         occurrence.setType(occurrenceCreateRequest.type());
         occurrence.setDateTime(occurrenceCreateRequest.dateTime());
         occurrence.setDescription(occurrenceCreateRequest.description());
+        occurrence.setAttachment(occurrenceCreateRequest.attachment());
         occurrence.setShipment(findShipment(occurrenceCreateRequest.shipmentId()));
         occurrence.setTransport(findTransport(occurrenceCreateRequest.transportId()));
         occurrence.setSender(findSender(occurrenceCreateRequest.senderId()));

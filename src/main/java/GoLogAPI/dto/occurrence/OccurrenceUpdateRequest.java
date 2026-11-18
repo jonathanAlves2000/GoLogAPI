@@ -13,7 +13,7 @@ public record OccurrenceUpdateRequest(
         @Size(min = 5, max = 500, message = "Descrição deve ter entre 5 e 500 caracteres.")
         String description,
 
-        @Size(min = 5, max = 1000)
+        @Size(min = 5)
         String attachment,
 
         UUID shipmentId,

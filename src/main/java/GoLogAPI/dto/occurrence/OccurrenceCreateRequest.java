@@ -17,6 +17,9 @@ public record OccurrenceCreateRequest(
     @Size(max = 500, message = "Descrição deve ter entre 5 e 500 caracteres.")
     String description,
 
+    // Anexo livre: hoje o app envia o SVG cru da assinatura do recebedor ou "Sem anexo"
+    String attachment,
+
     @NotNull(message = "O Id da entrega deve ser informado.")
     UUID shipmentId,
 
