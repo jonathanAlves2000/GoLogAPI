@@ -143,7 +143,9 @@ public class ProcessTransportService {
         Double costHourCalculated = (operationalDuration / 3600.0) * driverCostPerHour;
         Double custoTotalCalculated = costKmCalculated + costHourCalculated + settings.fixedCostPerVehicle();
 
-        transport.setShipmentQuantity(vehicleRoute.getVisitsCount());
+        // Remessas distintas: uma coleta com N entregas filhas volta do otimizador como N visitas de coleta
+        transport.setShipmentQuantity((int) vehicleRoute.getVisitsList().stream()
+                .map(ProcessRouteStopService::resolveTargetId).distinct().count());
         transport.setCalculedDistance(totalDistance);
         transport.setTravelDuration(travelDuration);
         transport.setTotalTimeCalculed(operationalDuration);

@@ -95,31 +95,11 @@ public class ProcessRouteStopService {
 
             releaseFromPreviousTransports(new HashSet<>(targetIds), transport);
 
-            List<RouteStop> newStops = new ArrayList<>();
+            List<RouteStop> newStops = buildStops(visits, transitions, targetIds, shipmentMap, transport);
             Map<UUID, Shipment> updatedShipments = new LinkedHashMap<>();
-            for (int i = 0; i < visits.size(); i++) {
-                // A transição i é o trajeto que chega na visita i
-                ShipmentRoute.Transition transition = i < transitions.size() ? transitions.get(i) : null;
-
-                UUID targetId = targetIds.get(i);
-                Shipment shipment = shipmentMap.get(targetId);
-                if (shipment == null) {
-                    throw new ResourceNotFoundException("Remessa devolvida pelo otimizador não encontrada: ", targetId);
-                }
-
-                RouteStop stop = new RouteStop();
-                stop.setSequenceOrder(i + 1);
-                stop.setRoutePlanned(encodePolyline(transition));
-                stop.setCalculatedCost(0.0);
-                stop.setCalculatedDistance(transition != null ? (int) transition.getTravelDistanceMeters() : 0);
-                stop.setCalculatedDuration(transition != null ? (int) transition.getTotalDuration().getSeconds() : 0);
-                stop.setCalculatedWait(transition != null ? (int) transition.getWaitDuration().getSeconds() : 0);
-                stop.setTransport(transport);
-                stop.setShipment(shipment);
-
-                shipment.setStatus(ShipmentStatus.AGUARDANDO_INICIO);
-                updatedShipments.put(shipment.getId(), shipment);
-                newStops.add(stop);
+            for (RouteStop stop : newStops) {
+                stop.getShipment().setStatus(ShipmentStatus.AGUARDANDO_INICIO);
+                updatedShipments.put(stop.getShipment().getId(), stop.getShipment());
             }
 
             updateWeightAndVolume(newStops);
@@ -135,6 +115,51 @@ public class ProcessRouteStopService {
             }
         }
         return created;
+    }
+
+    /**
+     * Uma parada por visita do otimizador, juntando visitas seguidas da mesma remessa. Uma coleta com N entregas
+     * filhas vai ao Google como N pares coleta→entrega, cada um com a sua coleta no mesmo endereço; o Google devolve N
+     * visitas de coleta seguidas, que são uma única parada para o motorista (sem isso a coleta aparecia N vezes e o
+     * peso das filhas era contado N vezes na carga a bordo). Os trechos das visitas juntadas (≈0 km, mesmo local)
+     * somam na parada que fica.
+     */
+    static List<RouteStop> buildStops(List<ShipmentRoute.Visit> visits, List<ShipmentRoute.Transition> transitions,
+                                      List<UUID> targetIds, Map<UUID, Shipment> shipmentMap, Transport transport) {
+        List<RouteStop> stops = new ArrayList<>();
+        for (int i = 0; i < visits.size(); i++) {
+            // A transição i é o trajeto que chega na visita i
+            ShipmentRoute.Transition transition = i < transitions.size() ? transitions.get(i) : null;
+            int distance = transition != null ? (int) transition.getTravelDistanceMeters() : 0;
+            int duration = transition != null ? (int) transition.getTotalDuration().getSeconds() : 0;
+            int wait = transition != null ? (int) transition.getWaitDuration().getSeconds() : 0;
+
+            UUID targetId = targetIds.get(i);
+            Shipment shipment = shipmentMap.get(targetId);
+            if (shipment == null) {
+                throw new ResourceNotFoundException("Remessa devolvida pelo otimizador não encontrada: ", targetId);
+            }
+
+            RouteStop previous = stops.isEmpty() ? null : stops.get(stops.size() - 1);
+            if (previous != null && previous.getShipment().getId().equals(targetId)) {
+                previous.setCalculatedDistance(previous.getCalculatedDistance() + distance);
+                previous.setCalculatedDuration(previous.getCalculatedDuration() + duration);
+                previous.setCalculatedWait(previous.getCalculatedWait() + wait);
+                continue;
+            }
+
+            RouteStop stop = new RouteStop();
+            stop.setSequenceOrder(stops.size() + 1);
+            stop.setRoutePlanned(encodePolyline(transition));
+            stop.setCalculatedCost(0.0);
+            stop.setCalculatedDistance(distance);
+            stop.setCalculatedDuration(duration);
+            stop.setCalculatedWait(wait);
+            stop.setTransport(transport);
+            stop.setShipment(shipment);
+            stops.add(stop);
+        }
+        return stops;
     }
 
     /**
