@@ -56,4 +56,15 @@ class TripIndicatorsServiceTest {
         eletrico.setTypeFuel(TypeFuel.ELETRICO);
         assertEquals(0.0, TripIndicatorsService.fuelLiters(eletrico, 100));
     }
+
+    @Test
+    void chegadaAntecipadaContaNoPrazoESaidaNaoEhChegada() {
+        LocalDateTime agendado = LocalDateTime.of(2026, 11, 22, 9, 0);
+        RouteStop antecipada = stop(agendado, agendado.minusHours(2));          // bem antes da janela
+        RouteStop soSaida = stop(agendado, null);
+        soSaida.setDepartedAt(agendado.minusMinutes(5));                      // sem chegada por geofence
+        ScheduleAdherence a = TripIndicatorsService.schedule(List.of(antecipada, soSaida), agendado.plusHours(1));
+        assertEquals(1, a.metOnTime());
+        assertEquals(1, a.late());   // sem chegada e agendado vencido
+    }
 }

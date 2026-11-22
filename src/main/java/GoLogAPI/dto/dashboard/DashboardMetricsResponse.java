@@ -38,7 +38,7 @@ public record DashboardMetricsResponse(
             long tripsFinished
     ) { }
 
-    /** Pontualidade das entregas concluídas com horário de conclusão registrado. */
+    /** Agenda atendida: entregas com chegada por geofence até o horário agendado (antecipada conta como no prazo). */
     public record Sla(
             long deliveredWithTimestamp,
             long deliveredOnTime,

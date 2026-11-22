@@ -113,14 +113,14 @@ public class TripIndicatorsService {
         return kmPerLiter == null || kmPerLiter <= 0 ? null : km / kmPerLiter;
     }
 
-    /** Agenda atendida = chegada (geofence ou registro manual) até o horário agendado da remessa. */
+    /** Agenda atendida = chegada por geofence até o horário agendado da remessa (antecipada conta como no prazo). */
     static ScheduleAdherence schedule(List<RouteStop> stops, LocalDateTime now) {
         int scheduled = 0, onTime = 0, late = 0, pending = 0;
         for (RouteStop rs : stops) {
             Shipment s = rs.getShipment();
             if (s == null || s.getSchedulind() == null) continue;
             scheduled++;
-            LocalDateTime arrived = rs.getArrivedAt() != null ? rs.getArrivedAt() : rs.getDepartedAt();
+            LocalDateTime arrived = rs.getArrivedAt(); // chegada por geofence; antecipada conta como no prazo
             if (arrived != null) {
                 if (arrived.isAfter(s.getSchedulind())) late++; else onTime++;
             } else if (now.isAfter(s.getSchedulind())) {

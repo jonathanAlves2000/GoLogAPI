@@ -38,20 +38,18 @@ public class DashboardService {
     private final ShipmentRepository shipmentRepository;
     private final RouteStopRepository routeStopRepository;
     private final EquipamentRepository equipamentRepository;
-    private final OccurrenceRepository occurrenceRepository;
     private final TrailerRepository trailerRepository;
     private final TenantGuard tenantGuard;
 
     public DashboardService(DriverRepository driverRepository, TransportRepository transportRepository,
                             ShipmentRepository shipmentRepository, RouteStopRepository routeStopRepository,
-                            EquipamentRepository equipamentRepository, OccurrenceRepository occurrenceRepository,
+                            EquipamentRepository equipamentRepository,
                             TrailerRepository trailerRepository, TenantGuard tenantGuard) {
         this.driverRepository = driverRepository;
         this.transportRepository = transportRepository;
         this.shipmentRepository = shipmentRepository;
         this.routeStopRepository = routeStopRepository;
         this.equipamentRepository = equipamentRepository;
-        this.occurrenceRepository = occurrenceRepository;
         this.trailerRepository = trailerRepository;
         this.tenantGuard = tenantGuard;
     }
@@ -73,7 +71,7 @@ public class DashboardService {
                 .collect(Collectors.groupingBy(rs -> rs.getTransport().getId()));
         stopsByTransport.values().forEach(l -> l.sort(Comparator.comparing(RouteStop::getSequenceOrder)));
 
-        Map<UUID, LocalDateTime> completionByShipment = completionTimes(shipments, stopsByTransport);
+        Map<UUID, LocalDateTime> arrivalByShipment = arrivalTimes(stopsByTransport);
 
         // ------------------------------------------------------------- Operação
         List<Shipment> deliveries = shipments.stream().filter(s -> s.getTypeOperation() == TypeOperation.ENTREGA).toList();
@@ -107,13 +105,18 @@ public class DashboardService {
                 tripsPlanned, tripsInProgress, tripsFinished);
 
         // ------------------------------------------------------------- SLA
+        // Agenda atendida = chegada por geofence até o horário agendado (chegada antecipada conta como no prazo).
+        // A ocorrência "Fim" do motorista não é chegada e não entra na conta.
         long withTs = 0, onTime = 0, withoutTs = 0;
         for (Shipment s : deliveries) {
-            if (s.getStatus() != ShipmentStatus.FINALIZADO) continue;
-            LocalDateTime done = completionByShipment.get(s.getId());
-            if (done == null || s.getSchedulind() == null) { withoutTs++; continue; }
+            if (s.getSchedulind() == null) continue;
+            LocalDateTime arrived = arrivalByShipment.get(s.getId());
+            if (arrived == null) {
+                if (s.getStatus() == ShipmentStatus.FINALIZADO) withoutTs++; // finalizada sem chegada por geofence
+                continue;
+            }
             withTs++;
-            if (!done.isAfter(s.getSchedulind())) onTime++;
+            if (!arrived.isAfter(s.getSchedulind())) onTime++;
         }
         Sla sla = new Sla(withTs, onTime, withTs == 0 ? null : round(100.0 * onTime / withTs, 1), withoutTs);
 
@@ -215,18 +218,13 @@ public class DashboardService {
 
     // ================================================================= cálculos
 
-    /** Conclusão = saída da parada (geofence) ou, na falta dela, a ocorrência "Fim" registrada pelo motorista. */
-    private Map<UUID, LocalDateTime> completionTimes(List<Shipment> shipments, Map<UUID, List<RouteStop>> stopsByTransport) {
-        Set<UUID> ids = shipments.stream().map(Shipment::getId).collect(Collectors.toSet());
+    /** Chegada na parada registrada pelo geofence (raio de 200 m), por remessa. */
+    private static Map<UUID, LocalDateTime> arrivalTimes(Map<UUID, List<RouteStop>> stopsByTransport) {
         Map<UUID, LocalDateTime> result = new HashMap<>();
         stopsByTransport.values().stream().flatMap(List::stream)
-                .filter(rs -> rs.getShipment() != null && rs.getDepartedAt() != null)
-                .forEach(rs -> result.put(rs.getShipment().getId(), rs.getDepartedAt()));
-        for (Occurrence o : occurrenceRepository.findAll()) {
-            if (o.getShipment() == null || !ids.contains(o.getShipment().getId()) || o.getType() == null) continue;
-            if (!o.getType().trim().equalsIgnoreCase("Fim") || o.getDateTime() == null) continue;
-            result.merge(o.getShipment().getId(), o.getDateTime(), (a, b) -> a);
-        }
+                .filter(rs -> rs.getShipment() != null && rs.getArrivedAt() != null)
+                .forEach(rs -> result.merge(rs.getShipment().getId(), rs.getArrivedAt(),
+                        (a, b) -> a.isBefore(b) ? a : b));
         return result;
     }
 
@@ -346,8 +344,9 @@ public class DashboardService {
 
     private static Map<String, String> methodology() {
         Map<String, String> m = new LinkedHashMap<>();
-        m.put("sla", "Entregas concluídas até o horário agendado ÷ entregas concluídas com horário de conclusão registrado "
-                + "(saída da parada por geofence ou ocorrência \"Fim\" do motorista). Entregas sem registro de horário ficam fora da conta.");
+        m.put("sla", "Entregas com chegada na parada até o horário agendado ÷ entregas com chegada registrada. Chegada = primeiro "
+                + "ponto de telemetria a até 200 m do endereço (geofence); chegada antecipada conta como no prazo. A ocorrência "
+                + "\"Fim\" do motorista não é considerada chegada; entregas finalizadas sem chegada por geofence ficam fora da conta.");
         m.put("overdue", "Remessas com horário agendado no passado que ainda não foram finalizadas.");
         m.put("plannedKm", "Soma das distâncias rodoviárias devolvidas pelo Google Route Optimization para as viagens planejadas.");
         m.put("loadFactor", "Peso das entregas da viagem ÷ capacidade de peso do conjunto (carretas ou, sem carreta, o próprio veículo). "
