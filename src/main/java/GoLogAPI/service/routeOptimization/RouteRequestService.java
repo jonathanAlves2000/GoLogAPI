@@ -333,6 +333,9 @@ public class RouteRequestService {
                 .toList();
 
         java.util.Set<UUID> handledDeliveryIds = new java.util.HashSet<>();
+        // Coletas cujo tempo de parada já foi cobrado: uma coleta com N entregas filhas vira N visitas de coleta no
+        // mesmo endereço, mas o motorista para uma vez só (a duração entra só na primeira visita)
+        java.util.Set<UUID> collectsWithServiceTime = new java.util.HashSet<>();
 
         for (Shipment collect : collects) {
             // Entregas filhas ainda planejáveis (as já iniciadas/finalizadas não voltam para o otimizador)
@@ -407,7 +410,7 @@ public class RouteRequestService {
 
                     com.google.maps.routeoptimization.v1.Shipment.VisitRequest.Builder pickupReqBuilder = com.google.maps.routeoptimization.v1.Shipment.VisitRequest.newBuilder()
                             .setArrivalLocation(pickupLocation)
-                            .setDuration(stopDuration)
+                            .setDuration(pickupDuration(collectsWithServiceTime, collect.getId(), stopDuration))
                             .addTimeWindows(pickupWindow)
                             .putAllLoadDemands(protoDemands);
                     if (!collectVisitTypes.isEmpty()) {
@@ -536,7 +539,7 @@ public class RouteRequestService {
 
                 com.google.maps.routeoptimization.v1.Shipment.VisitRequest.Builder origPickupBuilder = com.google.maps.routeoptimization.v1.Shipment.VisitRequest.newBuilder()
                         .setArrivalLocation(ocLocation)
-                        .setDuration(stopDuration)
+                        .setDuration(pickupDuration(collectsWithServiceTime, origCollect.getId(), stopDuration))
                         .addTimeWindows(ocWindow)
                         .putAllLoadDemands(protoDemands);
 
@@ -619,6 +622,15 @@ public class RouteRequestService {
             return new Outcome(null, preSkipped);
         }
         return new Outcome(routeOptimizationClient.optimizeTours(request), preSkipped);
+    }
+
+    /**
+     * Duração da visita de coleta: a duração da parada só na primeira visita de cada coleta; nas seguintes (outras
+     * entregas filhas da mesma coleta, mesmo endereço) zero, para o tempo de operação e o custo de horas contarem a
+     * parada uma vez só.
+     */
+    static Duration pickupDuration(java.util.Set<UUID> charged, UUID collectId, Duration full) {
+        return collectId == null || charged.add(collectId) ? full : Duration.getDefaultInstance();
     }
 
     /**
