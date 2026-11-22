@@ -144,6 +144,7 @@ public class ProcessTransportService {
         Double custoTotalCalculated = costKmCalculated + costHourCalculated + settings.fixedCostPerVehicle();
 
         // Remessas distintas: uma coleta com N entregas filhas volta do otimizador como N visitas de coleta
+        transport.setCollectStopTimeFixed(true); // tempo de parada da coleta já contado uma vez (RouteRequestService)
         transport.setShipmentQuantity((int) vehicleRoute.getVisitsList().stream()
                 .map(ProcessRouteStopService::resolveTargetId).distinct().count());
         transport.setCalculedDistance(totalDistance);

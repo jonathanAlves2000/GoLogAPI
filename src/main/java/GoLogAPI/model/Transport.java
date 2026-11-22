@@ -96,6 +96,13 @@ public class Transport extends Audit {
     @Column(name = "tracking_started_at")
     private java.time.LocalDateTime trackingStartedAt;
 
+    /**
+     * Tempo/custo calculados já sem a parada da coleta repetida (uma coleta com N entregas filhas contava N paradas).
+     * Viagens novas nascem corrigidas; as antigas são corrigidas uma vez por {@code CollectStopTimeBackfill}.
+     */
+    @Column(name = "collect_stop_time_fixed")
+    private Boolean collectStopTimeFixed;
+
     /** Último ponto aceito: base do próximo trecho e do delta da polilinha realizada. */
     @Column(name = "last_telemetry_at")
     private java.time.LocalDateTime lastTelemetryAt;
