@@ -18,4 +18,6 @@ public final class OptimizationDefaults {
     public static final int DEFAULT_GLOBAL_HORIZON_EXTRA_DAYS = 2;
     /** Raio do geofence de chegada na parada, quando nem o endereço nem o perfil da transportadora definem outro. */
     public static final int DEFAULT_GEOFENCE_RADIUS_METERS = 100;
+    /** Menor raio aceito: abaixo disso o erro do GPS e da geolocalização do endereço impede registrar a chegada. */
+    public static final int MIN_GEOFENCE_RADIUS_METERS = 100;
 }

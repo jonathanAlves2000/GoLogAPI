@@ -94,4 +94,11 @@ public class Company extends Audit{
 
     @Column(name = "webhook_active")
     private Boolean webhookActive = true;
+
+    /**
+     * Raio (m) do geofence de chegada nas paradas deste cliente/parceiro. Vazio usa o padrão do perfil de
+     * otimização da transportadora (100 m se nenhum definir).
+     */
+    @Column(name = "geofence_radius_meters")
+    private Integer geofenceRadiusMeters;
 }

@@ -18,5 +18,6 @@ public record CompanyResponse(
         UUID parentCompanyId,
         String webhookUrl,
         String webhookSecret,
-        Boolean webhookActive
+        Boolean webhookActive,
+        Integer geofenceRadiusMeters
 ) { }

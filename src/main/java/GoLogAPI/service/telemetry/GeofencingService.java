@@ -28,7 +28,7 @@ public class GeofencingService {
 
     private static final Logger log = LoggerFactory.getLogger(GeofencingService.class);
 
-    // Raio padrão de chegada na parada (100 m) quando nem o endereço nem o perfil da transportadora definem outro.
+    // Raio padrão de chegada na parada (100 m) quando nem o cliente nem o perfil da transportadora definem outro.
     // Basta um ponto de telemetria dentro do raio, sem critério de velocidade.
     public static final double DEFAULT_GEOFENCE_RADIUS_METERS = 100.0;
 
@@ -51,14 +51,15 @@ public class GeofencingService {
     }
 
     /**
-     * Raio da parada: o do endereço, se definido; senão o do perfil de otimização padrão da transportadora;
-     * senão {@value #DEFAULT_GEOFENCE_RADIUS_METERS} m.
+     * Raio da parada: o do cliente da remessa, se definido; senão o do perfil de otimização padrão da
+     * transportadora; senão {@value #DEFAULT_GEOFENCE_RADIUS_METERS} m. Nunca abaixo de 100 m (mínimo do cadastro).
      */
-    static double radiusMeters(Address addr, Integer transporterDefault) {
-        if (addr != null && addr.getGeofenceRadiusMeters() != null && addr.getGeofenceRadiusMeters() > 0) {
-            return addr.getGeofenceRadiusMeters();
+    static double radiusMeters(Company customer, Integer transporterDefault) {
+        double min = GoLogAPI.service.routeOptimization.OptimizationDefaults.MIN_GEOFENCE_RADIUS_METERS;
+        if (customer != null && customer.getGeofenceRadiusMeters() != null && customer.getGeofenceRadiusMeters() > 0) {
+            return Math.max(min, customer.getGeofenceRadiusMeters());
         }
-        if (transporterDefault != null && transporterDefault > 0) return transporterDefault;
+        if (transporterDefault != null && transporterDefault > 0) return Math.max(min, transporterDefault);
         return DEFAULT_GEOFENCE_RADIUS_METERS;
     }
 
@@ -136,7 +137,7 @@ public class GeofencingService {
 
             double distance = calculateHaversineDistanceMeters(vehicleLat, vehicleLon, targetLat, targetLon);
 
-            if (distance <= radiusMeters(addr, transporterRadius)) {
+            if (distance <= radiusMeters(shipment.getCustomer(), transporterRadius)) {
                 LocalDateTime arrivalTime = timestamp != null ? timestamp : LocalDateTime.now();
 
                 stop.setArrivedAt(arrivalTime);

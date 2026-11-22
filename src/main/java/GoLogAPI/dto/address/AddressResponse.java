@@ -12,6 +12,5 @@ public record AddressResponse(
         String cep,
         String complement,
         String latitude,
-        String longitude,
-        Integer geofenceRadiusMeters
+        String longitude
 ) { }

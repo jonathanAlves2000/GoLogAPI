@@ -18,5 +18,6 @@ public record CompanyResponseList(
         String ownerTenantName,
         UUID addressId,
         String city,
-        String state
+        String state,
+        Integer geofenceRadiusMeters
 ) { }

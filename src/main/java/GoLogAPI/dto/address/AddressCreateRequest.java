@@ -50,12 +50,7 @@ public record AddressCreateRequest(
 
          @NotBlank(message = "Longitude deve ser informada.")
          @Size(min = 1, max = 100, message = "Longitude deve ter de 1 a 100 caracteres")
-         String longitude,
-
-        /** Raio do geofence (m): vazio mantém o atual, 0 volta ao padrão do perfil da transportadora, 20–5000 define. */
-        @jakarta.validation.constraints.Min(value = 0, message = "O raio do geofence não pode ser negativo")
-        @jakarta.validation.constraints.Max(value = 5000, message = "O raio do geofence deve ser de no máximo 5000 m")
-        Integer geofenceRadiusMeters
+         String longitude
 
 ) implements AddressRequest
 { }

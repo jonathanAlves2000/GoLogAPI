@@ -176,25 +176,33 @@ class GeofencingServiceTest {
     }
 
     @Test
-    @DisplayName("Raio: endereço > perfil padrão da transportadora > 100 m")
+    @DisplayName("Raio: cliente da remessa > perfil padrão da transportadora > 100 m")
     void shouldResolveRadiusByPrecedence() {
-        Address semRaio = new Address();
-        Address comRaio = new Address();
+        Company semRaio = new Company();
+        Company comRaio = new Company();
         comRaio.setGeofenceRadiusMeters(300);
         assertEquals(300, GeofencingService.radiusMeters(comRaio, 150));
         assertEquals(150, GeofencingService.radiusMeters(semRaio, 150));
         assertEquals(100, GeofencingService.radiusMeters(semRaio, null));
         assertEquals(100, GeofencingService.radiusMeters(null, null));
+        // valores abaixo do mínimo gravados antes da regra nunca reduzem o raio
+        Company pequeno = new Company();
+        pequeno.setGeofenceRadiusMeters(30);
+        assertEquals(100, GeofencingService.radiusMeters(pequeno, null));
+        assertEquals(100, GeofencingService.radiusMeters(null, 50));
     }
 
-    private RouteStop pendingStopAt(Transport transport, String lat, String lon, Integer addressRadius) {
+    private RouteStop pendingStopAt(Transport transport, String lat, String lon, Integer customerRadius) {
         Address address = new Address();
         address.setLatitude(lat);
         address.setLongitude(lon);
-        address.setGeofenceRadiusMeters(addressRadius);
+        Company cliente = new Company();
+        cliente.setId(UUID.randomUUID());
+        cliente.setGeofenceRadiusMeters(customerRadius);
         Shipment shipment = new Shipment();
         shipment.setId(UUID.randomUUID());
         shipment.setAddress(address);
+        shipment.setCustomer(cliente);
         shipment.setStatus(ShipmentStatus.INICIADO);
         RouteStop stop = new RouteStop();
         stop.setId(UUID.randomUUID());
@@ -208,8 +216,8 @@ class GeofencingServiceTest {
     }
 
     @Test
-    @DisplayName("A ~150 m: sem check-in com o raio padrão de 100 m; com check-in se o endereço define 200 m")
-    void shouldUseAddressRadius() {
+    @DisplayName("A ~150 m: sem check-in com o raio padrão de 100 m; com check-in se o cliente define 200 m")
+    void shouldUseCustomerRadius() {
         Equipament equipament = new Equipament();
         equipament.setId(UUID.randomUUID());
         Transport transport = new Transport();
@@ -227,7 +235,7 @@ class GeofencingServiceTest {
     }
 
     @Test
-    @DisplayName("Usa o raio do perfil padrão da transportadora quando o endereço não define")
+    @DisplayName("Usa o raio do perfil padrão da transportadora quando o cliente não define")
     void shouldUseTransporterProfileRadius() {
         Equipament equipament = new Equipament();
         equipament.setId(UUID.randomUUID());

@@ -56,6 +56,8 @@ public class CompanyService {
         companyValidate.validate(request, owner.getId());
 
         Company company = companyMapper.toEntity(request);
+        company.setGeofenceRadiusMeters(null);
+        applyGeofenceRadius(company, request.geofenceRadiusMeters());
         company.setAddress(findAddress(request.addressId()));
         company.setCompanyType(Boolean.TRUE.equals(request.isCliente()) ? CompanyType.CLIENT : CompanyType.SUPPLIER);
         company.setIsMaster(false);
@@ -96,6 +98,7 @@ public class CompanyService {
         company.setCnpjCpf(request.cnpjCpf());
         company.setAddress(findAddress(request.addressId()));
         applyClientFlag(company, request.isCliente());
+        applyGeofenceRadius(company, request.geofenceRadiusMeters());
         companyRepository.save(company);
         return companyMapper.toCreateResponse(company);
     }
@@ -117,6 +120,7 @@ public class CompanyService {
             company.setPhoneNumber(request.phoneNumber());
         if(request.addressId() != null)
             company.setAddress(findAddress(request.addressId()));
+        applyGeofenceRadius(company, request.geofenceRadiusMeters());
         companyRepository.save(company);
         return companyMapper.toCreateResponse(company);
     }
@@ -171,6 +175,23 @@ public class CompanyService {
         } else {
             company.setIsCliente(false);
         }
+    }
+
+    /**
+     * Raio do geofence do cliente: {@code null} mantém o atual, {@code 0} volta ao padrão do perfil da
+     * transportadora, 100–5000 m define o raio de chegada nas paradas deste cliente.
+     */
+    static void applyGeofenceRadius(Company company, Integer radius) {
+        if (radius == null) return;
+        if (radius == 0) {
+            company.setGeofenceRadiusMeters(null);
+            return;
+        }
+        if (radius < GoLogAPI.service.routeOptimization.OptimizationDefaults.MIN_GEOFENCE_RADIUS_METERS) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST,
+                    "O raio do geofence deve ser de no mínimo 100 m (ou 0 para usar o padrão da transportadora).");
+        }
+        company.setGeofenceRadiusMeters(radius);
     }
 
     private static UUID ownerId(Company company) {

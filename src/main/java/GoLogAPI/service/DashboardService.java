@@ -342,7 +342,7 @@ public class DashboardService {
     private static Map<String, String> methodology() {
         Map<String, String> m = new LinkedHashMap<>();
         m.put("sla", "Entregas com chegada até o horário agendado ÷ entregas com chegada registrada. Chegada = primeiro ponto "
-                + "de telemetria dentro do raio do endereço (geofence: o raio do endereço ou o padrão do perfil da transportadora, "
+                + "de telemetria dentro do raio do endereço (geofence: o raio do cliente ou o padrão do perfil da transportadora, "
                 + "100 m se nenhum definir); sem geofence, vale o horário do registro de entrega (\"Fim\") do motorista. "
                 + "Chegada antecipada conta como no prazo. Entregas finalizadas sem nenhum dos dois registros ficam fora da conta.");
         m.put("overdue", "Remessas com horário agendado no passado que ainda não foram finalizadas.");
