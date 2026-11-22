@@ -1,6 +1,7 @@
 package GoLogAPI.service;
 
 import GoLogAPI.dto.transport.TripIndicatorsResponse.ScheduleAdherence;
+import GoLogAPI.model.Occurrence;
 import GoLogAPI.model.RouteStop;
 import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Tractor;
@@ -18,6 +19,7 @@ class TripIndicatorsServiceTest {
 
     private static RouteStop stop(LocalDateTime scheduled, LocalDateTime arrived) {
         Shipment s = new Shipment();
+        s.setId(java.util.UUID.randomUUID());
         s.setSchedulind(scheduled);
         RouteStop rs = new RouteStop();
         rs.setShipment(s);
@@ -33,7 +35,7 @@ class TripIndicatorsServiceTest {
                 stop(NOW.minusHours(1), null),                // vencida sem chegada
                 stop(NOW.plusHours(1), null),                 // ainda no prazo
                 stop(null, NOW)                               // sem agenda: fora da conta
-        ), NOW);
+        ), List.of(), NOW);
         assertEquals(4, a.scheduled());
         assertEquals(1, a.metOnTime());
         assertEquals(2, a.late());
@@ -63,8 +65,32 @@ class TripIndicatorsServiceTest {
         RouteStop antecipada = stop(agendado, agendado.minusHours(2));          // bem antes da janela
         RouteStop soSaida = stop(agendado, null);
         soSaida.setDepartedAt(agendado.minusMinutes(5));                      // sem chegada por geofence
-        ScheduleAdherence a = TripIndicatorsService.schedule(List.of(antecipada, soSaida), agendado.plusHours(1));
+        ScheduleAdherence a = TripIndicatorsService.schedule(List.of(antecipada, soSaida), List.of(), agendado.plusHours(1));
         assertEquals(1, a.metOnTime());
         assertEquals(1, a.late());   // sem chegada e agendado vencido
+    }
+
+    private static Occurrence fim(Shipment s, LocalDateTime at) {
+        Occurrence o = new Occurrence();
+        o.setShipment(s);
+        o.setType("Fim");
+        o.setDateTime(at);
+        return o;
+    }
+
+    @Test
+    void semGeofenceUsaRegistroDeEntregaEContaAFonte() {
+        LocalDateTime agendado = LocalDateTime.of(2026, 11, 22, 9, 0);
+        RouteStop porGeofence = stop(agendado, agendado.minusMinutes(10));
+        RouteStop porRegistro = stop(agendado, null);
+        RouteStop registroAtrasado = stop(agendado, null);
+        ScheduleAdherence a = TripIndicatorsService.schedule(List.of(porGeofence, porRegistro, registroAtrasado),
+                List.of(fim(porRegistro.getShipment(), agendado.minusMinutes(1)),
+                        fim(registroAtrasado.getShipment(), agendado.plusMinutes(20))),
+                agendado.plusHours(1));
+        assertEquals(2, a.metOnTime());
+        assertEquals(1, a.late());
+        assertEquals(1, a.byGeofence());
+        assertEquals(2, a.byDeliveryRecord());
     }
 }

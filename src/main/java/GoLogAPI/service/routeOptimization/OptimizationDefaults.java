@@ -16,4 +16,6 @@ public final class OptimizationDefaults {
     public static final int DEFAULT_VEHICLE_START_WINDOW_LEAD_HOURS = 2;
     public static final int DEFAULT_VEHICLE_END_WINDOW_MARGIN_HOURS = 2;
     public static final int DEFAULT_GLOBAL_HORIZON_EXTRA_DAYS = 2;
+    /** Raio do geofence de chegada na parada, quando nem o endereço nem o perfil da transportadora definem outro. */
+    public static final int DEFAULT_GEOFENCE_RADIUS_METERS = 100;
 }

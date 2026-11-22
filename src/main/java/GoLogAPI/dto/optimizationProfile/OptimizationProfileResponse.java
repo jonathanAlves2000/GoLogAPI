@@ -20,5 +20,6 @@ public record OptimizationProfileResponse(
         Integer timeWindowLeadMinutes,
         Integer vehicleStartWindowLeadHours,
         Integer vehicleEndWindowMarginHours,
-        Integer globalHorizonExtraDays
+        Integer globalHorizonExtraDays,
+        Integer geofenceRadiusMeters
 ) { }

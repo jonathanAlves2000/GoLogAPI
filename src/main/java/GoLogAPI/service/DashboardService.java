@@ -40,11 +40,14 @@ public class DashboardService {
     private final EquipamentRepository equipamentRepository;
     private final TrailerRepository trailerRepository;
     private final TenantGuard tenantGuard;
+    private final OccurrenceRepository occurrenceRepository;
 
     public DashboardService(DriverRepository driverRepository, TransportRepository transportRepository,
                             ShipmentRepository shipmentRepository, RouteStopRepository routeStopRepository,
                             EquipamentRepository equipamentRepository,
-                            TrailerRepository trailerRepository, TenantGuard tenantGuard) {
+                            TrailerRepository trailerRepository, TenantGuard tenantGuard,
+                            OccurrenceRepository occurrenceRepository) {
+        this.occurrenceRepository = occurrenceRepository;
         this.driverRepository = driverRepository;
         this.transportRepository = transportRepository;
         this.shipmentRepository = shipmentRepository;
@@ -71,7 +74,9 @@ public class DashboardService {
                 .collect(Collectors.groupingBy(rs -> rs.getTransport().getId()));
         stopsByTransport.values().forEach(l -> l.sort(Comparator.comparing(RouteStop::getSequenceOrder)));
 
-        Map<UUID, LocalDateTime> arrivalByShipment = arrivalTimes(stopsByTransport);
+        Map<UUID, AgendaArrival.Arrival> arrivalByShipment = AgendaArrival.resolve(
+                stopsByTransport.values().stream().flatMap(List::stream).toList(),
+                global ? occurrenceRepository.findAll() : occurrenceRepository.findByCompanyId(scope));
 
         // ------------------------------------------------------------- Operação
         List<Shipment> deliveries = shipments.stream().filter(s -> s.getTypeOperation() == TypeOperation.ENTREGA).toList();
@@ -105,20 +110,22 @@ public class DashboardService {
                 tripsPlanned, tripsInProgress, tripsFinished);
 
         // ------------------------------------------------------------- SLA
-        // Agenda atendida = chegada por geofence até o horário agendado (chegada antecipada conta como no prazo).
-        // A ocorrência "Fim" do motorista não é chegada e não entra na conta.
-        long withTs = 0, onTime = 0, withoutTs = 0;
+        // Agenda atendida = chegada até o horário agendado (antecipada conta como no prazo). Chegada = geofence ou,
+        // sem ele, o registro de entrega ("Fim") do motorista (AgendaArrival).
+        long withTs = 0, onTime = 0, withoutTs = 0, byGeofence = 0, byRecord = 0;
         for (Shipment s : deliveries) {
             if (s.getSchedulind() == null) continue;
-            LocalDateTime arrived = arrivalByShipment.get(s.getId());
-            if (arrived == null) {
-                if (s.getStatus() == ShipmentStatus.FINALIZADO) withoutTs++; // finalizada sem chegada por geofence
+            AgendaArrival.Arrival arrival = arrivalByShipment.get(s.getId());
+            if (arrival == null) {
+                if (s.getStatus() == ShipmentStatus.FINALIZADO) withoutTs++; // finalizada sem nenhum registro
                 continue;
             }
             withTs++;
-            if (!arrived.isAfter(s.getSchedulind())) onTime++;
+            if (arrival.source() == AgendaArrival.Source.GEOFENCE) byGeofence++; else byRecord++;
+            if (arrival.onTime(s.getSchedulind())) onTime++;
         }
-        Sla sla = new Sla(withTs, onTime, withTs == 0 ? null : round(100.0 * onTime / withTs, 1), withoutTs);
+        Sla sla = new Sla(withTs, onTime, withTs == 0 ? null : round(100.0 * onTime / withTs, 1), withoutTs,
+                byGeofence, byRecord);
 
         // ------------------------------------------------------------- Planejamento, emissões e sequenciamento
         double plannedKm = 0, plannedHours = 0, plannedCost = 0, tonKm = 0, realizedKm = 0;
@@ -217,16 +224,6 @@ public class DashboardService {
     }
 
     // ================================================================= cálculos
-
-    /** Chegada na parada registrada pelo geofence (raio de 200 m), por remessa. */
-    private static Map<UUID, LocalDateTime> arrivalTimes(Map<UUID, List<RouteStop>> stopsByTransport) {
-        Map<UUID, LocalDateTime> result = new HashMap<>();
-        stopsByTransport.values().stream().flatMap(List::stream)
-                .filter(rs -> rs.getShipment() != null && rs.getArrivedAt() != null)
-                .forEach(rs -> result.merge(rs.getShipment().getId(), rs.getArrivedAt(),
-                        (a, b) -> a.isBefore(b) ? a : b));
-        return result;
-    }
 
     /**
      * Toneladas transportadas × km de cada trecho. A carga a bordo é reconstruída pela sequência: entregas sem
@@ -344,9 +341,10 @@ public class DashboardService {
 
     private static Map<String, String> methodology() {
         Map<String, String> m = new LinkedHashMap<>();
-        m.put("sla", "Entregas com chegada na parada até o horário agendado ÷ entregas com chegada registrada. Chegada = primeiro "
-                + "ponto de telemetria a até 200 m do endereço (geofence); chegada antecipada conta como no prazo. A ocorrência "
-                + "\"Fim\" do motorista não é considerada chegada; entregas finalizadas sem chegada por geofence ficam fora da conta.");
+        m.put("sla", "Entregas com chegada até o horário agendado ÷ entregas com chegada registrada. Chegada = primeiro ponto "
+                + "de telemetria dentro do raio do endereço (geofence: o raio do endereço ou o padrão do perfil da transportadora, "
+                + "100 m se nenhum definir); sem geofence, vale o horário do registro de entrega (\"Fim\") do motorista. "
+                + "Chegada antecipada conta como no prazo. Entregas finalizadas sem nenhum dos dois registros ficam fora da conta.");
         m.put("overdue", "Remessas com horário agendado no passado que ainda não foram finalizadas.");
         m.put("plannedKm", "Soma das distâncias rodoviárias devolvidas pelo Google Route Optimization para as viagens planejadas.");
         m.put("loadFactor", "Peso das entregas da viagem ÷ capacidade de peso do conjunto (carretas ou, sem carreta, o próprio veículo). "

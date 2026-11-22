@@ -121,6 +121,7 @@ public class OptimizationProfileService {
         if (p.getVehicleStartWindowLeadHours() == null) p.setVehicleStartWindowLeadHours(OptimizationDefaults.DEFAULT_VEHICLE_START_WINDOW_LEAD_HOURS);
         if (p.getVehicleEndWindowMarginHours() == null) p.setVehicleEndWindowMarginHours(OptimizationDefaults.DEFAULT_VEHICLE_END_WINDOW_MARGIN_HOURS);
         if (p.getGlobalHorizonExtraDays() == null) p.setGlobalHorizonExtraDays(OptimizationDefaults.DEFAULT_GLOBAL_HORIZON_EXTRA_DAYS);
+        if (p.getGeofenceRadiusMeters() == null) p.setGeofenceRadiusMeters(OptimizationDefaults.DEFAULT_GEOFENCE_RADIUS_METERS);
     }
 
     public OptimizationProfile findVisible(UUID id) {

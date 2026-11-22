@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface OccurrenceRepository extends JpaRepository<Occurrence, UUID> {
     List<Occurrence> findByCompanyId(UUID companyId);
+
+    List<Occurrence> findByTransportId(UUID transportId);
 }

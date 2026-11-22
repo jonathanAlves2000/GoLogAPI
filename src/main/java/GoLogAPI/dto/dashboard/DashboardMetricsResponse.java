@@ -38,12 +38,17 @@ public record DashboardMetricsResponse(
             long tripsFinished
     ) { }
 
-    /** Agenda atendida: entregas com chegada por geofence até o horário agendado (antecipada conta como no prazo). */
+    /**
+     * Agenda atendida: entregas com chegada até o horário agendado (antecipada conta como no prazo). Chegada = geofence
+     * ou, sem ele, o registro de entrega ("Fim"); {@code arrivedByGeofence} + {@code arrivedByDeliveryRecord} = base.
+     */
     public record Sla(
             long deliveredWithTimestamp,
             long deliveredOnTime,
             Double onTimeRate,
-            long deliveredWithoutTimestamp
+            long deliveredWithoutTimestamp,
+            long arrivedByGeofence,
+            long arrivedByDeliveryRecord
     ) { }
 
     /** Totais do plano gerado pelo otimizador (Google Route Optimization). */

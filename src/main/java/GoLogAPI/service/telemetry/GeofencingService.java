@@ -4,11 +4,13 @@ import GoLogAPI.dto.telemetry.GeofenceEventResponse;
 import GoLogAPI.model.Address;
 import GoLogAPI.model.Company;
 import GoLogAPI.model.Equipament;
+import GoLogAPI.model.OptimizationProfile;
 import GoLogAPI.model.RouteStop;
 import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Transport;
 import GoLogAPI.model.enums.RouteStopStatus;
 import GoLogAPI.model.enums.ShipmentStatus;
+import GoLogAPI.repository.OptimizationProfileRepository;
 import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.ShipmentRepository;
 import org.slf4j.Logger;
@@ -19,28 +21,55 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class GeofencingService {
 
     private static final Logger log = LoggerFactory.getLogger(GeofencingService.class);
 
-    // Raio padrão para detecção de chegada na parada (200 metros)
-    public static final double DEFAULT_GEOFENCE_RADIUS_METERS = 200.0;
+    // Raio padrão de chegada na parada (100 m) quando nem o endereço nem o perfil da transportadora definem outro.
+    // Basta um ponto de telemetria dentro do raio, sem critério de velocidade.
+    public static final double DEFAULT_GEOFENCE_RADIUS_METERS = 100.0;
 
     private final RouteStopRepository routeStopRepository;
     private final ShipmentRepository shipmentRepository;
     private final GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService;
     private final ActiveTripResolver tripResolver;
+    private final OptimizationProfileRepository optimizationProfileRepository;
 
     public GeofencingService(RouteStopRepository routeStopRepository,
                              ShipmentRepository shipmentRepository,
                              GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService,
-                             ActiveTripResolver tripResolver) {
+                             ActiveTripResolver tripResolver,
+                             OptimizationProfileRepository optimizationProfileRepository) {
         this.routeStopRepository = routeStopRepository;
         this.shipmentRepository = shipmentRepository;
         this.webhookDispatcherService = webhookDispatcherService;
         this.tripResolver = tripResolver;
+        this.optimizationProfileRepository = optimizationProfileRepository;
+    }
+
+    /**
+     * Raio da parada: o do endereço, se definido; senão o do perfil de otimização padrão da transportadora;
+     * senão {@value #DEFAULT_GEOFENCE_RADIUS_METERS} m.
+     */
+    static double radiusMeters(Address addr, Integer transporterDefault) {
+        if (addr != null && addr.getGeofenceRadiusMeters() != null && addr.getGeofenceRadiusMeters() > 0) {
+            return addr.getGeofenceRadiusMeters();
+        }
+        if (transporterDefault != null && transporterDefault > 0) return transporterDefault;
+        return DEFAULT_GEOFENCE_RADIUS_METERS;
+    }
+
+    private Integer transporterDefaultRadius(Transport transport) {
+        if (optimizationProfileRepository == null || transport.getTransporter() == null
+                || transport.getTransporter().getId() == null) return null;
+        UUID companyId = transport.getTransporter().getId();
+        return optimizationProfileRepository.findFirstByCompanyIdAndIsDefaultTrue(companyId)
+                .or(() -> optimizationProfileRepository.findFirstByCompanyId(companyId))
+                .map(OptimizationProfile::getGeofenceRadiusMeters)
+                .orElse(null);
     }
 
     /** Check-in automático na viagem do veículo, sem viagem informada no ponto. */
@@ -85,6 +114,7 @@ public class GeofencingService {
         }
 
         // 3. Avalia cada parada pendente
+        Integer transporterRadius = transporterDefaultRadius(currentTransport);
         for (RouteStop stop : pendingStops) {
             Shipment shipment = stop.getShipment();
             if (shipment == null) {
@@ -106,7 +136,7 @@ public class GeofencingService {
 
             double distance = calculateHaversineDistanceMeters(vehicleLat, vehicleLon, targetLat, targetLon);
 
-            if (distance <= DEFAULT_GEOFENCE_RADIUS_METERS) {
+            if (distance <= radiusMeters(addr, transporterRadius)) {
                 LocalDateTime arrivalTime = timestamp != null ? timestamp : LocalDateTime.now();
 
                 stop.setArrivedAt(arrivalTime);

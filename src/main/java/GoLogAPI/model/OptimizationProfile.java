@@ -85,4 +85,9 @@ public class OptimizationProfile extends Audit {
     @Builder.Default
     @Column(name = "global_horizon_extra_days", nullable = false)
     private Integer globalHorizonExtraDays = 2;
+
+    /** Raio padrão (m) do geofence de chegada nas paradas desta transportadora; o endereço pode definir outro. */
+    @Builder.Default
+    @Column(name = "geofence_radius_meters")
+    private Integer geofenceRadiusMeters = 100;
 }

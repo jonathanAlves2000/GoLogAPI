@@ -31,7 +31,8 @@ public record TripIndicatorsResponse(
     }
 
     /** Paradas com horário agendado: atendidas até o horário, atendidas com atraso / vencidas, e ainda no prazo. */
-    public record ScheduleAdherence(int scheduled, int metOnTime, int late, int pending, Double onTimeRate) {
+    public record ScheduleAdherence(int scheduled, int metOnTime, int late, int pending, Double onTimeRate,
+                                    int byGeofence, int byDeliveryRecord) {
     }
 
     public record VehicleFactors(Double kmPerLiter, Double kgCo2PerKm, Double costPerKm, Double costPerHour) {

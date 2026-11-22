@@ -48,6 +48,8 @@ public class AddressService {
     @Transactional
     public AddressResponse save(AddressCreateRequest addressCreateRequest){
         Address address = addressMapper.toEntity(addressCreateRequest);
+        address.setGeofenceRadiusMeters(null);
+        applyGeofenceRadius(address, addressCreateRequest.geofenceRadiusMeters());
         address.setCompany(tenantGuard.ownerForWrite(null));
         addressRepository.save(address);
         return addressMapper.toResponse(address);
@@ -84,6 +86,7 @@ public class AddressService {
         address.setComplement(addressCreateRequest.complement());
         address.setLatitude(addressCreateRequest.latitude());
         address.setLongitude(addressCreateRequest.longitude());
+        applyGeofenceRadius(address, addressCreateRequest.geofenceRadiusMeters());
         addressRepository.save(address);
         return addressMapper.toResponse(address);
     }
@@ -112,9 +115,27 @@ public class AddressService {
             address.setLatitude(addressUpdateRequest.latitude());
         if(addressUpdateRequest.longitude() != null && !addressUpdateRequest.longitude().isBlank())
             address.setLongitude(addressUpdateRequest.longitude());
+        applyGeofenceRadius(address, addressUpdateRequest.geofenceRadiusMeters());
 
         addressRepository.save(address);
         return addressMapper.toResponse(address);
     }
 
+
+    /**
+     * Raio do geofence do endereço: {@code null} mantém o atual (telas que não editam o campo, como Empresas, não o
+     * apagam), {@code 0} volta ao padrão do perfil da transportadora, 20–5000 m define o raio do endereço.
+     */
+    static void applyGeofenceRadius(Address address, Integer radius) {
+        if (radius == null) return;
+        if (radius == 0) {
+            address.setGeofenceRadiusMeters(null);
+            return;
+        }
+        if (radius < 20) {
+            throw new GoLogAPI.exception.BusinessException(org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "O raio do geofence deve ser de no mínimo 20 m (ou 0 para usar o padrão da transportadora).");
+        }
+        address.setGeofenceRadiusMeters(radius);
+    }
 }

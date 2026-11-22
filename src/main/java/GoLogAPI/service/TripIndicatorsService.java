@@ -10,6 +10,8 @@ import GoLogAPI.model.Shipment;
 import GoLogAPI.model.Tractor;
 import GoLogAPI.model.Transport;
 import GoLogAPI.model.enums.TypeFuel;
+import GoLogAPI.model.Occurrence;
+import GoLogAPI.repository.OccurrenceRepository;
 import GoLogAPI.repository.RouteStopRepository;
 import GoLogAPI.repository.TransportRepository;
 import GoLogAPI.service.telemetry.TripTrackingService;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -35,9 +38,12 @@ public class TripIndicatorsService {
     private final TransportService transportService;
     private final TripTrackingService tripTrackingService;
     private final TransportRepository transportRepository;
+    private final OccurrenceRepository occurrenceRepository;
 
     public TripIndicatorsService(RouteStopRepository routeStopRepository, TransportService transportService,
-                                 TripTrackingService tripTrackingService, TransportRepository transportRepository) {
+                                 TripTrackingService tripTrackingService, TransportRepository transportRepository,
+                                 OccurrenceRepository occurrenceRepository) {
+        this.occurrenceRepository = occurrenceRepository;
         this.routeStopRepository = routeStopRepository;
         this.transportService = transportService;
         this.tripTrackingService = tripTrackingService;
@@ -71,7 +77,9 @@ public class TripIndicatorsService {
         Double costPerHour = plannedHourlyRate(t);
         VehicleFactors factors = new VehicleFactors(kmPerLiter, round(kgCo2PerKm, 4), round(costPerKm, 2), round(costPerHour, 2));
 
-        ScheduleAdherence schedule = schedule(stops, LocalDateTime.now());
+        ScheduleAdherence schedule = schedule(stops,
+                occurrenceRepository == null ? List.of() : occurrenceRepository.findByTransportId(t.getId()),
+                LocalDateTime.now());
 
         double km = t.getDistanceTraveled() == null ? 0.0 : t.getDistanceTraveled() / 1000.0;
         boolean hasRoute = t.getTrackingStartedAt() != null && km > 0;
@@ -113,16 +121,20 @@ public class TripIndicatorsService {
         return kmPerLiter == null || kmPerLiter <= 0 ? null : km / kmPerLiter;
     }
 
-    /** Agenda atendida = chegada por geofence até o horário agendado da remessa (antecipada conta como no prazo). */
-    static ScheduleAdherence schedule(List<RouteStop> stops, LocalDateTime now) {
-        int scheduled = 0, onTime = 0, late = 0, pending = 0;
+    /** Agenda atendida = chegada até o horário agendado (antecipada conta como no prazo); regra em {@link AgendaArrival}. */
+    static ScheduleAdherence schedule(List<RouteStop> stops, List<Occurrence> occurrences, LocalDateTime now) {
+        Map<UUID, AgendaArrival.Arrival> arrivals = AgendaArrival.resolve(stops, occurrences);
+        int scheduled = 0, onTime = 0, late = 0, pending = 0, byGeofence = 0, byRecord = 0;
+        java.util.Set<UUID> seen = new java.util.HashSet<>();
         for (RouteStop rs : stops) {
             Shipment s = rs.getShipment();
             if (s == null || s.getSchedulind() == null) continue;
+            if (s.getId() != null && !seen.add(s.getId())) continue; // parada repetida da mesma remessa
             scheduled++;
-            LocalDateTime arrived = rs.getArrivedAt(); // chegada por geofence; antecipada conta como no prazo
-            if (arrived != null) {
-                if (arrived.isAfter(s.getSchedulind())) late++; else onTime++;
+            AgendaArrival.Arrival arrival = s.getId() == null ? null : arrivals.get(s.getId());
+            if (arrival != null) {
+                if (arrival.source() == AgendaArrival.Source.GEOFENCE) byGeofence++; else byRecord++;
+                if (arrival.onTime(s.getSchedulind())) onTime++; else late++;
             } else if (now.isAfter(s.getSchedulind())) {
                 late++;
             } else {
@@ -131,7 +143,7 @@ public class TripIndicatorsService {
         }
         int resolved = onTime + late;
         return new ScheduleAdherence(scheduled, onTime, late, pending,
-                resolved == 0 ? null : round(100.0 * onTime / resolved, 1));
+                resolved == 0 ? null : round(100.0 * onTime / resolved, 1), byGeofence, byRecord);
     }
 
     private static Tractor tractor(Transport t) {

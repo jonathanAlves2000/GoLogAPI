@@ -38,12 +38,16 @@ class GeofencingServiceTest {
     @Mock
     private GoLogAPI.service.webhook.WebhookDispatcherService webhookDispatcherService;
 
+    @Mock
+    private GoLogAPI.repository.OptimizationProfileRepository optimizationProfileRepository;
+
     private GeofencingService geofencingService;
 
     @BeforeEach
     void setUp() {
         ActiveTripResolver resolver = new ActiveTripResolver(transportRepository, routeStopRepository);
-        geofencingService = new GeofencingService(routeStopRepository, shipmentRepository, webhookDispatcherService, resolver);
+        geofencingService = new GeofencingService(routeStopRepository, shipmentRepository, webhookDispatcherService, resolver,
+                optimizationProfileRepository);
     }
 
     @Test
@@ -61,7 +65,7 @@ class GeofencingServiceTest {
 
         assertTrue(distance > 0, "Distância deve ser positiva");
         assertTrue(distance < 150, "Distância deve ser menor que 150 metros");
-        assertTrue(distance <= GeofencingService.DEFAULT_GEOFENCE_RADIUS_METERS, "Deve estar dentro do raio padrão de geofence de 200m");
+        assertTrue(distance <= GeofencingService.DEFAULT_GEOFENCE_RADIUS_METERS, "Deve estar dentro do raio padrão de geofence de 100m");
     }
 
     @Test
@@ -169,5 +173,76 @@ class GeofencingServiceTest {
         assertEquals(emCurso.getId(), event.get().transportId());
         // Com viagem informada, não consulta as outras viagens do veículo
         verifyNoInteractions(transportRepository);
+    }
+
+    @Test
+    @DisplayName("Raio: endereço > perfil padrão da transportadora > 100 m")
+    void shouldResolveRadiusByPrecedence() {
+        Address semRaio = new Address();
+        Address comRaio = new Address();
+        comRaio.setGeofenceRadiusMeters(300);
+        assertEquals(300, GeofencingService.radiusMeters(comRaio, 150));
+        assertEquals(150, GeofencingService.radiusMeters(semRaio, 150));
+        assertEquals(100, GeofencingService.radiusMeters(semRaio, null));
+        assertEquals(100, GeofencingService.radiusMeters(null, null));
+    }
+
+    private RouteStop pendingStopAt(Transport transport, String lat, String lon, Integer addressRadius) {
+        Address address = new Address();
+        address.setLatitude(lat);
+        address.setLongitude(lon);
+        address.setGeofenceRadiusMeters(addressRadius);
+        Shipment shipment = new Shipment();
+        shipment.setId(UUID.randomUUID());
+        shipment.setAddress(address);
+        shipment.setStatus(ShipmentStatus.INICIADO);
+        RouteStop stop = new RouteStop();
+        stop.setId(UUID.randomUUID());
+        stop.setSequenceOrder(1);
+        stop.setShipment(shipment);
+        stop.setTransport(transport);
+        when(routeStopRepository.findByTransportIdOrderBySequenceOrderAsc(transport.getId())).thenReturn(List.of(stop));
+        when(routeStopRepository.findByTransportIdAndArrivedAtIsNullOrderBySequenceOrderAsc(transport.getId()))
+                .thenReturn(List.of(stop));
+        return stop;
+    }
+
+    @Test
+    @DisplayName("A ~150 m: sem check-in com o raio padrão de 100 m; com check-in se o endereço define 200 m")
+    void shouldUseAddressRadius() {
+        Equipament equipament = new Equipament();
+        equipament.setId(UUID.randomUUID());
+        Transport transport = new Transport();
+        transport.setId(UUID.randomUUID());
+        // ponto ~150 m ao norte do endereço
+        double lat = -23.550520 + 0.00135, lon = -46.633308;
+        assertTrue(GeofencingService.calculateHaversineDistanceMeters(lat, lon, -23.550520, -46.633308) > 140);
+
+        pendingStopAt(transport, "-23.550520", "-46.633308", null);
+        assertTrue(geofencingService.checkGeofenceArrival(equipament, transport, lat, lon, LocalDateTime.now(), 5.0).isEmpty());
+
+        RouteStop stop = pendingStopAt(transport, "-23.550520", "-46.633308", 200);
+        assertTrue(geofencingService.checkGeofenceArrival(equipament, transport, lat, lon, LocalDateTime.now(), 5.0).isPresent());
+        assertNotNull(stop.getArrivedAt());
+    }
+
+    @Test
+    @DisplayName("Usa o raio do perfil padrão da transportadora quando o endereço não define")
+    void shouldUseTransporterProfileRadius() {
+        Equipament equipament = new Equipament();
+        equipament.setId(UUID.randomUUID());
+        Company transportadora = new Company();
+        transportadora.setId(UUID.randomUUID());
+        Transport transport = new Transport();
+        transport.setId(UUID.randomUUID());
+        transport.setTransporter(transportadora);
+        OptimizationProfile perfil = new OptimizationProfile();
+        perfil.setGeofenceRadiusMeters(250);
+        when(optimizationProfileRepository.findFirstByCompanyIdAndIsDefaultTrue(transportadora.getId()))
+                .thenReturn(Optional.of(perfil));
+
+        pendingStopAt(transport, "-23.550520", "-46.633308", null);
+        double lat = -23.550520 + 0.00135, lon = -46.633308; // ~150 m
+        assertTrue(geofencingService.checkGeofenceArrival(equipament, transport, lat, lon, LocalDateTime.now(), 5.0).isPresent());
     }
 }

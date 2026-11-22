@@ -61,6 +61,10 @@ public class Address extends Audit {
     @Column(name = "longitude", nullable = false)
     private String longitude;
 
+    /** Raio (m) do geofence de chegada neste endereço; vazio usa o padrão do perfil da transportadora. */
+    @Column(name = "geofence_radius_meters")
+    private Integer geofenceRadiusMeters;
+
     @com.fasterxml.jackson.annotation.JsonIgnore
     @jakarta.persistence.ManyToOne
     @org.hibernate.annotations.Fetch(org.hibernate.annotations.FetchMode.SELECT)

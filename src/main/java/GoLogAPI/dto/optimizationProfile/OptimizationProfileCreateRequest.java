@@ -27,5 +27,8 @@ public record OptimizationProfileCreateRequest(
         Integer timeWindowLeadMinutes,
         Integer vehicleStartWindowLeadHours,
         Integer vehicleEndWindowMarginHours,
-        Integer globalHorizonExtraDays
+        Integer globalHorizonExtraDays,
+        @jakarta.validation.constraints.Min(value = 20, message = "O raio do geofence deve ser de no mínimo 20 m")
+        @jakarta.validation.constraints.Max(value = 5000, message = "O raio do geofence deve ser de no máximo 5000 m")
+        Integer geofenceRadiusMeters
 ) { }
